@@ -12,4 +12,12 @@
     padding: 1%;
     box-sizing: border-box;
   }
+
+  .Marketing {
+    background-color: lightblue;
+  }
+
+  .Dashboard {
+    background-color: lightgreen;
+  }
 }
