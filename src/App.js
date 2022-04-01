@@ -39,7 +39,7 @@ const App = () => {
     </div>
   ) : (
     <div className="App">
-      <p>
+      <p className="Hacker">
         Thank you for your interest! Unfortunately we are closed for alpha
         testing right now, don't worry, you're on the LIST for our beta test
       </p>
