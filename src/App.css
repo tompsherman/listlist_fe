@@ -24,4 +24,13 @@
   .Hacker {
     background-color: lightcoral;
   }
+
+  .headline {
+    text-align: center;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: row;
+  }
 }

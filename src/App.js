@@ -33,7 +33,6 @@ const App = () => {
     </div>
   ) : isLegit ? (
     <div className="App">
-      <LoginButton />
       <LogoutButton />
       <Dashboard />
     </div>
