@@ -77,13 +77,6 @@ const App = () => {
         {" "}
         MVP:
         <ul>
-          go into shopping mode
-          <ul>--- add check off toggles</ul>
-          <ul>--- at the end of the trip</ul>
-          <ul>--- add crossed off items to list "pantry"</ul>
-          <ul>--- add non-crossed off items to new list "grocery"</ul>
-        </ul>
-        <ul>
           organizing pantry
           <ul>--- starting expiration countdowns</ul>
           <ul>adding items to pantry</ul>

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const GetListIdHook = (getList) => {
-  const [list, setList] = useState([]);
-  // console.log("items, line 8", getList);
+  const [list, setList] = useState([{}, {}]);
+  console.log("getlistIDhook, line 6", getList);
 
   let currentList = "";
+  console.log("list", list, "currentList", currentList, "get list", getList);
 
   useEffect(() => {
     axios
@@ -16,15 +17,15 @@ const GetListIdHook = (getList) => {
       .catch((error) => console.log(error.message, error.stack));
   }, []);
 
-  // console.log("line 17", currentList, getList);
-
   list.length && getList === "*"
-    ? (currentList = list.find((list) => list.starred_list === getList))
+    ? (currentList = list.filter((list) => list.starred_list === getList))
     : list.length && getList.length
-    ? (currentList = list.find((list) => list.type === getList))
+    ? (currentList = list.filter((list) => list.type === getList))
     : (currentList = [{ list_id: "" }]);
 
-  return currentList;
+  console.log("returned:", currentList);
+
+  return currentList.pop();
 };
 
 export default GetListIdHook;

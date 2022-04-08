@@ -24,9 +24,8 @@ const initialFormToggle = {
 };
 
 const AddItem = ({ getList, flipNew, setFlipNew }) => {
-  // console.log("############", getList);
-  const list_id = GetListIdHook(getList).list_id;
-  // console.log("############", list_id);
+  const newGroceryListId = GetListIdHook(getList);
+  console.log(newGroceryListId, getList);
 
   const [itemDatabase, setItemDatabase] = useState([]);
   const [newItem, setNewItem] = useState(initialState);
@@ -65,7 +64,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       .catch((error) => console.log(error));
   };
 
-  const changeName = (event) => {
+  const changeValue = (event) => {
     event.preventDefault();
     setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
@@ -75,19 +74,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...formToggle, category: true });
   };
 
-  const changeCategory = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
-  };
-
   const subCategory = (event) => {
     event.preventDefault();
     setFormToggle({ ...formToggle, purchase_unit: true });
-  };
-
-  const changePurchaseUnit = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
 
   const subPurchaseUnit = (event) => {
@@ -95,19 +84,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...formToggle, use_unit: true });
   };
 
-  const changeUseUnit = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
-  };
-
   const subUseUnit = (event) => {
     event.preventDefault();
     setFormToggle({ ...formToggle, perishable: true });
-  };
-
-  const changePerishable = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
 
   const subPerishable = (event) => {
@@ -115,19 +94,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...formToggle, time_to_expire: true });
   };
 
-  const changeTimeToExpire = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
-  };
-
   const subTimeToExpire = (event) => {
     event.preventDefault();
     setFormToggle({ ...formToggle, storage_space: true });
-  };
-
-  const changeStorageSpace = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
 
   const subStorageSpace = (event) => {
@@ -135,54 +104,21 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...formToggle, cost: true });
   };
 
-  const changeCost = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
-  };
-
-  const changeDesiredAmount = (event) => {
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
-  };
-
   const dupeCheck = itemDatabase.filter((item) =>
     item.name.startsWith(newItem.name)
   );
 
-  // ? console.log(`we found ${newItem.name} in the database`)
-  // : console.log(`${newItem.name} is not ${item.name}`)
-
-  // console.log(
-  //   "new item",
-  //   newItem,
-  //   "form toggle",
-  //   formToggle,
-  //   "item db",
-  //   itemDatabase
-  // );
-
-  // GET current list information (or pass in props)
-  // GET all the items from the database (or pass in props)
-  // form that shows one field at a time (article: https://blog.devgenius.io/create-a-multi-step-form-with-reactjs-322aa97a2968#0779)
-  // first enter name
-  // on submit, check if name is in database
-  // // if so, use that item ask if want to edit or "add to list" button
-  // // // // if edit, go to item profile card
-  // // // // if add, how many do you want to buy?
-  // // // // // // POST new entry to list_items table
-
-  console.log("dupe chekc", dupeCheck);
-
   const item_id = GetItemIdHook(searchTerm);
-
-  console.log("outside submit list items", item_id, newItem.name, searchTerm);
-
+  // console.log(newGroceryListId);
+  let getTheId = "";
+  newGroceryListId ? (getTheId = newGroceryListId.list_id) : (getTheId = "");
   const bulletPoint = {
-    list_id: list_id,
+    list_id: getTheId,
     item_id: item_id,
     desired_amount: newItem.desired_amount,
+    acquired_amount: 0,
   };
-  console.log("passed req:", bulletPoint);
+
   const submitListItems = (event) => {
     event.preventDefault();
     axios
@@ -205,7 +141,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
             name="name"
             type="text"
             value={newItem.name}
-            onChange={changeName}
+            onChange={changeValue}
             placeholder={`enter item name`}
           />
           <button>next</button>
@@ -213,7 +149,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         {dupeCheck.map((dupe) => (
           <DupeAdd
             item_id={dupe.item_id}
-            list_id={list_id}
+            list_id={newGroceryListId.list_id}
             dupe={dupe}
             setDupeSend={setDupeSend}
             flipNew={flipNew}
@@ -236,7 +172,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="desired_amount"
           type="number"
           value={newItem.desired_amount}
-          onChange={changeDesiredAmount}
+          onChange={changeValue}
           placeholder={`enter amount to purchase`}
         />
         <button>submit item</button>
@@ -250,7 +186,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="cost"
           type="number"
           value={newItem.cost}
-          onChange={changeCost}
+          onChange={changeValue}
           placeholder={`enter item cost`}
         />
         <button>submit item</button>
@@ -288,7 +224,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Storage space</h4>
       <form onSubmit={subStorageSpace}>
-        <div onChange={changeStorageSpace}>
+        <div onChange={changeValue}>
           <input name="storage_space" type="radio" value="counter" /> counter
           <input name="storage_space" type="radio" value="pantry" /> pantry
           <input name="storage_space" type="radio" value="fridge" /> fridge
@@ -328,7 +264,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="time_to_expire"
           type="text"
           value={newItem.time_to_expire}
-          onChange={changeTimeToExpire}
+          onChange={changeValue}
           placeholder={`enter items expiration length`}
         />
         <button>next</button>
@@ -358,7 +294,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Perishable?</h4>
       <form onSubmit={subPerishable}>
-        <div onChange={changePerishable}>
+        <div onChange={changeValue}>
           <input name="perishable" type="radio" value="true" /> yes
           <input name="perishable" type="radio" value="false" /> no
         </div>
@@ -389,7 +325,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="use_unit"
           type="text"
           value={newItem.use_unit}
-          onChange={changeUseUnit}
+          onChange={changeValue}
           placeholder={`enter item 's use unit (bag, box, bulb, tbsp, etc)`}
         />
         <button>next</button>
@@ -415,7 +351,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="purchase_unit"
           type="text"
           value={newItem.purchase_unit}
-          onChange={changePurchaseUnit}
+          onChange={changeValue}
           placeholder={`enter item 's purchase unit (bag, box, loaf, etc)`}
         />
         <button>next</button>
@@ -437,7 +373,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="category"
           type="text"
           value={newItem.category}
-          onChange={changeCategory}
+          onChange={changeValue}
           placeholder={`enter item category`}
         />
         <button>next</button>
@@ -455,7 +391,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           name="name"
           type="text"
           value={newItem.name}
-          onChange={changeName}
+          onChange={changeValue}
           placeholder={`enter item name`}
         />
         <button>next</button>

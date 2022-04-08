@@ -17,6 +17,7 @@ const DupeAdd = ({
     desired_amount: 1,
     list_id: list_id,
     item_id: item_id,
+    acquired_amount: 0,
   });
 
   const clicker = () => {

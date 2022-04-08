@@ -89,4 +89,7 @@
   .centered {
     text-align: center;
   }
+  .strikethrough {
+    text-decoration: line-through;
+  }
 }
