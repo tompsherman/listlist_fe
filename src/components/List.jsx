@@ -1,0 +1,82 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import GetListIdHook from "../logic/GetListIdHook";
+import GeneralList from "./list-types/GeneralList";
+import PantryList from "./list-types/PantryList";
+
+const List = ({ getList, flipNew }) => {
+  // PANTRY - different background color, no "goshopping" button
+  // GROCERY - how list is built currently
+
+  const [items, setItems] = useState([]);
+
+  const exactList = GetListIdHook(getList);
+
+  // console.log("EXACT LIST", exactList);
+
+  const axiosCall = (route) => {
+    axios
+      // .get(`http://localhost:5505/api/lists/${route}`)
+      .get(`https://listlesslist.herokuapp.com/api/lists/${route}`)
+      .then((response) =>
+        //console.log("LINE 35,", response.data))
+        setItems(response.data)
+      )
+      // .then(console.log("GET list", list))
+      .catch((error) => console.log(error.message, error.stack));
+  };
+
+  let testVar = undefined;
+
+  exactList ? (testVar = exactList.list_id) : (testVar = "");
+
+  useEffect(() => {
+    axiosCall(testVar);
+  }, [exactList, flipNew]);
+
+  return exactList && exactList.type === "grocery" && items[0] ? (
+    items[0].name ? (
+      <div>
+        <h2 className="centered">{items[0].type} list</h2>
+        <GeneralList array={items} keyword={"vegetable"} />
+        <GeneralList array={items} keyword={"herbs"} />
+        <GeneralList array={items} keyword={"fruit"} />
+        <GeneralList array={items} keyword={"grains"} />
+        <GeneralList array={items} keyword={"meat"} />
+        <GeneralList array={items} keyword={"dairy"} />
+        <GeneralList array={items} keyword={"household"} />
+        <GeneralList array={items} keyword={"snack"} />
+      </div>
+    ) : (
+      <div>
+        <h2>oh no! youre listless!</h2>
+      </div>
+    )
+  ) : exactList && exactList.type === "pantry" && items[0] ? (
+    items[0].name ? (
+      <div>
+        <h2 className="centered">{items[0].type} list</h2>
+
+        <PantryList array={items} keyword={"vegetable"} />
+        <PantryList array={items} keyword={"herbs"} />
+        <PantryList array={items} keyword={"fruit"} />
+        <PantryList array={items} keyword={"grains"} />
+        <PantryList array={items} keyword={"herbs"} />
+        <PantryList array={items} keyword={"meat"} />
+        <PantryList array={items} keyword={"dairy"} />
+        <PantryList array={items} keyword={"household"} />
+        <PantryList array={items} keyword={"snack"} />
+      </div>
+    ) : (
+      <div>
+        <h2>oh no! youre listless!</h2>
+      </div>
+    )
+  ) : (
+    <div>
+      <h2>oh no! youre listless!</h2>
+    </div>
+  );
+};
+
+export default List;

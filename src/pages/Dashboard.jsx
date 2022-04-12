@@ -1,12 +1,93 @@
-import React from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useState } from "react";
+import AddItem from "../components/AddItem";
+import List from "../components/List";
+import GoShop from "../components/GoShop";
+import axios from "axios";
+import GetListIdHook from "../logic/GetListIdHook";
 
-const Dashboard = () => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+const Dashboard = ({ getList }) => {
+  const [list, setList] = useState([]);
+  const [flipNew, setFlipNew] = useState(false);
+  const [shopping, setShopping] = useState(false);
 
+  console.log("get list:", getList);
+
+  // need to figure out a way to useEffect to update
+  // the current list after ending the shopping trip
+  // (will fix the edge bug of cannot go shopping with a new list unless force refreshed)
+  const currentList = GetListIdHook(getList);
+  console.log("current list::", currentList);
+
+  const flipper = () => {
+    setFlipNew(!flipNew);
+  };
+  const goShopping = (event) => {
+    event.preventDefault();
+    const newGroceryList = {
+      created_timestamp: event.timeStamp,
+      list_open: true,
+      type: "grocery",
+      starred_list: "*",
+    };
+    console.log("GoShopping triggered:", newGroceryList);
+    axios
+      // .post(`http://localhost:5505/api/lists/`, newGroceryList)
+      .post(`http://listlesslist.heroku.com/api/lists/`, newGroceryList)
+      .then(
+        (response) => console.log("item response:", response),
+        setShopping(true)
+      )
+      .catch((error) => console.log(error));
+  };
   return (
     <div className="Dashboard">
-      <h1>Welcome to ListList!</h1>
+      {shopping || getList === "pantry" ? null : flipNew ? (
+        <AddItem
+          list={list}
+          setList={setList}
+          getList={getList}
+          flipNew={flipNew}
+          setFlipNew={setFlipNew}
+          flipper={flipper}
+        />
+      ) : (
+        <div className="flex-row fullwide">
+          <h3 className="halfwide list-button" onClick={flipper}>
+            add item
+          </h3>
+          <div className="halfwide list-button" onClick={goShopping}>
+            Go Shop
+          </div>
+        </div>
+      )}
+      {shopping ? (
+        <>
+          {console.log(
+            "DASHBOARD GOSHOP, currentList:",
+            currentList,
+            "getList",
+            getList
+          )}
+
+          <GoShop
+            getList={getList}
+            setList={setList}
+            shopping={shopping}
+            setShopping={setShopping}
+            currentList={currentList}
+          />
+        </>
+      ) : (
+        <>
+          {console.log(
+            "DASHBOARD LIST, currentList:",
+            currentList,
+            "getList",
+            getList
+          )}
+          <List currentList={currentList} getList={getList} flipNew={flipNew} />
+        </>
+      )}
     </div>
   );
 };
