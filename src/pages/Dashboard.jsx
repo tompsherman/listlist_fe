@@ -12,6 +12,9 @@ const Dashboard = ({ getList }) => {
 
   console.log("get list:", getList);
 
+  // need to figure out a way to useEffect to update
+  // the current list after ending the shopping trip
+  // (will fix the edge bug of cannot go shopping with a new list unless force refreshed)
   const currentList = GetListIdHook(getList);
   console.log("current list::", currentList);
 
@@ -24,12 +27,12 @@ const Dashboard = ({ getList }) => {
       created_timestamp: event.timeStamp,
       list_open: true,
       type: "grocery",
-      purchased_timestamp: "",
       starred_list: "*",
     };
     console.log("GoShopping triggered:", newGroceryList);
     axios
-      .post(`http://localhost:5505/api/lists/`, newGroceryList)
+      // .post(`http://localhost:5505/api/lists/`, newGroceryList)
+      .post(`http://listlesslist.heroku.com/api/lists/`, newGroceryList)
       .then(
         (response) => console.log("item response:", response),
         setShopping(true)
@@ -38,7 +41,7 @@ const Dashboard = ({ getList }) => {
   };
   return (
     <div className="Dashboard">
-      {shopping ? null : flipNew ? (
+      {shopping || getList === "pantry" ? null : flipNew ? (
         <AddItem
           list={list}
           setList={setList}
@@ -58,15 +61,32 @@ const Dashboard = ({ getList }) => {
         </div>
       )}
       {shopping ? (
-        <GoShop
-          getList={getList}
-          setList={setList}
-          shopping={shopping}
-          setShopping={setShopping}
-          currentList={currentList}
-        />
+        <>
+          {console.log(
+            "DASHBOARD GOSHOP, currentList:",
+            currentList,
+            "getList",
+            getList
+          )}
+
+          <GoShop
+            getList={getList}
+            setList={setList}
+            shopping={shopping}
+            setShopping={setShopping}
+            currentList={currentList}
+          />
+        </>
       ) : (
-        <List currentList={currentList} getList={getList} flipNew={flipNew} />
+        <>
+          {console.log(
+            "DASHBOARD LIST, currentList:",
+            currentList,
+            "getList",
+            getList
+          )}
+          <List currentList={currentList} getList={getList} flipNew={flipNew} />
+        </>
       )}
     </div>
   );

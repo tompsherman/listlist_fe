@@ -37,12 +37,11 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     fuse_to_list: false,
     add_dupe: false,
   });
-  const [dupeSend, setDupeSend] = useState("");
 
   useEffect(() => {
     axios
-      // .get(`https://whats-n-da-fridge.herokuapp.com/api/items/${ID_VARIABLE}`)
-      .get(`http://localhost:5505/api/items`)
+      .get(`https://listlesslist.herokuapp.com/api/items/`)
+      // .get(`http://localhost:5505/api/items`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
         setItemDatabase(response.data)
@@ -54,7 +53,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   const submitHandler = (event) => {
     event.preventDefault();
     axios
-      .post(`http://localhost:5505/api/items`, newItem)
+      // .post(`http://localhost:5505/api/items`, newItem)
+      .post(`http://listlesslist.herokuapp.com/api/items`, newItem)
+
       .then(
         (response) => console.log("item response:", response),
         setFormToggle({ ...formToggle, fuse_to_list: true }),
@@ -65,6 +66,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   };
 
   const changeValue = (event) => {
+    console.log("hello from change value:", event);
     event.preventDefault();
     setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
@@ -122,7 +124,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   const submitListItems = (event) => {
     event.preventDefault();
     axios
-      .post(`http://localhost:5505/api/list_items`, bulletPoint)
+      // .post(`http://localhost:5505/api/list_items`, bulletPoint)
+      .post(`http://listlesslist.herokuapp.com/api/list_items`, bulletPoint)
+
       .then(
         (response) => console.log("item response:", response),
         setNewItem(initialState),
@@ -151,7 +155,6 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
             item_id={dupe.item_id}
             list_id={newGroceryListId.list_id}
             dupe={dupe}
-            setDupeSend={setDupeSend}
             flipNew={flipNew}
             setFlipNew={setFlipNew}
             setFormToggle={setFormToggle}
@@ -224,11 +227,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Storage space</h4>
       <form onSubmit={subStorageSpace}>
-        <div onChange={changeValue}>
-          <input name="storage_space" type="radio" value="counter" /> counter
-          <input name="storage_space" type="radio" value="pantry" /> pantry
-          <input name="storage_space" type="radio" value="fridge" /> fridge
-        </div>
+        <select name="storage_space" onChange={changeValue}>
+          <option value="counter">counter</option>
+          <option value="pantry">pantry</option>
+          <option value="fridge">fridge</option>
+          <option value="freezer">freezer</option>
+          <option value="closet">closet</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">
@@ -260,13 +265,18 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Expiration</h4>
       <form onSubmit={subTimeToExpire}>
-        <input
-          name="time_to_expire"
-          type="text"
-          value={newItem.time_to_expire}
-          onChange={changeValue}
-          placeholder={`enter items expiration length`}
-        />
+        <select name="time_to_expire" onChange={changeValue}>
+          <option value="three_days">3 days</option>
+          <option value="six_days">6 days</option>
+          <option value="nine_days">1 week (9 days)</option>
+          <option value="eighteen_days">2 weeks (18 days)</option>
+          <option value="thirty-six_days">1 month (36 days)</option>
+          <option value="seventy-three_days">1 season (73 days)</option>
+          <option value="three-hundred-sixty-five_days">
+            1 year (365 days)
+          </option>
+          <option value="never">one of itself (ex. apple)</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">
@@ -294,10 +304,10 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Perishable?</h4>
       <form onSubmit={subPerishable}>
-        <div onChange={changeValue}>
-          <input name="perishable" type="radio" value="true" /> yes
-          <input name="perishable" type="radio" value="false" /> no
-        </div>
+        <select name="perishable" onChange={changeValue}>
+          <option value="true">true</option>
+          <option value="false">false</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">
@@ -321,13 +331,18 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Usage unit:</h4>
       <form onSubmit={subUseUnit}>
-        <input
-          name="use_unit"
-          type="text"
-          value={newItem.use_unit}
-          onChange={changeValue}
-          placeholder={`enter item 's use unit (bag, box, bulb, tbsp, etc)`}
-        />
+        <select name="use_unit" onChange={changeValue}>
+          <option value="bag">bag</option>
+          <option value="box">box</option>
+          <option value="can">can</option>
+          <option value="cup">cup</option>
+          <option value="handful">handful</option>
+          <option value="package">package</option>
+          <option value="scoop">scoop</option>
+          <option value="tbsp">tbsp</option>
+          <option value="tsp">tsp</option>
+          <option value="self">one of itself (ex. apple)</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">
@@ -347,13 +362,14 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Purchase unit:</h4>
       <form onSubmit={subPurchaseUnit}>
-        <input
-          name="purchase_unit"
-          type="text"
-          value={newItem.purchase_unit}
-          onChange={changeValue}
-          placeholder={`enter item 's purchase unit (bag, box, loaf, etc)`}
-        />
+        <select name="purchase_unit" onChange={changeValue}>
+          <option value="bag">bag</option>
+          <option value="box">box</option>
+          <option value="bunch">bunch</option>
+          <option value="can">can</option>
+          <option value="package">package</option>
+          <option value="lb">lb</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">
@@ -369,13 +385,17 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Category</h4>
       <form onSubmit={subCategory}>
-        <input
-          name="category"
-          type="text"
-          value={newItem.category}
-          onChange={changeValue}
-          placeholder={`enter item category`}
-        />
+        <select name="category" onChange={changeValue}>
+          <option value="vegetable">vegetable</option>
+          <option value="herbs">herbs</option>
+          <option value="fruit">fruit</option>
+          <option value="grains">grains</option>
+          <option value="meat">meat</option>
+          <option value="dairy">dairy</option>
+          <option value="household">household</option>
+          <option value="drinks">drinks</option>
+          <option value="snack">snack</option>
+        </select>
         <button>next</button>
       </form>
       <div className="item">

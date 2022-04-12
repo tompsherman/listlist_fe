@@ -88,15 +88,6 @@ const App = () => {
         REFACTORING MVP:
         <ul>
           item form
-          <ul>--- state issues with radio button</ul>
-          <ul>
-            --- drop downs in form
-            <ul>--- --- for category types</ul>
-            <ul>--- --- for purchase and usage variables</ul>
-          </ul>
-          <ul>
-            --- state issues with input form showing the previously input item
-          </ul>
           <ul>--- logic like auto filling in expiration "never"</ul>
           <ul>--- "go back" buttons</ul>
         </ul>

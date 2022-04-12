@@ -7,8 +7,8 @@ const GetListItemsHook = (id) => {
 
   useEffect(() => {
     axios
-      // .get(`https://whats-n-da-fridge.herokuapp.com/api/lists/`)
-      .get(`http://localhost:5505/api/lists/${id}`)
+      // .get(`http://localhost:5505/api/lists/${id}`)
+      .get(`http://listlesslist.heroku.com/api/lists/${id}`)
       .then((response) => setList(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));

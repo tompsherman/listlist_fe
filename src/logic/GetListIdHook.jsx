@@ -3,15 +3,15 @@ import axios from "axios";
 
 const GetListIdHook = (getList) => {
   const [list, setList] = useState([{}, {}]);
-  console.log("getlistIDhook, line 6", getList);
+  // console.log("getlistIDhook, line 6", getList);
 
   let currentList = "";
-  console.log("list", list, "currentList", currentList, "get list", getList);
+  // console.log("list", list, "currentList", currentList, "get list", getList);
 
   useEffect(() => {
     axios
-      // .get(`https://whats-n-da-fridge.herokuapp.com/api/lists/`)
-      .get("http://localhost:5505/api/lists/")
+      // .get("http://localhost:5505/api/lists/")
+      .get(`https://listlesslist.herokuapp.com/api/lists/`)
       .then((response) => setList(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));
@@ -23,7 +23,7 @@ const GetListIdHook = (getList) => {
     ? (currentList = list.filter((list) => list.type === getList))
     : (currentList = [{ list_id: "" }]);
 
-  console.log("returned:", currentList);
+  // console.log("returned:", currentList.pop());
 
   return currentList.pop();
 };

@@ -7,7 +7,6 @@ const DupeAdd = ({
   setNewItem,
   initialFormToggle,
   initialState,
-  setDupeSend,
   dupe,
   item_id,
   list_id,
@@ -32,7 +31,9 @@ const DupeAdd = ({
   const submitListItems = (event) => {
     event.preventDefault();
     axios
-      .post(`http://localhost:5505/api/list_items`, bullet)
+      // .post(`http://localhost:5505/api/list_items`, bullet)
+      .post(`http://listlesslist.herokuapp.com/api/list_items`, bullet)
+
       .then(
         (response) => console.log("item response:", response),
         setNewItem(initialState),

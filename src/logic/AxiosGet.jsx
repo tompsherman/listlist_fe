@@ -4,8 +4,8 @@ import axios from "axios";
 const AxiosGet = ({ route, setter }) => {
   useEffect(() => {
     axios
-      // .get(`https://whats-n-da-fridge.herokuapp.com/api/lists/${ID_VARIABLE}`)
-      .get(`http://localhost:5505/api/${route}`)
+      // .get(`http://localhost:5505/api/${route}`)
+      .get(`http://listlesslist.heroku.com/api/${route}`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
         setter(response.data)
