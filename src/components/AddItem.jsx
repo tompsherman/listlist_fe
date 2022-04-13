@@ -67,7 +67,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   };
 
   const changeValue = (event) => {
-    console.log("hello from change value:", event);
+    console.log(
+      "hello from change value:",
+      event,
+      "also from new item",
+      newItem
+    );
     event.preventDefault();
     setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
@@ -231,7 +236,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <select name="storage_space" onChange={changeValue}>
           <option value="counter">counter</option>
           <option value="pantry">pantry</option>
-          <option value="fridge">fridge</option>
+          <option selected value="fridge">
+            fridge
+          </option>
           <option value="freezer">freezer</option>
           <option value="closet">closet</option>
         </select>
@@ -269,14 +276,16 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <select name="time_to_expire" onChange={changeValue}>
           <option value="three_days">3 days</option>
           <option value="six_days">6 days</option>
-          <option value="nine_days">1 week (9 days)</option>
+          <option selected value="nine_days">
+            1 week (9 days)
+          </option>
           <option value="eighteen_days">2 weeks (18 days)</option>
           <option value="thirty-six_days">1 month (36 days)</option>
           <option value="seventy-three_days">1 season (73 days)</option>
           <option value="three-hundred-sixty-five_days">
             1 year (365 days)
           </option>
-          <option value="never">one of itself (ex. apple)</option>
+          <option value="never">never</option>
         </select>
         <button>next</button>
       </form>
@@ -342,7 +351,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="scoop">scoop</option>
           <option value="tbsp">tbsp</option>
           <option value="tsp">tsp</option>
-          <option value="self">one of itself (ex. apple)</option>
+          <option selected value="self">
+            one of itself (ex. apple)
+          </option>
         </select>
         <button>next</button>
       </form>
@@ -365,9 +376,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       <form onSubmit={subPurchaseUnit}>
         <select name="purchase_unit" onChange={changeValue}>
           <option value="bag">bag</option>
-          <option value="box">box</option>
+          <option selected value="box">
+            box
+          </option>
           <option value="bunch">bunch</option>
           <option value="can">can</option>
+          <option value="carton">carton</option>
           <option value="package">package</option>
           <option value="lb">lb</option>
         </select>
@@ -387,7 +401,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       <h4>Category</h4>
       <form onSubmit={subCategory}>
         <select name="category" onChange={changeValue}>
-          <option value="vegetable">vegetable</option>
+          <option selected value="vegetable">
+            vegetable
+          </option>
           <option value="herbs">herbs</option>
           <option value="fruit">fruit</option>
           <option value="grains">grains</option>
