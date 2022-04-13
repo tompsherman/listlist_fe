@@ -6,14 +6,14 @@ import DupeAdd from "./DupeAdd";
 
 const initialState = {
   name: "",
-  purchase_unit: "",
-  use_unit: "",
-  category: "",
-  perishable: "",
-  time_to_expire: "",
+  purchase_unit: "box",
+  use_unit: "self",
+  category: "vegetable",
+  perishable: "true",
+  time_to_expire: "thirty-six_days",
   priority: 5,
   cost: "",
-  storage_space: "",
+  storage_space: "fridge",
 };
 
 const initialFormToggle = {
