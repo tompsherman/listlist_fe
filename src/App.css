@@ -24,4 +24,72 @@
   .Hacker {
     background-color: lightcoral;
   }
+
+  .AddItem {
+    background-color: lightyellow;
+  }
+
+  .headline {
+    text-align: center;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: row;
+    background-color: antiquewhite;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .list-button {
+    background-color: gainsboro;
+  }
+  .meat {
+    background-color: lightcoral;
+  }
+
+  .vegetable {
+    background-color: green;
+  }
+  .fruit {
+    background-color: greenyellow;
+  }
+  .grains {
+    background-color: goldenrod;
+  }
+  .household {
+    background-color: lightblue;
+  }
+  .herbs {
+    background-color: burlywood;
+  }
+  .snack {
+    background-color: orangered;
+  }
+  .dairy {
+    background-color: white;
+  }
+  .drinks {
+    background-color: darkkhaki;
+  }
+  .halfwide {
+    width: 45%;
+  }
+  .fullwide {
+    width: 95%;
+  }
+  .centered {
+    text-align: center;
+  }
+  .strikethrough {
+    text-decoration: line-through;
+  }
 }
