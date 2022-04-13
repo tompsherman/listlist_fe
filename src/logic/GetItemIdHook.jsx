@@ -10,7 +10,7 @@ const GetItemIdHook = (getItem) => {
   useEffect(() => {
     axios
       // .get("http://localhost:5505/api/items/")
-      .get("http://listlesslist.heroku.com/api/items/")
+      .get("https://listlesslist.heroku.com/api/items/")
       .then((response) => setItems(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));

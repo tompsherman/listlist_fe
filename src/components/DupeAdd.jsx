@@ -32,7 +32,7 @@ const DupeAdd = ({
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/list_items`, bullet)
-      .post(`http://listlesslist.herokuapp.com/api/list_items`, bullet)
+      .post(`https://listlesslist.herokuapp.com/api/list_items`, bullet)
 
       .then(
         (response) => console.log("item response:", response),

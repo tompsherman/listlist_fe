@@ -55,7 +55,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/items`, newItem)
-      .post(`http://listlesslist.herokuapp.com/api/items`, newItem)
+      .post(`https://listlesslist.herokuapp.com/api/items`, newItem)
 
       .then(
         (response) => console.log("item response:", response),

@@ -32,7 +32,7 @@ const Dashboard = ({ getList }) => {
     console.log("GoShopping triggered:", newGroceryList);
     axios
       // .post(`http://localhost:5505/api/lists/`, newGroceryList)
-      .post(`http://listlesslist.heroku.com/api/lists/`, newGroceryList)
+      .post(`https://listlesslist.heroku.com/api/lists/`, newGroceryList)
       .then(
         (response) => console.log("item response:", response),
         setShopping(true)
