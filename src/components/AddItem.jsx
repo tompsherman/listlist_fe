@@ -51,10 +51,11 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   }, []);
 
   const submitHandler = (event) => {
+    console.log("ITEM ADDED TO DATABASE???", newItem);
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/items`, newItem)
-      .post(`http://listlesslist.herokuapp.com/api/items`, newItem)
+      .post(`https://listlesslist.herokuapp.com/api/items`, newItem)
 
       .then(
         (response) => console.log("item response:", response),
@@ -230,7 +231,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <select name="storage_space" onChange={changeValue}>
           <option value="counter">counter</option>
           <option value="pantry">pantry</option>
-          <option value="fridge">fridge</option>
+          <option selected value="fridge">
+            fridge
+          </option>
           <option value="freezer">freezer</option>
           <option value="closet">closet</option>
         </select>
@@ -268,14 +271,16 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <select name="time_to_expire" onChange={changeValue}>
           <option value="three_days">3 days</option>
           <option value="six_days">6 days</option>
-          <option value="nine_days">1 week (9 days)</option>
+          <option selected value="nine_days">
+            1 week (9 days)
+          </option>
           <option value="eighteen_days">2 weeks (18 days)</option>
           <option value="thirty-six_days">1 month (36 days)</option>
           <option value="seventy-three_days">1 season (73 days)</option>
           <option value="three-hundred-sixty-five_days">
             1 year (365 days)
           </option>
-          <option value="never">one of itself (ex. apple)</option>
+          <option value="never">never</option>
         </select>
         <button>next</button>
       </form>
@@ -367,6 +372,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="box">box</option>
           <option value="bunch">bunch</option>
           <option value="can">can</option>
+          <option value="carton">carton</option>
           <option value="package">package</option>
           <option value="lb">lb</option>
         </select>
