@@ -67,7 +67,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   };
 
   const changeValue = (event) => {
-    console.log("hello from change value:", event);
+    console.log(
+      "hello from change value:",
+      event,
+      "also from new item",
+      newItem
+    );
     event.preventDefault();
     setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
@@ -346,7 +351,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="scoop">scoop</option>
           <option value="tbsp">tbsp</option>
           <option value="tsp">tsp</option>
-          <option value="self">one of itself (ex. apple)</option>
+          <option selected value="self">
+            one of itself (ex. apple)
+          </option>
         </select>
         <button>next</button>
       </form>
@@ -369,7 +376,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       <form onSubmit={subPurchaseUnit}>
         <select name="purchase_unit" onChange={changeValue}>
           <option value="bag">bag</option>
-          <option value="box">box</option>
+          <option selected value="box">
+            box
+          </option>
           <option value="bunch">bunch</option>
           <option value="can">can</option>
           <option value="carton">carton</option>
@@ -392,7 +401,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       <h4>Category</h4>
       <form onSubmit={subCategory}>
         <select name="category" onChange={changeValue}>
-          <option value="vegetable">vegetable</option>
+          <option selected value="vegetable">
+            vegetable
+          </option>
           <option value="herbs">herbs</option>
           <option value="fruit">fruit</option>
           <option value="grains">grains</option>
