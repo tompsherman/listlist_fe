@@ -118,7 +118,14 @@ const GoShop = ({ getList, currentList, setShopping }) => {
       }
       return panArr && grocArr;
     });
-    // console.log("outside the function:", panArr, grocArr);
+    console.log(
+      "panArr outside the function:",
+      panArr,
+      "futurelist",
+      futureList,
+      "currentList",
+      currentList
+    );
     // event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/list_items/bulk_add`, panArr)
