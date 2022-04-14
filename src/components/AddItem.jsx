@@ -129,6 +129,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   const submitListItems = (event) => {
     event.preventDefault();
+    console.log("bulletpoint", bulletPoint);
     axios
       // .post(`http://localhost:5505/api/list_items`, bulletPoint)
       .post(`https://listlesslist.herokuapp.com/api/list_items`, bulletPoint)
