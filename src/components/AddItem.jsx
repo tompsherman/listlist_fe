@@ -351,6 +351,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="scoop">scoop</option>
           <option value="tbsp">tbsp</option>
           <option value="tsp">tsp</option>
+          <option value="slice">slice</option>
           <option selected value="self">
             one of itself (ex. apple)
           </option>

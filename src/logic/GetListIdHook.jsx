@@ -17,6 +17,8 @@ const GetListIdHook = (getList) => {
       .catch((error) => console.log(error.message, error.stack));
   }, []);
 
+  console.log("in get list hook,", list);
+
   list.length && getList === "*"
     ? (currentList = list.filter((list) => list.starred_list === getList))
     : list.length && getList.length
