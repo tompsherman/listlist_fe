@@ -27,7 +27,7 @@ const GetListIdHook = (getList) => {
 
   console.log("returned:", currentList.pop());
 
-  return currentList.pop();
+  currentList.pop();
 };
 
 export default GetListIdHook;
