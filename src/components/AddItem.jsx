@@ -26,6 +26,7 @@ const initialFormToggle = {
 const AddItem = ({ getList, flipNew, setFlipNew }) => {
   const newGroceryListId = GetListIdHook(getList);
   console.log(newGroceryListId, getList);
+  console.log(GetListIdHook(getList));
 
   const [itemDatabase, setItemDatabase] = useState([]);
   const [newItem, setNewItem] = useState(initialState);
