@@ -20,12 +20,12 @@ const GetListIdHook = (getList) => {
   console.log("in get list hook,", list);
 
   list.length && getList === "*"
-    ? (currentList = list.filter((list) => list.starred_list === getList))
+    ? (currentList = list.filter((list) => list.starred === getList))
     : list.length && getList.length
     ? (currentList = list.filter((list) => list.type === getList))
     : (currentList = [{ list_id: "" }]);
 
-  // console.log("returned:", currentList.pop());
+  console.log("returned:", currentList.pop());
 
   return currentList.pop();
 };
