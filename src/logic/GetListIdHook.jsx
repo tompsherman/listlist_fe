@@ -25,9 +25,11 @@ const GetListIdHook = (getList) => {
     ? (currentList = list.filter((list) => list.type === getList))
     : (currentList = [{ list_id: "" }]);
 
-  console.log("returned:", currentList.pop());
+  const finalAnswer = currentList.pop();
 
-  return currentList.pop();
+  console.log("returned:", finalAnswer);
+
+  return finalAnswer;
 };
 
 export default GetListIdHook;
