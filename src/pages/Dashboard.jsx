@@ -24,12 +24,12 @@ const Dashboard = ({ getList }) => {
   const goShopping = (event) => {
     event.preventDefault();
     const newGroceryList = {
-      created_timestamp: event.timeStamp,
+      created_timestamp: new Date().toDateString(),
       list_open: true,
       type: "grocery",
       starred_list: "*",
     };
-    console.log("GoShopping triggered:", newGroceryList);
+    console.log("GO SHOPPING TRIGGERED:", newGroceryList);
     axios
       // .post(`http://localhost:5505/api/lists/`, newGroceryList)
       .post(`https://listlesslist.heroku.com/api/lists/`, newGroceryList)
