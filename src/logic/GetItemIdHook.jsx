@@ -14,7 +14,7 @@ const GetItemIdHook = (getItem) => {
       .then((response) => setItems(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));
-  }, [getItem]);
+  }, []);
 
   let currentItem = items.find((items) => items.name === getItem);
   console.log("items, line 20", getItem, items, currentItem);

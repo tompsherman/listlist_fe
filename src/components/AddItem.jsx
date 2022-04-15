@@ -73,7 +73,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         (response) => console.log("item response:", response),
         setFormToggle({ ...formToggle, fuse_to_list: true }),
         setSearchTerm(newItem.name),
-        setNewItem({ ...newItem, desired_amount: 1 })
+        setNewItem({ ...newItem, desired_amount: 1 }),
+        console.log(
+          "item response:",
+          formToggle.fuse_to_list,
+          searchTerm,
+          newItem.desired_amount
+        )
       )
       .catch((error) => console.log(error));
   };
