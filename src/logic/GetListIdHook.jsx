@@ -17,7 +17,7 @@ const GetListIdHook = (getList) => {
       .catch((error) => console.log(error.message, error.stack));
   }, []);
 
-  console.log("in get list hook,", list);
+  // console.log("in get list hook,", list);
 
   list.length && getList === "*"
     ? (currentList = list.filter((list) => list.starred === getList))
@@ -27,7 +27,7 @@ const GetListIdHook = (getList) => {
 
   const finalAnswer = currentList.pop();
 
-  console.log("returned:", finalAnswer);
+  // console.log("returned:", finalAnswer);
 
   return finalAnswer;
 };

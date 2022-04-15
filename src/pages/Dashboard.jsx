@@ -10,13 +10,13 @@ const Dashboard = ({ getList }) => {
   const [flipNew, setFlipNew] = useState(false);
   const [shopping, setShopping] = useState(false);
 
-  console.log("get list:", getList);
-
+  // console.log("get list:", getList);
+  //
   // need to figure out a way to useEffect to update
   // the current list after ending the shopping trip
   // (will fix the edge bug of cannot go shopping with a new list unless force refreshed)
   const currentList = GetListIdHook(getList);
-  console.log("current list::", currentList);
+  // console.log("current list::", currentList);
 
   const flipper = () => {
     setFlipNew(!flipNew);
@@ -79,12 +79,6 @@ const Dashboard = ({ getList }) => {
         </>
       ) : (
         <>
-          {console.log(
-            "DASHBOARD LIST, currentList:",
-            currentList,
-            "getList",
-            getList
-          )}
           <List currentList={currentList} getList={getList} flipNew={flipNew} />
         </>
       )}
