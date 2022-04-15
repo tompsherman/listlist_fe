@@ -39,6 +39,17 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     add_dupe: false,
   });
 
+  console.log(
+    "SEARCH TERM",
+    searchTerm,
+    "ITEM DATABASE",
+    itemDatabase,
+    "FORM TOGGLE.FUSETOLIST",
+    formToggle.fuse_to_list,
+    "NEW ITEM",
+    newItem
+  );
+
   useEffect(() => {
     axios
       .get(`https://listlesslist.herokuapp.com/api/items/`)
