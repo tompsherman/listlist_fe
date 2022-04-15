@@ -21,10 +21,13 @@ const Dashboard = ({ getList }) => {
   const flipper = () => {
     setFlipNew(!flipNew);
   };
+
+  const currentTime = new Date().toDateString().split(" ");
+
   const goShopping = (event) => {
     event.preventDefault();
     const newGroceryList = {
-      created_timestamp: new Date().toDateString(),
+      created_timestamp: `${currentTime[1]} ${currentTime[2]} ${currentTime[3]}`,
       list_open: true,
       type: "grocery",
       starred_list: "*",
