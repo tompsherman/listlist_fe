@@ -163,11 +163,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       // .post(`http://localhost:5505/api/list_items`, bulletPoint)
       .post(`https://listlesslist.herokuapp.com/api/list_items`, bulletPoint)
 
+      .then((response) => console.log("item response:", response))
       .then(
-        (response) => console.log("item response:", response),
         setNewItem(initialState),
         setFormToggle(initialFormToggle),
-        setFlipNew(!flipNew)
+        setFlipNew(!flipNew),
+        console.log("second .then fired, hopefully fixing state issue.")
       )
       .catch((error) => console.log(error));
   };
