@@ -17,6 +17,7 @@ const GetItemIdHook = (getItem) => {
   }, [getItem]);
 
   let currentItem = items.find((items) => items.name === getItem);
+  console.log("items, line 20", getItem, items, currentItem);
 
   let send_id = "";
   currentItem
