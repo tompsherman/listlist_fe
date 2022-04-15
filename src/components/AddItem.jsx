@@ -69,18 +69,10 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       // .post(`http://localhost:5505/api/items`, newItem)
       .post(`https://listlesslist.herokuapp.com/api/items`, newItem)
 
-      .then(
-        (response) => console.log("item response:", response),
-        () => setFormToggle({ ...formToggle, fuse_to_list: true }),
-        () => setSearchTerm(newItem.name),
-        () => setNewItem({ ...newItem, desired_amount: 1 }),
-        console.log(
-          "item response:",
-          formToggle.fuse_to_list,
-          searchTerm,
-          newItem.desired_amount
-        )
-      )
+      .then((response) => console.log("item response:", response))
+      .then(() => setFormToggle({ ...formToggle, fuse_to_list: true }))
+      .then(() => setSearchTerm(newItem.name))
+      .then(() => setNewItem({ ...newItem, desired_amount: 1 }))
       .catch((error) => console.log(error));
   };
 
