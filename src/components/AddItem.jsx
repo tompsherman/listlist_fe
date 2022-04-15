@@ -128,9 +128,20 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     acquired_amount: 0,
   };
 
+  console.log(
+    "bulletpoint",
+    bulletPoint,
+    "newGroceryList",
+    newGroceryListId,
+    "Get the ID",
+    getTheId,
+    "item_iD",
+    item_id
+  );
+  console.log("dupecheck", dupeCheck, "itemdatabase", itemDatabase);
+
   const submitListItems = (event) => {
     event.preventDefault();
-    console.log("bulletpoint", bulletPoint);
     axios
       // .post(`http://localhost:5505/api/list_items`, bulletPoint)
       .post(`https://listlesslist.herokuapp.com/api/list_items`, bulletPoint)
