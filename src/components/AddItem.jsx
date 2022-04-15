@@ -71,9 +71,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
       .then(
         (response) => console.log("item response:", response),
-        setFormToggle({ ...formToggle, fuse_to_list: true }),
-        setSearchTerm(newItem.name),
-        setNewItem({ ...newItem, desired_amount: 1 }),
+        () => setFormToggle({ ...formToggle, fuse_to_list: true }),
+        () => setSearchTerm(newItem.name),
+        () => setNewItem({ ...newItem, desired_amount: 1 }),
         console.log(
           "item response:",
           formToggle.fuse_to_list,
@@ -163,12 +163,11 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       // .post(`http://localhost:5505/api/list_items`, bulletPoint)
       .post(`https://listlesslist.herokuapp.com/api/list_items`, bulletPoint)
 
-      .then((response) => console.log("item response:", response))
       .then(
+        (response) => console.log("item response:", response),
         setNewItem(initialState),
         setFormToggle(initialFormToggle),
-        setFlipNew(!flipNew),
-        console.log("second .then fired, hopefully fixing state issue.")
+        setFlipNew(!flipNew)
       )
       .catch((error) => console.log(error));
   };
