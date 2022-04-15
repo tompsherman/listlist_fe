@@ -60,7 +60,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       )
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));
-  }, [formToggle.fuse_to_list]);
+  }, [formToggle.fuse_to_list, searchTerm]);
 
   const submitHandler = (event) => {
     console.log("ITEM ADDED TO DATABASE???", newItem);
