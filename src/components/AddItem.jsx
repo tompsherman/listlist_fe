@@ -396,6 +396,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="bunch">bunch</option>
           <option value="can">can</option>
           <option value="carton">carton</option>
+          <option value="jar">jar</option>
           <option value="package">package</option>
           <option value="lb">lb</option>
         </select>
@@ -441,7 +442,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <input
           name="name"
           type="text"
-          value={newItem.name}
+          value={newItem.name.toLowerCase()}
           onChange={changeValue}
           placeholder={`enter item name`}
         />
