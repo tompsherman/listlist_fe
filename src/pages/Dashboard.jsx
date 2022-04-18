@@ -30,7 +30,7 @@ const Dashboard = ({ getList }) => {
       created_timestamp: `${currentTime[1]} ${currentTime[2]} ${currentTime[3]}`,
       list_open: true,
       type: "grocery",
-      starred_list: "*",
+      starred: "*",
     };
     console.log("GO SHOPPING TRIGGERED:", newGroceryList);
     axios
