@@ -36,10 +36,8 @@ const Dashboard = ({ getList }) => {
     axios
       // .post(`http://localhost:5505/api/lists/`, newGroceryList)
       .post(`https://listlesslist.heroku.com/api/lists/`, newGroceryList)
-      .then(
-        (response) => console.log("item response:", response),
-        setShopping(true)
-      )
+      .then((response) => console.log("item response:", response))
+      .then(() => setShopping(true))
       .catch((error) => console.log(error));
   };
   return (
