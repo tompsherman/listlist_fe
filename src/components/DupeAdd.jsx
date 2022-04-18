@@ -34,12 +34,10 @@ const DupeAdd = ({
       // .post(`http://localhost:5505/api/list_items`, bullet)
       .post(`https://listlesslist.herokuapp.com/api/list_items`, bullet)
 
-      .then(
-        (response) => console.log("item response:", response),
-        setNewItem(initialState),
-        setFormToggle(initialFormToggle),
-        setFlipNew(!flipNew)
-      )
+      .then((response) => console.log("item response:", response))
+      .then(() => setNewItem(initialState))
+      .then(() => setFormToggle(initialFormToggle))
+      .then(() => setFlipNew(!flipNew))
       .catch((error) => console.log(error));
   };
 
