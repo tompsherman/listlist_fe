@@ -90,7 +90,7 @@ const GoShop = ({ getList, currentList, setShopping }) => {
           purchase_date: `${currentTime[1]} ${currentTime[2]}`,
           purchase_year: `${currentTime[3]}`,
           desired_amount: cart[item.name].desired_amount,
-          list_id: futureList.list_id,
+          list_id: futureList.list_id + 1,
         });
       } else {
         panArr.push({
@@ -114,7 +114,7 @@ const GoShop = ({ getList, currentList, setShopping }) => {
           desired_amount:
             cart[item.name].desired_amount -
             cart[item.name].desired_amount * cart[item.name].fulfilled,
-          list_id: futureList.list_id,
+          list_id: futureList.list_id + 1,
         });
       }
       return panArr && grocArr;
