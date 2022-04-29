@@ -73,7 +73,7 @@ const App = () => {
       </Routes>
       {/* <ul>---in tab Recipes GET pod_lists WHERE list.type === RECIPES RETURN DESCENDING</ul> */}
 
-      <ul>
+      {/* <ul>
         {" "}
         MVP:
         <ul>
@@ -95,7 +95,7 @@ const App = () => {
           adding duplicate items
           <ul>--- edit item logic</ul>
         </ul>
-      </ul>
+      </ul> */}
     </div>
   ) : (
     <div className="App">
