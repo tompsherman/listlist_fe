@@ -21,6 +21,7 @@ const GoShop = ({ getList, currentList, setShopping }) => {
   const [cart, setCart] = useState([]);
 
   const futureList = GetListIdHook(getList);
+  console.log("futurlist then getlist", futureList, getList);
   const shopList = GetListItemsHook(currentList.list_id);
 
   useEffect(() => {
