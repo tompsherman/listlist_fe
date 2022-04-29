@@ -16,7 +16,7 @@ const Dashboard = ({ getList }) => {
   // the current list after ending the shopping trip
   // (will fix the edge bug of cannot go shopping with a new list unless force refreshed)
   const currentList = GetListIdHook(getList);
-  // console.log("current list::", currentList);
+  console.log("DASHBOARD current list::", currentList);
 
   const flipper = () => {
     setFlipNew(!flipNew);
