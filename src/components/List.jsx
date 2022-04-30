@@ -46,6 +46,7 @@ const List = ({ getList, flipNew }) => {
         <GeneralList array={items} keyword={"dairy"} />
         <GeneralList array={items} keyword={"household"} />
         <GeneralList array={items} keyword={"snack"} />
+        <GeneralList array={items} keyword={"drinks"} />
       </div>
     ) : (
       <div>
@@ -66,6 +67,7 @@ const List = ({ getList, flipNew }) => {
         <PantryList array={items} keyword={"dairy"} />
         <PantryList array={items} keyword={"household"} />
         <PantryList array={items} keyword={"snack"} />
+        <PantryList array={items} keyword={"drinks"} />
       </div>
     ) : (
       <div>
