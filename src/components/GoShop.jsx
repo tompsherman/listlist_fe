@@ -155,7 +155,7 @@ const GoShop = ({ getList, currentList, setShopping }) => {
     (item) => item.category === "household"
   );
   const herbsList = shopList.filter((item) => item.category === "herbs");
-  const snackList = shopList.filter((item) => item.category === "snack food");
+  const snackList = shopList.filter((item) => item.category === "snack");
   const drinksList = shopList.filter((item) => item.category === "drinks");
 
   const collapseCategory = (event) => {
