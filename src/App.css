@@ -113,5 +113,15 @@
   }
   .strikethrough {
     text-decoration: line-through;
+    font-size: 1em;
+  }
+  h2 {
+    font-size: 3em;
+  }
+  h3 {
+    font-size: 2em;
+  }
+  p {
+    font-size: 1.75em;
   }
 }

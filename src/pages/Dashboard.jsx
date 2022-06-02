@@ -59,9 +59,9 @@ const Dashboard = ({ getList }) => {
           <h3 className="halfwide list-button" onClick={flipper}>
             add item
           </h3>
-          <div className="halfwide list-button" onClick={goShopping}>
+          <h3 className="halfwide list-button" onClick={goShopping}>
             Go Shop
-          </div>
+          </h3>
         </div>
       )}
       {shopping ? (

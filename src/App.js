@@ -56,8 +56,9 @@ const App = () => {
         <div className="button" onClick={pantryRoute}>
           pantry
         </div>
+        <div className="button">add new list</div>
         {/* <p>recipes</p> */}
-        <p>add new list</p>
+        {/* <p>add new list</p> */}
       </div>
       {/* <p>need an account set up flow:</p> */}
       {/* <ul>create pod (unecessary for T&K, harcode start)</ul>
