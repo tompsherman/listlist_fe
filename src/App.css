@@ -27,6 +27,25 @@
 
   .AddItem {
     background-color: lightyellow;
+    font-size: 3em;
+  }
+
+  input {
+    padding: 0.2em;
+    margin: 8px 0;
+    box-sizing: border-box;
+    font-size: 1em;
+    width: 100%;
+  }
+
+  button {
+    font-size: 1em;
+  }
+
+  select {
+    box-sizing: border-box;
+    font-size: 1em;
+    width: 100%;
   }
 
   .headline {
@@ -37,6 +56,9 @@
     display: flex;
     flex-direction: row;
     background-color: antiquewhite;
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 0.75em;
   }
 
   .nav {
