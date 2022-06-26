@@ -175,6 +175,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
             value={newItem.name}
             onChange={changeValue}
             placeholder={`enter item name`}
+            ref={(ref) => ref && ref.focus()}
+            onFocus={(e) =>
+              e.currentTarget.setSelectionRange(
+                e.currentTarget.value.length,
+                e.currentTarget.value.length
+              )
+            }
           />
           <button>next</button>
         </form>
@@ -454,6 +461,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           value={newItem.name.toLowerCase()}
           onChange={changeValue}
           placeholder={`enter item name`}
+          ref={(ref) => ref && ref.focus()}
+          onFocus={(e) =>
+            e.currentTarget.setSelectionRange(
+              e.currentTarget.value.length,
+              e.currentTarget.value.length
+            )
+          }
         />
         <button>next</button>
       </form>
