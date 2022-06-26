@@ -12,7 +12,15 @@ const List = ({ getList, flipNew }) => {
 
   const exactList = GetListIdHook(getList);
 
-  // console.log("EXACT LIST", exactList);
+  console.log("EXACT LIST", items);
+
+  let estPrice = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    estPrice = estPrice + items[i].cost;
+  }
+
+  console.log("EST PRICE", estPrice);
 
   const axiosCall = (route) => {
     axios
@@ -47,6 +55,9 @@ const List = ({ getList, flipNew }) => {
         <GeneralList array={items} keyword={"household"} />
         <GeneralList array={items} keyword={"snack"} />
         <GeneralList array={items} keyword={"drinks"} />
+        <div className="flex-row">
+          <h3>est. cost:</h3> <h3>${estPrice}</h3>
+        </div>
       </div>
     ) : (
       <div>
