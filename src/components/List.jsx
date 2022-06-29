@@ -17,7 +17,7 @@ const List = ({ getList, flipNew }) => {
   let estPrice = 0;
 
   for (let i = 0; i < items.length; i++) {
-    estPrice = estPrice + items[i].cost;
+    estPrice = estPrice + parseInt(items[i].cost);
   }
 
   console.log("EST PRICE", estPrice);
