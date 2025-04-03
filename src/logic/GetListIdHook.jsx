@@ -6,12 +6,12 @@ const GetListIdHook = (getList) => {
   // console.log("getlistIDhook, line 6", getList);
 
   let currentList = "";
-  // console.log("list", list, "currentList", currentList, "get list", getList);
+  console.log("list", list, "currentList", currentList, "get list", getList);
 
   useEffect(() => {
     axios
-      // .get("http://localhost:5505/api/lists/")
-      .get(`https://listlesslist.herokuapp.com/api/lists/`)
+      .get("http://localhost:5505/api/lists/")
+      // .get(`https://listlist-be.onrender.com/api/lists/`)
       .then((response) => setList(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));

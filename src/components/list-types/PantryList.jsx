@@ -3,6 +3,15 @@ import React from "react";
 const PantryList = ({ array, keyword }) => {
   const keyList = array.filter((item) => item.category === keyword);
   console.log("PANTRYLIST component:::", keyList);
+
+  const testKey = keyList.map((item) => ({
+    name: item.name,
+    date: item.purchase_date,
+    expires: item.time_to_expire,
+    use_unit: item.use_unit,
+  }));
+
+  console.log("PL TESTKEY:", testKey);
   return (
     <>
       {keyList.length ? (

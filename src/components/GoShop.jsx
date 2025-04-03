@@ -130,10 +130,7 @@ const GoShop = ({ getList, currentList, setShopping }) => {
     // event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/list_items/bulk_add`, panArr)
-      .post(
-        `https://listlesslist.herokuapp.com/api/list_items/bulk_add`,
-        panArr
-      )
+      .post(`https://listlist-be.onrender.com/api/list_items/bulk_add`, panArr)
 
       .then((response) => console.log("item response:", response))
       .catch((error) => console.log(error));

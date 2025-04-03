@@ -24,8 +24,8 @@ const List = ({ getList, flipNew }) => {
 
   const axiosCall = (route) => {
     axios
-      // .get(`http://localhost:5505/api/lists/${route}`)
-      .get(`https://listlesslist.herokuapp.com/api/lists/${route}`)
+      .get(`http://localhost:5505/api/lists/${route}`)
+      // .get(`https://listlist-be.onrender.com/api/lists/${route}`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
         setItems(response.data)
