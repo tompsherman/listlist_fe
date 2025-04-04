@@ -10,8 +10,8 @@ const GetListIdHook = (getList) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5505/api/lists/")
-      // .get(`https://listlist-be.onrender.com/api/lists/`)
+      // .get("http://localhost:5505/api/lists/")
+      .get(`https://listlist-be.onrender.com/api/lists/`)
       .then((response) => setList(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));
