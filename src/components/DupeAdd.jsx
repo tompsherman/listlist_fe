@@ -32,7 +32,7 @@ const DupeAdd = ({
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/list_items`, bullet)
-      .post(`https://listlist-be.onrender.com/api/list_items`, bullet)
+      .post(`https://listlist-db.onrender.com/api/list_items`, bullet)
 
       .then((response) => console.log("item response:", response))
       .then(() => setNewItem(initialState))

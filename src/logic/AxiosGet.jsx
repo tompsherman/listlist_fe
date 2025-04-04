@@ -5,7 +5,7 @@ const AxiosGet = ({ route, setter }) => {
   useEffect(() => {
     axios
       // .get(`http://localhost:5505/api/${route}`)
-      .get(`https://listlist-be.onrender.com/api/${route}`)
+      .get(`https://listlist-db.onrender.com/api/${route}`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
         setter(response.data)

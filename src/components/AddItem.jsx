@@ -52,7 +52,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   useEffect(() => {
     axios
-      .get(`https://listlist-be.onrender.com/api/items/`)
+      .get(`https://listlist-db.onrender.com/api/items/`)
       // .get(`http://localhost:5505/api/items`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
@@ -67,7 +67,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/items`, newItem)
-      .post(`https://listlist-be.onrender.com/api/items`, newItem)
+      .post(`https://listlist-db.onrender.com/api/items`, newItem)
 
       .then((response) => console.log("item response:", response))
       .then(() => setFormToggle({ ...formToggle, fuse_to_list: true }))
@@ -153,7 +153,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     event.preventDefault();
     axios
       // .post(`http://localhost:5505/api/list_items`, bulletPoint)
-      .post(`https://listlist-be.onrender.com/api/list_items`, bulletPoint)
+      .post(`https://listlist-db.onrender.com/api/list_items`, bulletPoint)
 
       .then(
         (response) => console.log("item response:", response),
