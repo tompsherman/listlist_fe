@@ -42,11 +42,11 @@ const DupeAdd = ({
   };
 
   return toggle ? (
-    <div>
-      <button onClick={clicker}>add {dupe.name} to list?</button>
+    <div className="dupe-suggestion">
+      <button className="dupe-add-btn" onClick={clicker}>add {dupe.name} to list?</button>
     </div>
   ) : (
-    <div>
+    <div className="dupe-form">
       <h4>how many {dupe.name}?</h4>
       <form onSubmit={submitListItems}>
         <input
@@ -54,9 +54,9 @@ const DupeAdd = ({
           type="number"
           value={bullet.desired_amount}
           onChange={changeDesiredAmount}
-          placeholder={`enter amount to purchase`}
+          placeholder={`enter amount`}
         />
-        <button>submit item</button>
+        <button>submit</button>
       </form>
     </div>
   );
