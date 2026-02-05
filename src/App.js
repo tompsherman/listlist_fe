@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Route, Routes, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import Marketing from "./pages/Marketing";
 import Dashboard from "./pages/Dashboard";
@@ -12,9 +13,42 @@ import "./App.css";
 const App = () => {
   //auth0 logic;
   const { user, isLoading } = useAuth0();
+  const [listsInitialized, setListsInitialized] = useState(false);
   //return: if authentic and authorized, show App, else Marketing page
 
   const vip = process.env.REACT_APP_WHITELIST.split("_");
+
+  // Initialize default lists (pantry) for new users
+  useEffect(() => {
+    if (user && vip.includes(user.email) && !listsInitialized) {
+      // Check if pantry list exists, create if not
+      axios
+        .get("https://listlist-db.onrender.com/api/lists/")
+        .then((response) => {
+          const lists = response.data;
+          const hasPantry = lists.some((list) => list.type === "pantry");
+          
+          if (!hasPantry) {
+            const currentTime = new Date().toDateString().split(" ");
+            axios
+              .post("https://listlist-db.onrender.com/api/lists/", {
+                created_timestamp: `${currentTime[1]} ${currentTime[2]} ${currentTime[3]}`,
+                list_open: true,
+                type: "pantry",
+                starred: "",
+              })
+              .then(() => {
+                console.log("Pantry list created for new user");
+                setListsInitialized(true);
+              })
+              .catch((err) => console.error("Error creating pantry:", err));
+          } else {
+            setListsInitialized(true);
+          }
+        })
+        .catch((err) => console.error("Error checking lists:", err));
+    }
+  }, [user, vip, listsInitialized]);
 
   const navigate = useNavigate();
   const homeRoute = (event) => {
