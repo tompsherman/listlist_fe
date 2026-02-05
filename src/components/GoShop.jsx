@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import GetListIdHook from "../logic/GetListIdHook";
 import GetListItemsHook from "../logic/GetListItemsHook";
 import axios from "axios";
 import ShoppingList from "./list-types/ShoppingList";
 
 const GoShop = ({ getList, currentList, setShopping }) => {
+  const navigate = useNavigate();
   // console.log("goshop current list:", getList, "current list", currentList);
   const [categoryShown, setCategoryShown] = useState({
     vegetable: true,
@@ -20,8 +22,6 @@ const GoShop = ({ getList, currentList, setShopping }) => {
   });
   const [cart, setCart] = useState([]);
 
-  const futureList = GetListIdHook(getList);
-  console.log("futurlist then getlist", futureList, getList);
   const shopList = GetListItemsHook(currentList.list_id);
 
   useEffect(() => {
@@ -61,82 +61,53 @@ const GoShop = ({ getList, currentList, setShopping }) => {
   // const getGroceryList = GetListIdHook("grocery");
 
   const doneShopping = (event) => {
-    let panArr = [];
-    let grocArr = [];
+    let itemsToSend = [];
     const currentTime = new Date().toDateString().split(" ");
 
     shopList.forEach((item) => {
-      if (cart[item.name].fulfilled === 1) {
-        panArr.push({
+      const cartItem = cart[item.name];
+      const acquiredAmount = Math.round(cartItem.desired_amount * (cartItem.fulfilled || 0));
+      const remainingAmount = cartItem.desired_amount - acquiredAmount;
+
+      // If any amount was acquired, add to pantry
+      if (acquiredAmount > 0) {
+        itemsToSend.push({
           name: item.name,
           item_id: item.item_id,
-          acquired_amount:
-            cart[item.name].desired_amount * cart[item.name].fulfilled,
+          acquired_amount: acquiredAmount,
           purchase_date: `${currentTime[1]} ${currentTime[2]}`,
           purchase_year: `${currentTime[3]}`,
           desired_amount: 0,
           list_id: getPantryList.list_id,
-          amount_left:
-            cart[item.name].desired_amount * cart[item.name].fulfilled,
-        });
-      } else if (
-        cart[item.name].fulfilled === 0 ||
-        !cart[item.name].fulfilled
-      ) {
-        panArr.push({
-          name: item.name,
-          item_id: item.item_id,
-          acquired_amount: 0,
-          purchase_date: `${currentTime[1]} ${currentTime[2]}`,
-          purchase_year: `${currentTime[3]}`,
-          desired_amount: cart[item.name].desired_amount,
-          list_id: futureList.list_id + 1,
-        });
-      } else {
-        panArr.push({
-          name: item.name,
-          item_id: item.item_id,
-          acquired_amount:
-            cart[item.name].desired_amount * cart[item.name].fulfilled,
-          purchase_date: `${currentTime[1]} ${currentTime[2]}`,
-          purchase_year: `${currentTime[3]}`,
-          desired_amount: 0,
-          list_id: getPantryList.list_id,
-          amount_left:
-            cart[item.name].desired_amount * cart[item.name].fulfilled,
-        });
-        panArr.push({
-          name: item.name,
-          item_id: item.item_id,
-          acquired_amount: 0,
-          purchase_date: `${currentTime[1]} ${currentTime[2]}`,
-          purchase_year: `${currentTime[3]}`,
-          desired_amount:
-            cart[item.name].desired_amount -
-            cart[item.name].desired_amount * cart[item.name].fulfilled,
-          list_id: futureList.list_id + 1,
+          amount_left: acquiredAmount,
         });
       }
-      return panArr && grocArr;
-    });
-    console.log(
-      "panArr outside the function:",
-      panArr,
-      "futurelist",
-      futureList,
-      "currentList",
-      currentList
-    );
-    // event.preventDefault();
-    axios
-      // .post(`http://localhost:5505/api/list_items/bulk_add`, panArr)
-      .post(`https://listlist-db.onrender.com/api/list_items/bulk_add`, panArr)
 
-      .then((response) => console.log("item response:", response))
+      // If any amount remains unfulfilled, add to new grocery list (backend creates it)
+      if (remainingAmount > 0) {
+        itemsToSend.push({
+          name: item.name,
+          item_id: item.item_id,
+          acquired_amount: 0,
+          purchase_date: `${currentTime[1]} ${currentTime[2]}`,
+          purchase_year: `${currentTime[3]}`,
+          desired_amount: remainingAmount,
+          list_id: null, // Backend will create new grocery list and assign ID
+        });
+      }
+    });
+
+    console.log("doneShopping items:", itemsToSend);
+
+    axios
+      .post(`https://listlist-db.onrender.com/api/list_items/bulk_add`, itemsToSend)
+      .then((response) => {
+        console.log("bulk_add response:", response);
+        setShopping(false);
+        // Navigate to pantry to see inventory
+        navigate("/pantry");
+      })
       .catch((error) => console.log(error));
-    // setPantry(panArr);
-    // setGrocery(grocArr);
-    setShopping(false);
   };
 
   // console.log(pantry, grocery);
