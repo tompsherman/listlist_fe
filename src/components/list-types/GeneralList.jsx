@@ -10,9 +10,8 @@ const GeneralList = ({ array, keyword }) => {
           <h3>{keyList[0].category}</h3>
           <div className="list_container">
             {keyList.map((item) => (
-              <div className="item">
-                <p>{item.desired_amount}</p>
-                <p>{item.name}</p>
+              <div className="item" key={item._id}>
+                <p>{item.desired_amount} {item.purchase_unit} of {item.name}</p>
               </div>
             ))}
           </div>

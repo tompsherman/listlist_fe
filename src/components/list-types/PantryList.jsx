@@ -110,8 +110,7 @@ const PantryList = ({ array, keyword, onItemRemoved }) => {
                 ) : (
                   // Normal item display
                   <>
-                    <p>{item.acquired_amount || item.amount_left}</p>
-                    <p>{item.name}</p>
+                    <p>{item.acquired_amount || item.amount_left} {item.purchase_unit} of {item.name}</p>
                     <p>{item.purchase_date}</p>
                     <button 
                       className="delete-x-btn"

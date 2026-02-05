@@ -87,6 +87,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setNewItem({ ...newItem, [event.target.name]: event.target.value });
   };
 
+  const handleCancel = () => {
+    setNewItem(initialState);
+    setFormToggle(initialFormToggle);
+    setFlipNew(false);
+  };
+
   const subName = (event) => {
     event.preventDefault();
     setFormToggle({ ...formToggle, category: true });
@@ -184,6 +190,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
             }
           />
           <button>next</button>
+          <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
         </form>
         {dupeCheck.map((dupe) => (
           <DupeAdd
@@ -386,6 +393,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           </option>
         </select>
         <button>next</button>
+        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
       <div className="item">
         <p>name:</p>
@@ -417,6 +425,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="lb">lb</option>
         </select>
         <button>next</button>
+        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
       <div className="item">
         <p>name:</p>
@@ -445,6 +454,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="snack">snack</option>
         </select>
         <button>next</button>
+        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
       <div className="item">
         <p>name:</p>
@@ -470,6 +480,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           }
         />
         <button>next</button>
+        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
     </div>
   ) : (
