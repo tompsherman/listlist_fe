@@ -41,6 +41,7 @@ const List = ({ getList, flipNew }) => {
 
   useEffect(() => {
     axiosCall(testVar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exactList, flipNew]);
 
   return exactList && exactList.type === "grocery" && items[0] ? (
