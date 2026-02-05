@@ -333,6 +333,24 @@
     background-color: #c82333 !important;
   }
 
+  /* List header with title and est cost */
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  .list-header h2 {
+    margin: 0;
+  }
+
+  .est-cost {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #28a745;
+  }
+
   /* Pantry delete button styles */
   .delete-x-btn {
     background-color: #dc3545;

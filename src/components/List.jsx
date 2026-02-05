@@ -56,7 +56,10 @@ const List = ({ getList, flipNew }) => {
   return exactList && exactList.type === "grocery" && items[0] ? (
     items[0].name ? (
       <div>
-        <h2 className="centered">{items[0].type} list</h2>
+        <div className="list-header">
+          <h2 className="centered">{items[0].type} list</h2>
+          <p className="est-cost">est. cost: ${estPrice}</p>
+        </div>
         <GeneralList array={items} keyword={"vegetable"} />
         <GeneralList array={items} keyword={"herbs"} />
         <GeneralList array={items} keyword={"fruit"} />
@@ -66,9 +69,6 @@ const List = ({ getList, flipNew }) => {
         <GeneralList array={items} keyword={"household"} />
         <GeneralList array={items} keyword={"snack"} />
         <GeneralList array={items} keyword={"drinks"} />
-        <div className="flex-row">
-          <h3>est. cost:</h3> <h3>${estPrice}</h3>
-        </div>
       </div>
     ) : (
       <div>
