@@ -45,7 +45,7 @@ const Dashboard = ({ getList }) => {
   };
   return (
     <div className="Dashboard">
-      {shopping || getList === "pantry" ? null : flipNew ? (
+      {shopping ? null : flipNew ? (
         <AddItem
           list={list}
           setList={setList}
@@ -54,6 +54,12 @@ const Dashboard = ({ getList }) => {
           setFlipNew={setFlipNew}
           flipper={flipper}
         />
+      ) : getList === "pantry" ? (
+        <div className="flex-row fullwide">
+          <h3 className="fullwide list-button" onClick={flipper}>
+            add item
+          </h3>
+        </div>
       ) : (
         <div className="flex-row fullwide">
           <h3 className="halfwide list-button" onClick={flipper}>

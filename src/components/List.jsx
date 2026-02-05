@@ -44,6 +44,13 @@ const List = ({ getList, flipNew }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exactList, flipNew]);
 
+  // Refresh function for when pantry items are removed
+  const refreshList = () => {
+    if (testVar) {
+      axiosCall(testVar);
+    }
+  };
+
   return exactList && exactList.type === "grocery" && items[0] ? (
     items[0].name ? (
       <div>
@@ -71,16 +78,15 @@ const List = ({ getList, flipNew }) => {
       <div>
         <h2 className="centered">{items[0].type} list</h2>
 
-        <PantryList array={items} keyword={"vegetable"} />
-        <PantryList array={items} keyword={"herbs"} />
-        <PantryList array={items} keyword={"fruit"} />
-        <PantryList array={items} keyword={"grains"} />
-        <PantryList array={items} keyword={"herbs"} />
-        <PantryList array={items} keyword={"meat"} />
-        <PantryList array={items} keyword={"dairy"} />
-        <PantryList array={items} keyword={"household"} />
-        <PantryList array={items} keyword={"snack"} />
-        <PantryList array={items} keyword={"drinks"} />
+        <PantryList array={items} keyword={"vegetable"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"herbs"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"fruit"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"grains"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"meat"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"dairy"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"household"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"snack"} onItemRemoved={refreshList} />
+        <PantryList array={items} keyword={"drinks"} onItemRemoved={refreshList} />
       </div>
     ) : (
       <div>

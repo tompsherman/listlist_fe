@@ -124,4 +124,88 @@
   /* p {
     font-size: 6vw;
   } */
+
+  /* Pantry delete button styles */
+  .delete-x-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.2em 0.5em;
+    font-size: 1em;
+    cursor: pointer;
+    margin-left: auto;
+    border-radius: 4px;
+  }
+
+  .delete-x-btn:hover {
+    background-color: #c82333;
+  }
+
+  .delete-flow {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5em;
+  }
+
+  .delete-item-name {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+
+  .delete-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    align-items: center;
+  }
+
+  .delete-buttons p {
+    width: 100%;
+    margin: 0 0 0.3em 0;
+  }
+
+  .delete-option-btn {
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .finished-btn {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .expired-btn {
+    background-color: #ffc107;
+    color: black;
+  }
+
+  .yes-btn {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .no-btn {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .delete-cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .delete-option-btn:hover,
+  .delete-cancel-btn:hover {
+    opacity: 0.8;
+  }
 }
