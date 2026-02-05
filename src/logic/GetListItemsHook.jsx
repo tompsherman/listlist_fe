@@ -7,8 +7,8 @@ const GetListItemsHook = (id) => {
 
   useEffect(() => {
     axios
-      // .get(`http://localhost:5505/api/lists/${id}`)
-      .get(`https://listlist-db.onrender.com/api/lists/${id}`)
+      // .get(`http://localhost:5505/api/lists/${id}/items`)
+      .get(`https://listlist-db.onrender.com/api/lists/${id}/items`)
       .then((response) => setList(response.data))
       // .then(console.log("GET list", list))
       .catch((error) => console.log(error.message, error.stack));

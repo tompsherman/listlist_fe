@@ -25,8 +25,8 @@ const List = ({ getList, flipNew }) => {
   const axiosCall = (route) => {
     console.log("LIST 26 -- route", route);
     axios
-      // .get(`http://localhost:5505/api/lists/${route}`)
-      .get(`https://listlist-db.onrender.com/api/lists/${route}`)
+      // .get(`http://localhost:5505/api/lists/${route}/items`)
+      .get(`https://listlist-db.onrender.com/api/lists/${route}/items`)
       .then((response) =>
         //console.log("LINE 35,", response.data))
         setItems(response.data)
