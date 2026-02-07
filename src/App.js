@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 import Marketing from "./pages/Marketing";
 import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
 import LoginButton from "./components/LoginButton";
 import LogoutButton from "./components/LogoutButton";
 
@@ -14,7 +15,13 @@ const App = () => {
   //auth0 logic;
   const { user, isLoading } = useAuth0();
   const [listsInitialized, setListsInitialized] = useState(false);
+  const location = useLocation();
   //return: if authentic and authorized, show App, else Marketing page
+
+  // Admin page is accessible without auth (hidden URL)
+  if (location.pathname === "/admin") {
+    return <Admin />;
+  }
 
   const vip = process.env.REACT_APP_WHITELIST.split("_");
 
