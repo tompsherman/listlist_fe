@@ -12,45 +12,19 @@ import LogoutButton from "./components/LogoutButton";
 import "./App.css";
 
 const App = () => {
-  //auth0 logic;
+  // All hooks must be called unconditionally at the top
   const { user, isLoading } = useAuth0();
   const [listsInitialized, setListsInitialized] = useState(false);
   const location = useLocation();
-  //return: if authentic and authorized, show App, else Marketing page
+  const navigate = useNavigate();
 
   const vip = process.env.REACT_APP_WHITELIST.split("_");
   const ADMIN_EMAIL = "tpsherman703@gmail.com";
-
-  // Admin page - requires auth + admin email
-  if (location.pathname === "/admin") {
-    if (isLoading) {
-      return <div>Loading...</div>;
-    }
-    if (!user) {
-      return (
-        <div className="Admin">
-          <h1>🔐 Admin Access Required</h1>
-          <p>Please log in to access the admin panel.</p>
-          <LoginButton />
-        </div>
-      );
-    }
-    if (user.email !== ADMIN_EMAIL) {
-      return (
-        <div className="Admin">
-          <h1>🚫 Access Denied</h1>
-          <p>You don't have permission to view this page.</p>
-          <LogoutButton />
-        </div>
-      );
-    }
-    return <Admin />;
-  }
+  const isAdminRoute = location.pathname === "/admin";
 
   // Initialize default lists (pantry) for new users
   useEffect(() => {
-    if (user && vip.includes(user.email) && !listsInitialized) {
-      // Check if pantry list exists, create if not
+    if (user && vip.includes(user.email) && !listsInitialized && !isAdminRoute) {
       axios
         .get("https://listlist-db.onrender.com/api/lists/")
         .then((response) => {
@@ -77,19 +51,13 @@ const App = () => {
         })
         .catch((err) => console.error("Error checking lists:", err));
     }
-  }, [user, vip, listsInitialized]);
+  }, [user, vip, listsInitialized, isAdminRoute]);
 
-  const navigate = useNavigate();
-  const homeRoute = (event) => {
-    navigate(`/`);
-  };
-  const groceryRoute = (event) => {
-    navigate(`/grocery`);
-  };
-  const pantryRoute = (event) => {
-    navigate(`/pantry`);
-  };
+  const homeRoute = () => navigate(`/`);
+  const groceryRoute = () => navigate(`/grocery`);
+  const pantryRoute = () => navigate(`/pantry`);
 
+  // Determine user status
   let isLegit = "";
   if (!user) {
     isLegit = "loggin";
@@ -99,14 +67,60 @@ const App = () => {
     isLegit = false;
   }
 
-  return isLoading ? (
-    <div>Loading...</div>
-  ) : isLegit === "loggin" ? (
-    <div>
-      <Marketing />
-      <LoginButton />
-    </div>
-  ) : isLegit ? (
+  // Loading state
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // Admin route - requires auth + admin email
+  if (isAdminRoute) {
+    if (!user) {
+      return (
+        <div className="Admin">
+          <h1>🔐 Admin Access Required</h1>
+          <p>Please log in to access the admin panel.</p>
+          <LoginButton />
+        </div>
+      );
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      return (
+        <div className="Admin">
+          <h1>🚫 Access Denied</h1>
+          <p>You don't have permission to view this page.</p>
+          <LogoutButton />
+        </div>
+      );
+    }
+    return <Admin />;
+  }
+
+  // Not logged in - show marketing
+  if (isLegit === "loggin") {
+    return (
+      <div>
+        <Marketing />
+        <LoginButton />
+      </div>
+    );
+  }
+
+  // Logged in but not whitelisted
+  if (isLegit === false) {
+    return (
+      <div className="App">
+        <p className="Hacker">
+          Thank you for your interest! Unfortunately we are closed for alpha
+          testing right now, don't worry, you're on the LIST for our beta test
+        </p>
+        <LogoutButton />
+        <Marketing />
+      </div>
+    );
+  }
+
+  // Logged in and whitelisted - show app
+  return (
     <div className="App">
       <div className="nav">
         <LogoutButton />
@@ -120,55 +134,12 @@ const App = () => {
           pantry
         </div>
         <div className="button">add new list</div>
-        {/* <p>recipes</p> */}
-        {/* <p>add new list</p> */}
       </div>
-      {/* <p>need an account set up flow:</p> */}
-      {/* <ul>create pod (unecessary for T&K, harcode start)</ul>
-      <ul>--- GET user_id from "pods"</ul>
-      <ul>--- GET email from "users"</ul>
-      <ul>create first list</ul>
-      <ul>--- POST to "lists"</ul>
-      <ul>--- POST user_id to </ul> */}
       <Routes>
         <Route path="/" element={<Dashboard getList={"*"} />} />
         <Route path="/grocery" element={<Dashboard getList={"grocery"} />} />
         <Route path="/pantry" element={<Dashboard getList={"pantry"} />} />
       </Routes>
-      {/* <ul>---in tab Recipes GET pod_lists WHERE list.type === RECIPES RETURN DESCENDING</ul> */}
-
-      {/* <ul>
-        {" "}
-        MVP:
-        <ul>
-          organizing pantry
-          <ul>--- starting expiration countdowns</ul>
-          <ul>adding items to pantry</ul>
-          <ul>sort options (expiration / oldest, category type etc)</ul>
-        </ul>
-      </ul>
-      <ul>
-        {" "}
-        REFACTORING MVP:
-        <ul>
-          item form
-          <ul>--- logic like auto filling in expiration "never"</ul>
-          <ul>--- "go back" buttons</ul>
-        </ul>
-        <ul>
-          adding duplicate items
-          <ul>--- edit item logic</ul>
-        </ul>
-      </ul> */}
-    </div>
-  ) : (
-    <div className="App">
-      <p className="Hacker">
-        Thank you for your interest! Unfortunately we are closed for alpha
-        testing right now, don't worry, you're on the LIST for our beta test
-      </p>
-      <LogoutButton />
-      <Marketing />
     </div>
   );
 };
