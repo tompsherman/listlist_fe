@@ -736,3 +736,19 @@
   text-align: center;
   padding: 1rem;
 }
+
+/* Marketing page buttons */
+.marketing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.create-pod-btn {
+  background: #e91e8c;
+}
+
+.create-pod-btn:hover {
+  background: #c4177a;
+}
