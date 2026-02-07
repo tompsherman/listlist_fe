@@ -18,12 +18,34 @@ const App = () => {
   const location = useLocation();
   //return: if authentic and authorized, show App, else Marketing page
 
-  // Admin page is accessible without auth (hidden URL)
+  const vip = process.env.REACT_APP_WHITELIST.split("_");
+  const ADMIN_EMAIL = "tpsherman703@gmail.com";
+
+  // Admin page - requires auth + admin email
   if (location.pathname === "/admin") {
+    if (isLoading) {
+      return <div>Loading...</div>;
+    }
+    if (!user) {
+      return (
+        <div className="Admin">
+          <h1>🔐 Admin Access Required</h1>
+          <p>Please log in to access the admin panel.</p>
+          <LoginButton />
+        </div>
+      );
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      return (
+        <div className="Admin">
+          <h1>🚫 Access Denied</h1>
+          <p>You don't have permission to view this page.</p>
+          <LogoutButton />
+        </div>
+      );
+    }
     return <Admin />;
   }
-
-  const vip = process.env.REACT_APP_WHITELIST.split("_");
 
   // Initialize default lists (pantry) for new users
   useEffect(() => {
