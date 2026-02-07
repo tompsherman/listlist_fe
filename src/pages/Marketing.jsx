@@ -78,12 +78,6 @@ const Marketing = () => {
         <button onClick={handleLogin} className="submit-btn">
           🫛 Log In
         </button>
-        <button 
-          onClick={() => setShowSignupForm(!showSignupForm)} 
-          className="submit-btn create-pod-btn"
-        >
-          🌸 Create Your Pod
-        </button>
       </div>
 
       <div className="hero">
@@ -94,6 +88,14 @@ const Marketing = () => {
           lists, manage your pantry, and never forget what's in the fridge
           again.
         </p>
+      </div>
+      <div className="Marketing">
+      <button 
+          onClick={() => setShowSignupForm(!showSignupForm)} 
+          className="submit-btn create-pod-btn"
+        >
+          🌸 Create Your Pod
+        </button>
       </div>
 
       {showSignupForm && (
