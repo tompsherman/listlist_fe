@@ -20,7 +20,11 @@ const App = () => {
 
   const vip = process.env.REACT_APP_WHITELIST.split("_");
   const ADMIN_EMAIL = "tpsherman703@gmail.com";
-  const isAdminRoute = location.pathname === "/admin";
+  // Check for /admin with or without trailing slash
+  const isAdminRoute = location.pathname === "/admin" || location.pathname === "/admin/";
+  
+  // Debug logging - remove after fixing
+  console.log("Current path:", location.pathname, "isAdminRoute:", isAdminRoute, "user:", user?.email);
 
   // Initialize default lists (pantry) for new users
   useEffect(() => {
@@ -74,6 +78,7 @@ const App = () => {
 
   // Admin route - requires auth + admin email
   if (isAdminRoute) {
+    console.log("Admin route detected. User email:", user?.email, "ADMIN_EMAIL:", ADMIN_EMAIL);
     if (!user) {
       return (
         <div className="Admin">
@@ -83,11 +88,13 @@ const App = () => {
         </div>
       );
     }
-    if (user.email !== ADMIN_EMAIL) {
+    // Case-insensitive email check
+    if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
       return (
         <div className="Admin">
           <h1>🚫 Access Denied</h1>
           <p>You don't have permission to view this page.</p>
+          <p style={{fontSize: '0.8rem', color: '#666'}}>Logged in as: {user.email}</p>
           <LogoutButton />
         </div>
       );
