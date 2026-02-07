@@ -108,7 +108,6 @@ const App = () => {
     return (
       <div>
         <Marketing />
-        <LoginButton />
       </div>
     );
   }

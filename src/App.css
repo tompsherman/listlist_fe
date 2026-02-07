@@ -745,10 +745,17 @@
   margin-bottom: 1.5rem;
 }
 
+.marketing-buttons .submit-btn,
+.Marketing .submit-btn {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
 .create-pod-btn {
-  background: #e91e8c;
+  background: #e91e8c !important;
 }
 
 .create-pod-btn:hover {
-  background: #c4177a;
+  background: #c4177a !important;
 }
