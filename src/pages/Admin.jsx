@@ -79,7 +79,7 @@ const Admin = () => {
           <p className="empty-state">No pending signups 🎉</p>
         ) : (
           pending.map((signup) => (
-            <div key={signup.signup_id} className="signup-card pending">
+            <div key={signup._id || signup.signup_id} className="signup-card pending">
               <div className="signup-info">
                 <strong>{signup.pod_name}</strong>
                 <span className="signup-date">
@@ -93,15 +93,15 @@ const Admin = () => {
               </div>
               <div className="signup-actions">
                 <button
-                  onClick={() => handleApprove(signup.signup_id)}
-                  disabled={actionLoading === signup.signup_id}
+                  onClick={() => handleApprove(signup._id || signup.signup_id)}
+                  disabled={actionLoading === (signup._id || signup.signup_id)}
                   className="approve-btn"
                 >
-                  {actionLoading === signup.signup_id ? "..." : "✓ Approve"}
+                  {actionLoading === (signup._id || signup.signup_id) ? "..." : "✓ Approve"}
                 </button>
                 <button
-                  onClick={() => handleReject(signup.signup_id)}
-                  disabled={actionLoading === signup.signup_id}
+                  onClick={() => handleReject(signup._id || signup.signup_id)}
+                  disabled={actionLoading === (signup._id || signup.signup_id)}
                   className="reject-btn"
                 >
                   ✗ Reject
@@ -133,7 +133,7 @@ const Admin = () => {
           <div>
             <h3>Approved ({approved.length})</h3>
             {approved.map((s) => (
-              <div key={s.signup_id} className="mini-card approved">
+              <div key={s._id || s.signup_id} className="mini-card approved">
                 <strong>{s.pod_name}</strong>
                 <span>
                   {[s.primary_email, s.invite_email_1, s.invite_email_2]
@@ -147,7 +147,7 @@ const Admin = () => {
           <div>
             <h3>Rejected ({rejected.length})</h3>
             {rejected.map((s) => (
-              <div key={s.signup_id} className="mini-card rejected">
+              <div key={s._id || s.signup_id} className="mini-card rejected">
                 <strong>{s.pod_name}</strong>
                 <span>{s.primary_email}</span>
               </div>
@@ -169,7 +169,7 @@ const Admin = () => {
           </thead>
           <tbody>
             {pods.map((pod) => (
-              <tr key={pod.pod_id}>
+              <tr key={pod._id || pod.pod_id}>
                 <td>{pod.pod_name}</td>
                 <td>{pod.member_emails || "(no members)"}</td>
                 <td>{pod.list_count}</td>
