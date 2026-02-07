@@ -20,11 +20,12 @@ const App = () => {
 
   const vip = process.env.REACT_APP_WHITELIST.split("_");
   const ADMIN_EMAIL = "tpsherman703@gmail.com";
-  // Check for /admin with or without trailing slash
-  const isAdminRoute = location.pathname === "/admin" || location.pathname === "/admin/";
+  // Check for /admin - use window.location directly to catch it during Auth0 redirect
+  const currentPath = window.location.pathname;
+  const isAdminRoute = currentPath === "/admin" || currentPath === "/admin/";
   
   // Debug logging - remove after fixing
-  console.log("Current path:", location.pathname, "isAdminRoute:", isAdminRoute, "user:", user?.email);
+  console.log("Current path (window):", currentPath, "React Router path:", location.pathname, "isAdminRoute:", isAdminRoute, "user:", user?.email);
 
   // Initialize default lists (pantry) for new users
   useEffect(() => {

@@ -42,7 +42,10 @@ const List = ({ getList, flipNew }) => {
   exactList ? (testVar = exactList.list_id) : (testVar = "");
 
   useEffect(() => {
-    axiosCall(testVar);
+    // Only make API call if we have a valid list ID
+    if (testVar) {
+      axiosCall(testVar);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exactList, flipNew]);
 
