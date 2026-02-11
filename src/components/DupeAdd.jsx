@@ -147,9 +147,11 @@ const DupeAdd = ({
   }
 
   // mode === "quantity"
+  // Use editItem.name if we came from edit mode (has been modified), otherwise use dupe.name
+  const displayName = editItem.name !== dupe.name ? editItem.name : dupe.name;
   return (
     <div className="dupe-form">
-      <h4>how many {dupe.name}?</h4>
+      <h4>how many {displayName}?</h4>
       <form onSubmit={submitListItems}>
         <input
           name="desired_amount"
