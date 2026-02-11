@@ -85,14 +85,23 @@ const DupeAdd = ({
 
   const submitEditedItem = (event) => {
     event.preventDefault();
+    console.log("=== SUBMIT EDIT ===");
+    console.log("item_id prop:", item_id);
+    console.log("dupe.item_id:", dupe.item_id);
+    console.log("editItem being sent:", editItem);
+    console.log("URL:", `https://listlist-db.onrender.com/api/items/${item_id}`);
+    
     // Update the item in the database
     axios
       .put(`https://listlist-db.onrender.com/api/items/${item_id}`, editItem)
       .then((response) => {
-        console.log("Item updated:", response);
+        console.log("SUCCESS - Item updated:", response);
         setMode("quantity"); // Go to quantity selection after edit
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.error("ERROR updating item:", error);
+        console.error("Error response:", error.response);
+      });
   };
 
   if (mode === "suggestion") {
