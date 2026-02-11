@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const DupeAdd = ({
@@ -29,6 +29,27 @@ const DupeAdd = ({
     cost: dupe.cost || "",
     storage_space: dupe.storage_space || "fridge",
   });
+
+  // Reset editItem and bullet when dupe/item_id changes (handles component reuse)
+  useEffect(() => {
+    setEditItem({
+      name: dupe.name,
+      purchase_unit: dupe.purchase_unit || "box",
+      use_unit: dupe.use_unit || "self",
+      category: dupe.category || "vegetable",
+      perishable: dupe.perishable || "true",
+      time_to_expire: dupe.time_to_expire || "thirty-six_days",
+      cost: dupe.cost || "",
+      storage_space: dupe.storage_space || "fridge",
+    });
+    setBullet({
+      desired_amount: 1,
+      list_id: list_id,
+      item_id: item_id,
+      acquired_amount: 0,
+    });
+    setMode("suggestion");
+  }, [dupe.item_id, item_id, list_id]);
 
   const handleAddClick = () => {
     setMode("quantity");

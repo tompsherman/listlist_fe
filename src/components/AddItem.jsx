@@ -194,6 +194,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         </form>
         {dupeCheck.map((dupe) => (
           <DupeAdd
+            key={dupe.item_id}
             item_id={dupe.item_id}
             list_id={newGroceryListId.list_id}
             dupe={dupe}
