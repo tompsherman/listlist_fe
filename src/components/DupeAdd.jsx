@@ -49,6 +49,7 @@ const DupeAdd = ({
       acquired_amount: 0,
     });
     setMode("suggestion");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dupe.item_id, item_id, list_id]);
 
   const handleAddClick = () => {
