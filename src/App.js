@@ -58,7 +58,7 @@ const App = () => {
     }
   }, [user, vip, listsInitialized, isAdminRoute]);
 
-  const homeRoute = () => navigate(`/`);
+  // const homeRoute = () => navigate(`/`); // Future feature
   const groceryRoute = () => navigate(`/grocery`);
   const pantryRoute = () => navigate(`/pantry`);
 
@@ -136,12 +136,7 @@ const App = () => {
         <div className="nav-btn" onClick={pantryRoute}>
           inventory
         </div>
-        {/* Future feature
-        <div className="nav-btn" onClick={homeRoute}>
-          home
-        </div>
-        <div className="nav-btn">add new list</div>
-        */}
+        {/* Future features: home button, add new list button */}
         <div className="nav-spacer"></div>
         <LogoutButton />
       </div>
