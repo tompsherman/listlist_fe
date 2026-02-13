@@ -149,6 +149,15 @@
     background-color: #e8f5e9;
   }
 
+  .nav-btn-active {
+    background-color: #4a7c59;
+    color: white;
+  }
+
+  .nav-btn-active:hover {
+    background-color: #3d6a4a;
+  }
+
   .nav button {
     flex: 1;
     padding: 0.6rem 1.2rem;
@@ -163,6 +172,10 @@
 
   .nav button:hover {
     background-color: #3d6a4a;
+  }
+
+  .nav button:active {
+    background-color: #2d5a3a;
   }
 
   .flex-row {

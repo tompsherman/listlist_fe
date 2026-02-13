@@ -130,10 +130,16 @@ const App = () => {
   return (
     <div className="App">
       <div className="nav">
-        <div className="nav-btn" onClick={groceryRoute}>
+        <div 
+          className={`nav-btn ${location.pathname === '/grocery' || location.pathname === '/' ? 'nav-btn-active' : ''}`} 
+          onClick={groceryRoute}
+        >
           grocery
         </div>
-        <div className="nav-btn" onClick={pantryRoute}>
+        <div 
+          className={`nav-btn ${location.pathname === '/pantry' ? 'nav-btn-active' : ''}`} 
+          onClick={pantryRoute}
+        >
           inventory
         </div>
         {/* Future features: home button, add new list button */}
