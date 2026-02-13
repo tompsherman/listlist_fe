@@ -115,7 +115,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   const subPerishable = (event) => {
     event.preventDefault();
-    setFormToggle({ ...formToggle, time_to_expire: true });
+    // If not perishable, auto-set expiration to "never" and skip to storage_space
+    if (newItem.perishable === "false") {
+      setNewItem({ ...newItem, time_to_expire: "never" });
+      setFormToggle({ ...formToggle, storage_space: true });
+    } else {
+      setFormToggle({ ...formToggle, time_to_expire: true });
+    }
   };
 
   const subTimeToExpire = (event) => {
@@ -128,8 +134,37 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...formToggle, cost: true });
   };
 
+  // Back button handlers
+  const backToName = () => {
+    setFormToggle({ ...initialFormToggle, name: true });
+  };
+
+  const backToCategory = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true });
+  };
+
+  const backToPurchaseUnit = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true });
+  };
+
+  const backToUseUnit = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true });
+  };
+
+  const backToPerishable = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true });
+  };
+
+  const backToTimeToExpire = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true });
+  };
+
+  const backToStorageSpace = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true });
+  };
+
   const dupeCheck = itemDatabase.filter((item) =>
-    item.name.startsWith(newItem.name)
+    item.name.toLowerCase().startsWith(newItem.name.toLowerCase())
   );
 
   const item_id = GetItemIdHook(searchTerm);
@@ -235,6 +270,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           onChange={changeValue}
           placeholder={`enter item cost`}
         />
+        <button type="button" className="back-btn" onClick={backToStorageSpace}>back</button>
         <button>submit item</button>
       </form>
       <div className="item">
@@ -279,6 +315,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="freezer">freezer</option>
           <option value="closet">closet</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToTimeToExpire}>back</button>
         <button>next</button>
       </form>
       <div className="item">
@@ -324,6 +361,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           </option>
           <option value="never">never</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToPerishable}>back</button>
         <button>next</button>
       </form>
       <div className="item">
@@ -355,6 +393,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="true">true</option>
           <option value="false">false</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToUseUnit}>back</button>
         <button>next</button>
       </form>
       <div className="item">
@@ -393,6 +432,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
             one of itself (ex. apple)
           </option>
         </select>
+        <button type="button" className="back-btn" onClick={backToPurchaseUnit}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
@@ -425,6 +465,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="package">package</option>
           <option value="lb">lb</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToCategory}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
@@ -454,6 +495,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="drinks">drinks</option>
           <option value="snack">snack</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToName}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>

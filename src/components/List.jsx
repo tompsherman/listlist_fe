@@ -4,11 +4,15 @@ import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
 import PantryList from "./list-types/PantryList";
 
+const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
+const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
+
 const List = ({ getList, flipNew }) => {
   // PANTRY - different background color, no "goshopping" button
   // GROCERY - how list is built currently
 
   const [items, setItems] = useState([]);
+  const [groupBy, setGroupBy] = useState("category"); // "category" or "storage"
 
   const exactList = GetListIdHook(getList);
 
@@ -63,15 +67,15 @@ const List = ({ getList, flipNew }) => {
           <h2 className="centered">{items[0].type} list</h2>
           <p className="est-cost">est. cost: ${estPrice}</p>
         </div>
-        <GeneralList array={items} keyword={"vegetable"} />
-        <GeneralList array={items} keyword={"herbs"} />
-        <GeneralList array={items} keyword={"fruit"} />
-        <GeneralList array={items} keyword={"grains"} />
-        <GeneralList array={items} keyword={"meat"} />
-        <GeneralList array={items} keyword={"dairy"} />
-        <GeneralList array={items} keyword={"household"} />
-        <GeneralList array={items} keyword={"snack"} />
-        <GeneralList array={items} keyword={"drinks"} />
+        <GeneralList array={items} keyword={"vegetable"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"herbs"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"fruit"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"grains"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"meat"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"dairy"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"household"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"snack"} onItemRemoved={refreshList} />
+        <GeneralList array={items} keyword={"drinks"} onItemRemoved={refreshList} />
       </div>
     ) : (
       <div>
@@ -82,16 +86,37 @@ const List = ({ getList, flipNew }) => {
     items[0].name ? (
       <div>
         <h2 className="centered">{items[0].type} list</h2>
+        
+        {/* Group by toggle */}
+        <div className="group-toggle">
+          <span>Group by: </span>
+          <button 
+            className={`toggle-btn ${groupBy === "category" ? "active" : ""}`}
+            onClick={() => setGroupBy("category")}
+          >
+            category
+          </button>
+          <button 
+            className={`toggle-btn ${groupBy === "storage" ? "active" : ""}`}
+            onClick={() => setGroupBy("storage")}
+          >
+            location
+          </button>
+        </div>
 
-        <PantryList array={items} keyword={"vegetable"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"herbs"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"fruit"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"grains"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"meat"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"dairy"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"household"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"snack"} onItemRemoved={refreshList} />
-        <PantryList array={items} keyword={"drinks"} onItemRemoved={refreshList} />
+        {groupBy === "category" ? (
+          <>
+            {CATEGORIES.map(cat => (
+              <PantryList key={cat} array={items} keyword={cat} onItemRemoved={refreshList} groupBy="category" />
+            ))}
+          </>
+        ) : (
+          <>
+            {STORAGE_LOCATIONS.map(loc => (
+              <PantryList key={loc} array={items} keyword={loc} onItemRemoved={refreshList} groupBy="storage" />
+            ))}
+          </>
+        )}
       </div>
     ) : (
       <div>
