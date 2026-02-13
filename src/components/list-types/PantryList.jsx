@@ -11,9 +11,19 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [movingItem, setMovingItem] = useState(null);
 
   // Filter by category or storage_space based on groupBy prop
-  const keyList = array.filter((item) => 
-    groupBy === "storage" ? item.storage_space === keyword : item.category === keyword
-  );
+  // Debug: log first item to see available fields
+  if (array.length > 0 && groupBy === "storage") {
+    console.log("PantryList item fields:", Object.keys(array[0]), "storage_space:", array[0].storage_space);
+  }
+  
+  const keyList = array.filter((item) => {
+    if (groupBy === "storage") {
+      // Handle case where storage_space might be missing or have different casing
+      const itemStorage = (item.storage_space || "fridge").toLowerCase();
+      return itemStorage === keyword.toLowerCase();
+    }
+    return item.category === keyword;
+  });
 
   const handleDeleteClick = (item, e) => {
     e.stopPropagation();
