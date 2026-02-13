@@ -137,7 +137,6 @@ const App = () => {
           inventory
         </div>
         {/* Future features: home button, add new list button */}
-        <div className="nav-spacer"></div>
         <LogoutButton />
       </div>
       <Routes>
