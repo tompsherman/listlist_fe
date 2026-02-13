@@ -130,20 +130,23 @@ const App = () => {
   return (
     <div className="App">
       <div className="nav">
-        <LogoutButton />
-        <div className="button" onClick={homeRoute}>
-          home
-        </div>
-        <div className="button" onClick={groceryRoute}>
+        <div className="nav-btn" onClick={groceryRoute}>
           grocery
         </div>
-        <div className="button" onClick={pantryRoute}>
-          pantry
+        <div className="nav-btn" onClick={pantryRoute}>
+          inventory
         </div>
-        <div className="button">add new list</div>
+        {/* Future feature
+        <div className="nav-btn" onClick={homeRoute}>
+          home
+        </div>
+        <div className="nav-btn">add new list</div>
+        */}
+        <div className="nav-spacer"></div>
+        <LogoutButton />
       </div>
       <Routes>
-        <Route path="/" element={<Dashboard getList={"*"} />} />
+        <Route path="/" element={<Dashboard getList={"grocery"} />} />
         <Route path="/grocery" element={<Dashboard getList={"grocery"} />} />
         <Route path="/pantry" element={<Dashboard getList={"pantry"} />} />
       </Routes>
