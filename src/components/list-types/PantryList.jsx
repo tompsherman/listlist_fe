@@ -33,6 +33,47 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
   const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
+  const [usingItem, setUsingItem] = useState(null);
+
+  // Calculate uses remaining for an item
+  const getUsesRemaining = (item) => {
+    if (item.uses_remaining !== undefined && item.uses_remaining !== null) {
+      return item.uses_remaining;
+    }
+    // Calculate from acquired_amount * use_per_unit
+    const usePerUnit = item.use_per_unit || 1;
+    return (item.acquired_amount || 1) * usePerUnit;
+  };
+
+  // Handle using an item (decrement)
+  const handleUseItem = async (item, e) => {
+    e.stopPropagation();
+    setUsingItem(item._id);
+    
+    try {
+      const response = await axios.post(`https://listlist-db.onrender.com/api/list_items/${item._id}/use`, {
+        amount: 1
+      });
+      
+      console.log("USE response:", response.data);
+      
+      if (response.data.is_empty) {
+        // Item is empty - trigger delete flow
+        setUsingItem(null);
+        setDeletingItem(item);
+        setDeleteStep("empty");
+      } else {
+        setUsingItem(null);
+        if (onItemRemoved) {
+          onItemRemoved(); // Refresh the list
+        }
+      }
+    } catch (error) {
+      console.error("Error using item:", error);
+      setUsingItem(null);
+      alert("Error using item. Please try again.");
+    }
+  };
 
   // Filter by category or storage_space based on groupBy prop
   const keyList = array.filter((item) => {
@@ -232,11 +273,32 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
               </button>
             </div>
           )}
+
+          {deleteStep === "empty" && (
+            <div className="delete-buttons">
+              <p>All used up! Add to grocery list?</p>
+              <button 
+                className="delete-option-btn yes-btn"
+                onClick={() => handleGroceryDecision(true)}
+              >
+                yes
+              </button>
+              <button 
+                className="delete-option-btn no-btn"
+                onClick={() => handleGroceryDecision(false)}
+              >
+                no
+              </button>
+            </div>
+          )}
         </div>
       );
     }
     
     if (expandedItem?._id === item._id) {
+      const usesRemaining = getUsesRemaining(item);
+      const useUnitDisplay = item.use_unit === "self" ? item.name : item.use_unit;
+      
       return (
         <div className="item-card" onClick={(e) => e.stopPropagation()}>
           <div className="item-card-header">
@@ -250,13 +312,20 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
           </div>
           <div className="item-card-details">
             <p><strong>Amount:</strong> {item.acquired_amount || item.amount_left} {item.purchase_unit}</p>
-            <p><strong>Use unit:</strong> {item.use_unit || "—"}</p>
+            <p><strong>Uses remaining:</strong> {usesRemaining} {useUnitDisplay}{usesRemaining !== 1 ? 's' : ''}</p>
             <p><strong>Category:</strong> {item.category}</p>
             <p><strong>Location:</strong> {item.storage_space || "fridge"}</p>
             <p><strong>Purchased:</strong> {item.purchase_date}</p>
             {item.time_to_expire && <p><strong>Expires:</strong> {item.time_to_expire}</p>}
           </div>
           <div className="item-card-actions">
+            <button 
+              className="use-btn"
+              onClick={(e) => handleUseItem(item, e)}
+              disabled={usingItem === item._id}
+            >
+              {usingItem === item._id ? "using..." : `use 1 ${useUnitDisplay}`}
+            </button>
             <button 
               className="move-btn"
               onClick={(e) => handleMoveClick(item, e)}
