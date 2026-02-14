@@ -144,13 +144,13 @@ const List = ({ getList, flipNew, onAddItem }) => {
         {groupBy === "category" ? (
           <>
             {CATEGORIES.map(cat => (
-              <PantryList key={cat} array={items} keyword={cat} onItemRemoved={refreshList} groupBy="category" />
+              <PantryList key={cat} array={items} keyword={cat} onItemRemoved={refreshList} groupBy="category" allPantryItems={items} pantryListId={testVar} />
             ))}
           </>
         ) : (
           <>
             {STORAGE_LOCATIONS.map(loc => (
-              <PantryList key={loc} array={items} keyword={loc} onItemRemoved={refreshList} groupBy="storage" />
+              <PantryList key={loc} array={items} keyword={loc} onItemRemoved={refreshList} groupBy="storage" allPantryItems={items} pantryListId={testVar} />
             ))}
           </>
         )}

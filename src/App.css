@@ -1684,3 +1684,246 @@
   font-weight: 600;
   color: #2e7d32;
 }
+
+/* =========================
+   Cook Dish Modal
+   ========================= */
+
+.cook-dish-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.cook-dish-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cook-dish-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: white;
+}
+
+.cook-dish-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.cook-dish-header .close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.25rem;
+}
+
+.cook-dish-modal form {
+  padding: 1rem;
+}
+
+.cook-field {
+  margin-bottom: 1rem;
+}
+
+.cook-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.cook-field input[type="text"],
+.cook-field input[type="number"],
+.cook-field select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.cook-field input:focus,
+.cook-field select:focus {
+  outline: none;
+  border-color: #fd7e14;
+  box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.2);
+}
+
+/* Existing dishes suggestions */
+.existing-dishes {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.existing-dish {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.existing-dish:last-child {
+  border-bottom: none;
+}
+
+.existing-dish:hover {
+  background: #e9ecef;
+}
+
+/* Ingredients list */
+.ingredients-list {
+  margin-bottom: 0.5rem;
+}
+
+.ingredient-row {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-left: 4px solid #ddd;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+}
+
+.ingredient-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.ingredient-amount {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ingredient-amount button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.ingredient-amount button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ingredient-amount span {
+  min-width: 24px;
+  text-align: center;
+}
+
+.use-unit {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.remove-ingredient {
+  background: #dc3545;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Add ingredient */
+.add-ingredient {
+  position: relative;
+}
+
+.add-ingredient input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.ingredient-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.ingredient-suggestion {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-left: 4px solid #ddd;
+}
+
+.ingredient-suggestion:hover {
+  background: #f8f9fa;
+}
+
+/* Cook actions */
+.cook-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.cook-btn-submit {
+  flex: 1;
+  padding: 0.75rem;
+  background: #fd7e14;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cook-btn-submit:hover {
+  background: #e96b02;
+}
+
+.cook-btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.cook-actions .cancel-btn {
+  padding: 0.75rem 1rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
