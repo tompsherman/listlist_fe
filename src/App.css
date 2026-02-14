@@ -474,6 +474,11 @@
     color: black;
   }
 
+  .trashed-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+
   .yes-btn {
     background-color: #28a745;
     color: white;

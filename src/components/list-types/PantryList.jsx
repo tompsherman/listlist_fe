@@ -58,9 +58,10 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
       console.log("USE response:", response.data);
       
       if (response.data.is_empty) {
-        // Item is empty - trigger delete flow
+        // Item is empty - trigger delete flow with "used" reason
         setUsingItem(null);
         setDeletingItem(item);
+        setRemovalReason("used");
         setDeleteStep("empty");
       } else {
         setUsingItem(null);
@@ -246,6 +247,12 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                 onClick={() => handleReasonSelect("expired")}
               >
                 expired?
+              </button>
+              <button 
+                className="delete-option-btn trashed-btn"
+                onClick={() => handleReasonSelect("trashed")}
+              >
+                trashed?
               </button>
               <button 
                 className="delete-cancel-btn"
