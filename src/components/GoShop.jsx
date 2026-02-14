@@ -73,18 +73,21 @@ const GoShop = ({ getList, currentList, setShopping }) => {
       const acquiredAmount = Math.round(cartItem.desired_amount * (cartItem.fulfilled || 0));
       const remainingAmount = cartItem.desired_amount - acquiredAmount;
 
-      // If any amount was acquired, add to pantry
+      // If any amount was acquired, add INDIVIDUAL items to pantry
+      // (so user can delete/move them separately)
       if (acquiredAmount > 0) {
-        itemsToSend.push({
-          name: item.name,
-          item_id: item.item_id,
-          acquired_amount: acquiredAmount,
-          purchase_date: `${currentTime[1]} ${currentTime[2]}`,
-          purchase_year: `${currentTime[3]}`,
-          desired_amount: 0,
-          list_id: pantryListId,
-          amount_left: acquiredAmount,
-        });
+        for (let i = 0; i < acquiredAmount; i++) {
+          itemsToSend.push({
+            name: item.name,
+            item_id: item.item_id,
+            acquired_amount: 1,
+            purchase_date: `${currentTime[1]} ${currentTime[2]}`,
+            purchase_year: `${currentTime[3]}`,
+            desired_amount: 0,
+            list_id: pantryListId,
+            amount_left: 1,
+          });
+        }
       }
 
       // If any amount remains unfulfilled, add to new grocery list (backend creates it)
