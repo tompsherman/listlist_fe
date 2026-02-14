@@ -86,11 +86,15 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
     if (!selectedDbItem) return;
     
     try {
+      const acquiredAmount = parseInt(amount);
+      const usePerUnit = selectedDbItem.use_per_unit || 1;
+      
       const listItem = {
         list_id: pantryListId,
         item_id: selectedDbItem._id || selectedDbItem.item_id,
         desired_amount: 0,
-        acquired_amount: parseInt(amount),
+        acquired_amount: acquiredAmount,
+        uses_remaining: acquiredAmount * usePerUnit,
         purchase_date: formatDate(),
         storage_space: selectedDbItem.storage_space || "fridge",
       };

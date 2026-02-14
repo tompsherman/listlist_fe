@@ -76,11 +76,13 @@ const GoShop = ({ getList, currentList, setShopping }) => {
       // If any amount was acquired, add INDIVIDUAL items to pantry
       // (so user can delete/move them separately)
       if (acquiredAmount > 0) {
+        const usePerUnit = item.use_per_unit || 1;
         for (let i = 0; i < acquiredAmount; i++) {
           itemsToSend.push({
             name: item.name,
             item_id: item.item_id,
             acquired_amount: 1,
+            uses_remaining: usePerUnit, // 1 unit * uses per unit
             purchase_date: `${currentTime[1]} ${currentTime[2]}`,
             purchase_year: `${currentTime[3]}`,
             desired_amount: 0,
