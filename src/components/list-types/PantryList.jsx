@@ -133,6 +133,39 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
     return SPLIT_OPTIONS[size] || [];
   };
 
+  // Check if item can be broken down
+  const canBreakDown = (item) => {
+    return item.breaks_down === "yes" && (item.breaks_into_1 || item.breaks_into_2);
+  };
+
+  // Get what item breaks into
+  const getBreakdownComponents = (item) => {
+    return [item.breaks_into_1, item.breaks_into_2].filter(c => c && c.trim());
+  };
+
+  // Handle breaking down an item
+  const handleBreakDown = async (item, e) => {
+    e.stopPropagation();
+    const components = getBreakdownComponents(item);
+    
+    if (!confirm(`Break down ${item.name} into ${components.join(" + ")}?`)) {
+      return;
+    }
+
+    try {
+      const response = await axios.post(`https://listlist-db.onrender.com/api/list_items/${item._id}/breakdown`);
+      
+      console.log("BREAKDOWN response:", response.data);
+      setExpandedItem(null);
+      if (onItemRemoved) {
+        onItemRemoved(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error breaking down item:", error);
+      alert("Error breaking down item. Please try again.");
+    }
+  };
+
   // Filter by category or storage_space based on groupBy prop
   const keyList = array.filter((item) => {
     if (groupBy === "storage") {
@@ -409,6 +442,14 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                 onClick={(e) => handleSplitClick(item, e)}
               >
                 split...
+              </button>
+            )}
+            {canBreakDown(item) && (
+              <button 
+                className="breakdown-btn"
+                onClick={(e) => handleBreakDown(item, e)}
+              >
+                break down
               </button>
             )}
             <button 

@@ -664,6 +664,20 @@
     background-color: #5a32a3;
   }
 
+  .breakdown-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background-color: #e83e8c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .breakdown-btn:hover {
+    background-color: #d63384;
+  }
+
   .move-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
