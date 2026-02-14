@@ -6,7 +6,6 @@ const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
 const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
 
 // Categories that can be used as meal ingredients (excludes household items)
-const EDIBLE_CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "snack", "drinks"];
 const NON_EDIBLE_CATEGORIES = ["household"];
 
 // Helper to check if an item can be used in meals
