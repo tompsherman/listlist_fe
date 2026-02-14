@@ -158,6 +158,7 @@ const DupeAdd = ({
         <div className="item-card-info">
           <p><strong>Category:</strong> {dupe.category}</p>
           <p><strong>Purchase unit:</strong> {dupe.purchase_unit}</p>
+          <p><strong>Use unit:</strong> {dupe.use_unit || "self"}</p>
           <p><strong>Storage:</strong> {dupe.storage_space || "fridge"}</p>
           {dupe.cost && <p><strong>Cost:</strong> ${dupe.cost}</p>}
           <p><strong>Expires:</strong> {dupe.time_to_expire}</p>
@@ -229,6 +230,23 @@ const DupeAdd = ({
               <option value="jar">jar</option>
               <option value="package">package</option>
               <option value="lb">lb</option>
+              <option value="unit">unit</option>
+            </select>
+          </div>
+          <div className="edit-field">
+            <label>Use unit:</label>
+            <select name="use_unit" value={editItem.use_unit} onChange={changeEditField}>
+              <option value="bag">bag</option>
+              <option value="box">box</option>
+              <option value="can">can</option>
+              <option value="cup">cup</option>
+              <option value="handful">handful</option>
+              <option value="package">package</option>
+              <option value="scoop">scoop</option>
+              <option value="tbsp">tbsp</option>
+              <option value="tsp">tsp</option>
+              <option value="slice">slice</option>
+              <option value="self">one of itself</option>
               <option value="unit">unit</option>
             </select>
           </div>
