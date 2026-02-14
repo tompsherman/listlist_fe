@@ -14,6 +14,15 @@ const initialState = {
   priority: 5,
   cost: "",
   storage_space: "fridge",
+  storage_size: "",
+  image_url: "",
+  has_substitutes: "no",
+  substitutes: "",
+  brand_matters: "no",
+  brand: "",
+  breaks_down: "no",
+  breaks_into_1: "",
+  breaks_into_2: "",
 };
 
 const initialFormToggle = {
@@ -131,6 +140,58 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   const subStorageSpace = (event) => {
     event.preventDefault();
+    setFormToggle({ ...formToggle, storage_size: true });
+  };
+
+  const subStorageSize = (event) => {
+    event.preventDefault();
+    setFormToggle({ ...formToggle, image_url: true });
+  };
+
+  const subImageUrl = (event) => {
+    event.preventDefault();
+    setFormToggle({ ...formToggle, has_substitutes: true });
+  };
+
+  const subHasSubstitutes = (event) => {
+    event.preventDefault();
+    if (newItem.has_substitutes === "yes") {
+      setFormToggle({ ...formToggle, substitutes: true });
+    } else {
+      setFormToggle({ ...formToggle, brand_matters: true });
+    }
+  };
+
+  const subSubstitutes = (event) => {
+    event.preventDefault();
+    setFormToggle({ ...formToggle, brand_matters: true });
+  };
+
+  const subBrandMatters = (event) => {
+    event.preventDefault();
+    if (newItem.brand_matters === "yes") {
+      setFormToggle({ ...formToggle, brand: true });
+    } else {
+      setFormToggle({ ...formToggle, breaks_down: true });
+    }
+  };
+
+  const subBrand = (event) => {
+    event.preventDefault();
+    setFormToggle({ ...formToggle, breaks_down: true });
+  };
+
+  const subBreaksDown = (event) => {
+    event.preventDefault();
+    if (newItem.breaks_down === "yes") {
+      setFormToggle({ ...formToggle, breaks_into: true });
+    } else {
+      setFormToggle({ ...formToggle, cost: true });
+    }
+  };
+
+  const subBreaksInto = (event) => {
+    event.preventDefault();
     setFormToggle({ ...formToggle, cost: true });
   };
 
@@ -161,6 +222,38 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   const backToStorageSpace = () => {
     setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true });
+  };
+
+  const backToStorageSize = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true });
+  };
+
+  const backToImageUrl = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true });
+  };
+
+  const backToHasSubstitutes = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true });
+  };
+
+  const backToSubstitutes = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
+  };
+
+  const backToBrandMatters = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true });
+  };
+
+  const backToBrand = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
+  };
+
+  const backToBreaksDown = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true });
+  };
+
+  const backToBreaksInto = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true, breaks_into: true });
   };
 
   const dupeCheck = itemDatabase.filter((item) =>
@@ -270,7 +363,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           onChange={changeValue}
           placeholder={`enter item cost`}
         />
-        <button type="button" className="back-btn" onClick={backToStorageSpace}>back</button>
+        <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
         <button>submit item</button>
       </form>
       <div className="item">
@@ -282,25 +375,133 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <p>{newItem.category}</p>
       </div>
       <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-      <div className="item">
-        <p>use unit:</p>
-        <p>{newItem.use_unit}</p>
-      </div>
-      <div className="item">
-        <p>perishable:</p>
-        <p>{newItem.perishable}</p>
-      </div>
-      <div className="item">
-        <p>expires after:</p>
-        <p>{newItem.time_to_expire}</p>
-      </div>
-      <div className="item">
         <p>storage space:</p>
         <p>{newItem.storage_space}</p>
       </div>
+      {newItem.storage_size && (
+        <div className="item">
+          <p>storage size:</p>
+          <p>{newItem.storage_size}</p>
+        </div>
+      )}
+    </div>
+  ) : formToggle.breaks_into ? (
+    <div className="AddItem">
+      <h4>What does it break into?</h4>
+      <form onSubmit={subBreaksInto}>
+        <input
+          name="breaks_into_1"
+          type="text"
+          value={newItem.breaks_into_1}
+          onChange={changeValue}
+          placeholder="component 1"
+        />
+        <input
+          name="breaks_into_2"
+          type="text"
+          value={newItem.breaks_into_2}
+          onChange={changeValue}
+          placeholder="component 2"
+        />
+        <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.breaks_down ? (
+    <div className="AddItem">
+      <h4>Breaks down into components?</h4>
+      <form onSubmit={subBreaksDown}>
+        <select name="breaks_down" value={newItem.breaks_down} onChange={changeValue}>
+          <option value="no">no</option>
+          <option value="yes">yes</option>
+        </select>
+        <button type="button" className="back-btn" onClick={backToBrandMatters}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.brand ? (
+    <div className="AddItem">
+      <h4>What brand?</h4>
+      <form onSubmit={subBrand}>
+        <input
+          name="brand"
+          type="text"
+          value={newItem.brand}
+          onChange={changeValue}
+          placeholder="enter brand name"
+        />
+        <button type="button" className="back-btn" onClick={backToBrandMatters}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.brand_matters ? (
+    <div className="AddItem">
+      <h4>Specific brand matters?</h4>
+      <form onSubmit={subBrandMatters}>
+        <select name="brand_matters" value={newItem.brand_matters} onChange={changeValue}>
+          <option value="no">no</option>
+          <option value="yes">yes</option>
+        </select>
+        <button type="button" className="back-btn" onClick={backToHasSubstitutes}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.substitutes ? (
+    <div className="AddItem">
+      <h4>What substitutes?</h4>
+      <form onSubmit={subSubstitutes}>
+        <input
+          name="substitutes"
+          type="text"
+          value={newItem.substitutes}
+          onChange={changeValue}
+          placeholder="enter substitute item"
+        />
+        <button type="button" className="back-btn" onClick={backToHasSubstitutes}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.has_substitutes ? (
+    <div className="AddItem">
+      <h4>Has substitutes?</h4>
+      <form onSubmit={subHasSubstitutes}>
+        <select name="has_substitutes" value={newItem.has_substitutes} onChange={changeValue}>
+          <option value="no">no</option>
+          <option value="yes">yes</option>
+        </select>
+        <button type="button" className="back-btn" onClick={backToImageUrl}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.image_url ? (
+    <div className="AddItem">
+      <h4>Image URL (optional)</h4>
+      <form onSubmit={subImageUrl}>
+        <input
+          name="image_url"
+          type="text"
+          value={newItem.image_url}
+          onChange={changeValue}
+          placeholder="paste image URL"
+        />
+        <button type="button" className="back-btn" onClick={backToStorageSize}>back</button>
+        <button>next</button>
+      </form>
+    </div>
+  ) : formToggle.storage_size ? (
+    <div className="AddItem">
+      <h4>Storage size?</h4>
+      <form onSubmit={subStorageSize}>
+        <select name="storage_size" value={newItem.storage_size} onChange={changeValue}>
+          <option value="">-- select --</option>
+          <option value="pint">pint</option>
+          <option value="quart">quart</option>
+          <option value="half_gallon">1/2 gallon</option>
+          <option value="gallon">gallon</option>
+        </select>
+        <button type="button" className="back-btn" onClick={backToStorageSpace}>back</button>
+        <button>next</button>
+      </form>
     </div>
   ) : formToggle.storage_space ? (
     <div className="AddItem">

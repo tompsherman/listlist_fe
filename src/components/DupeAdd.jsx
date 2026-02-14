@@ -40,6 +40,15 @@ const DupeAdd = ({
     time_to_expire: dupe.time_to_expire || "thirty-six_days",
     cost: dupe.cost || "",
     storage_space: dupe.storage_space || "fridge",
+    storage_size: dupe.storage_size || "",
+    image_url: dupe.image_url || "",
+    has_substitutes: dupe.has_substitutes || "no",
+    substitutes: dupe.substitutes || "",
+    brand_matters: dupe.brand_matters || "no",
+    brand: dupe.brand || "",
+    breaks_down: dupe.breaks_down || "no",
+    breaks_into_1: dupe.breaks_into_1 || "",
+    breaks_into_2: dupe.breaks_into_2 || "",
   });
 
   // Reset when dupe/item_id changes
@@ -53,6 +62,15 @@ const DupeAdd = ({
       time_to_expire: dupe.time_to_expire || "thirty-six_days",
       cost: dupe.cost || "",
       storage_space: dupe.storage_space || "fridge",
+      storage_size: dupe.storage_size || "",
+      image_url: dupe.image_url || "",
+      has_substitutes: dupe.has_substitutes || "no",
+      substitutes: dupe.substitutes || "",
+      brand_matters: dupe.brand_matters || "no",
+      brand: dupe.brand || "",
+      breaks_down: dupe.breaks_down || "no",
+      breaks_into_1: dupe.breaks_into_1 || "",
+      breaks_into_2: dupe.breaks_into_2 || "",
     });
     setBullet({
       desired_amount: 1,
@@ -228,6 +246,65 @@ const DupeAdd = ({
               <option value="closet">closet</option>
             </select>
           </div>
+          <div className="edit-field">
+            <label>Size:</label>
+            <select name="storage_size" value={editItem.storage_size} onChange={changeEditField}>
+              <option value="">-- none --</option>
+              <option value="pint">pint</option>
+              <option value="quart">quart</option>
+              <option value="half_gallon">1/2 gallon</option>
+              <option value="gallon">gallon</option>
+            </select>
+          </div>
+          <div className="edit-field">
+            <label>Image URL:</label>
+            <input name="image_url" type="text" value={editItem.image_url} onChange={changeEditField} placeholder="paste URL" />
+          </div>
+          <div className="edit-field">
+            <label>Substitutes?</label>
+            <select name="has_substitutes" value={editItem.has_substitutes} onChange={changeEditField}>
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+          {editItem.has_substitutes === "yes" && (
+            <div className="edit-field">
+              <label>Substitute:</label>
+              <input name="substitutes" type="text" value={editItem.substitutes} onChange={changeEditField} />
+            </div>
+          )}
+          <div className="edit-field">
+            <label>Brand matters?</label>
+            <select name="brand_matters" value={editItem.brand_matters} onChange={changeEditField}>
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+          {editItem.brand_matters === "yes" && (
+            <div className="edit-field">
+              <label>Brand:</label>
+              <input name="brand" type="text" value={editItem.brand} onChange={changeEditField} />
+            </div>
+          )}
+          <div className="edit-field">
+            <label>Breaks down?</label>
+            <select name="breaks_down" value={editItem.breaks_down} onChange={changeEditField}>
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+          {editItem.breaks_down === "yes" && (
+            <>
+              <div className="edit-field">
+                <label>Component 1:</label>
+                <input name="breaks_into_1" type="text" value={editItem.breaks_into_1} onChange={changeEditField} />
+              </div>
+              <div className="edit-field">
+                <label>Component 2:</label>
+                <input name="breaks_into_2" type="text" value={editItem.breaks_into_2} onChange={changeEditField} />
+              </div>
+            </>
+          )}
           <div className="edit-buttons">
             <button type="submit">save</button>
             <button type="button" onClick={() => setMode("row")}>cancel</button>
