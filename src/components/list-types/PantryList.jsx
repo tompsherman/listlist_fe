@@ -30,7 +30,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [removalReason, setRemovalReason] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [movingItem, setMovingItem] = useState(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
   const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
 
