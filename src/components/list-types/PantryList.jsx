@@ -4,6 +4,13 @@ import axios from "axios";
 const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
 const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
 
+// Categories that can be used as meal ingredients (excludes household items)
+const EDIBLE_CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "snack", "drinks"];
+const NON_EDIBLE_CATEGORIES = ["household"];
+
+// Helper to check if an item can be used in meals
+const isEdible = (item) => !NON_EDIBLE_CATEGORIES.includes(item?.category);
+
 const CATEGORY_COLORS = {
   vegetable: "#228B22",
   herbs: "#8B7355",
@@ -333,6 +340,18 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
             >
               {usingItem === item._id ? "using..." : `use 1 ${useUnitDisplay}`}
             </button>
+            {isEdible(item) && (
+              <button 
+                className="cook-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // TODO: Phase 6 - Make a dish flow
+                  alert("Coming soon: Cook with this ingredient!");
+                }}
+              >
+                cook with this
+              </button>
+            )}
             <button 
               className="move-btn"
               onClick={(e) => handleMoveClick(item, e)}
