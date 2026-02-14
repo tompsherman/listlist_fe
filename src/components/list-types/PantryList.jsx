@@ -105,7 +105,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const toggleItemGroup = (groupKey) => {
     setCollapsedItemGroups(prev => ({
       ...prev,
-      [groupKey]: !prev[groupKey]
+      [groupKey]: prev[groupKey] === false ? true : false
     }));
   };
 
