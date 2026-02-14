@@ -3,6 +3,7 @@ import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
 import PantryList from "./list-types/PantryList";
+import PantrySearch from "./PantrySearch";
 
 const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
 const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
@@ -114,6 +115,13 @@ const List = ({ getList, flipNew }) => {
     items[0].name ? (
       <div>
         <h2 className="centered">{items[0].type} list</h2>
+        
+        {/* Pantry Search */}
+        <PantrySearch 
+          pantryItems={items} 
+          pantryListId={testVar}
+          onItemAdded={refreshList}
+        />
         
         {/* Group by toggle */}
         <div className="group-toggle">

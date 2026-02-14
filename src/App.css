@@ -1294,3 +1294,254 @@
 .create-pod-btn:hover {
   background: #c4177a !important;
 }
+
+/* =========================
+   Pantry Search
+   ========================= */
+
+.pantry-search {
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.search-bar {
+  margin-bottom: 0.5rem;
+}
+
+.pantry-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #4a7c59;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.pantry-search-input:focus {
+  outline: none;
+  border-color: #3d6a4a;
+  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.2);
+}
+
+.pantry-search-input::placeholder {
+  color: #999;
+}
+
+/* Search results */
+.search-results {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  background: #fafafa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.search-result-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.search-result-item:only-child {
+  border-radius: 6px;
+}
+
+.search-result-item:hover {
+  background: #f0f0f0;
+}
+
+.result-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.result-amount {
+  color: #666;
+  font-size: 0.9rem;
+  margin-right: 1rem;
+}
+
+.result-location {
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Not in pantry message */
+.not-in-pantry {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.not-found-message {
+  font-weight: 600;
+  color: #856404;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+}
+
+.not-found-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.action-btn.pantry-btn {
+  background: #4a7c59;
+  color: white;
+}
+
+.action-btn.grocery-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.action-btn:hover {
+  opacity: 0.85;
+}
+
+/* Add flow container */
+.add-flow {
+  background: white;
+  border: 2px solid #4a7c59;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.flow-title {
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: #333;
+}
+
+/* DB item list (for selection) */
+.db-item-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+}
+
+.db-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  margin: 0.3rem 0;
+  background: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.db-item:hover {
+  background: #e9ecef;
+}
+
+.db-item.selected {
+  background: #d4edda;
+  border: 2px solid #28a745;
+}
+
+.db-item-unit {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Amount input */
+.amount-input {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.amount-input label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.amount-input input {
+  width: 100px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.amount-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.amount-actions .submit-btn {
+  padding: 0.5rem 1rem;
+  background: #4a7c59;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.amount-actions .cancel-btn {
+  padding: 0.5rem 1rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.amount-actions button:hover {
+  opacity: 0.85;
+}
+
+/* Item not in DB message */
+.item-not-in-db {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.item-not-in-db p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.add-flow .cancel-btn {
+  display: block;
+  margin: 1rem auto 0;
+  padding: 0.5rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
