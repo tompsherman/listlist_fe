@@ -150,7 +150,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
     e.stopPropagation();
     const components = getBreakdownComponents(item);
     
-    if (!confirm(`Break down ${item.name} into ${components.join(" + ")}?`)) {
+    if (!window.confirm(`Break down ${item.name} into ${components.join(" + ")}?`)) {
       return;
     }
 
