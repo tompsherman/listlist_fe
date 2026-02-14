@@ -54,13 +54,7 @@ const Dashboard = ({ getList }) => {
           setFlipNew={setFlipNew}
           flipper={flipper}
         />
-      ) : getList === "pantry" ? (
-        <div className="flex-row fullwide">
-          <h3 className="fullwide list-button" onClick={flipper}>
-            add item
-          </h3>
-        </div>
-      ) : (
+      ) : getList === "pantry" ? null : (
         <div className="flex-row fullwide">
           <h3 className="halfwide list-button" onClick={flipper}>
             add item
@@ -89,7 +83,7 @@ const Dashboard = ({ getList }) => {
         </>
       ) : (
         <>
-          <List currentList={currentList} getList={getList} flipNew={flipNew} />
+          <List currentList={currentList} getList={getList} flipNew={flipNew} onAddItem={flipper} />
         </>
       )}
     </div>

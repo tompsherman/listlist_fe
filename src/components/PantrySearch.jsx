@@ -13,7 +13,7 @@ const CATEGORY_COLORS = {
   snack: "#FF6347",
 };
 
-const PantrySearch = ({ pantryItems, pantryListId, onItemAdded }) => {
+const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [itemDatabase, setItemDatabase] = useState([]);
   const [mode, setMode] = useState("search"); // "search" | "addToPantry" | "addToGrocery" | "addNewItem"
@@ -256,8 +256,12 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded }) => {
           ) : (
             <div className="item-not-in-db">
               <p>"{searchTerm}" is not in your item database.</p>
-              <p>Add it through the "Add Item" flow first, then you can add it to your pantry.</p>
-              <button className="cancel-btn" onClick={handleCancel}>back</button>
+              <div className="not-in-db-actions">
+                <button className="add-item-btn" onClick={onAddItem}>
+                  add item
+                </button>
+                <button className="cancel-btn" onClick={handleCancel}>back</button>
+              </div>
             </div>
           )}
         </div>
@@ -312,8 +316,12 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded }) => {
           ) : (
             <div className="item-not-in-db">
               <p>"{searchTerm}" is not in your item database.</p>
-              <p>Add it through the "Add Item" flow first.</p>
-              <button className="cancel-btn" onClick={handleCancel}>back</button>
+              <div className="not-in-db-actions">
+                <button className="add-item-btn" onClick={onAddItem}>
+                  add item
+                </button>
+                <button className="cancel-btn" onClick={handleCancel}>back</button>
+              </div>
             </div>
           )}
         </div>
@@ -324,8 +332,12 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded }) => {
         <div className="add-flow">
           <div className="item-not-in-db">
             <p>"{searchTerm}" is not in your item database.</p>
-            <p>Use the "Add Item" tab to create this item first, then you can add it to your pantry or grocery list.</p>
-            <button className="cancel-btn" onClick={handleCancel}>back</button>
+            <div className="not-in-db-actions">
+              <button className="add-item-btn" onClick={onAddItem}>
+                add item
+              </button>
+              <button className="cancel-btn" onClick={handleCancel}>back</button>
+            </div>
           </div>
         </div>
       )}

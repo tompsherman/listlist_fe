@@ -8,7 +8,7 @@ import PantrySearch from "./PantrySearch";
 const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
 const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
 
-const List = ({ getList, flipNew }) => {
+const List = ({ getList, flipNew, onAddItem }) => {
   // PANTRY - different background color, no "goshopping" button
   // GROCERY - how list is built currently
 
@@ -121,6 +121,7 @@ const List = ({ getList, flipNew }) => {
           pantryItems={items} 
           pantryListId={testVar}
           onItemAdded={refreshList}
+          onAddItem={onAddItem}
         />
         
         {/* Group by toggle */}
