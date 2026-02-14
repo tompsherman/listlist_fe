@@ -32,6 +32,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [movingItem, setMovingItem] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
+  const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
 
   // Filter by category or storage_space based on groupBy prop
   const keyList = array.filter((item) => {
@@ -45,10 +46,8 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   // Get subgroups based on the opposite grouping
   const getSubgroups = () => {
     if (groupBy === "storage") {
-      // Grouped by location, subgroup by category
       return CATEGORIES.filter(cat => keyList.some(item => item.category === cat));
     } else {
-      // Grouped by category, subgroup by location
       return STORAGE_LOCATIONS.filter(loc => 
         keyList.some(item => (item.storage_space || "fridge").toLowerCase() === loc)
       );
@@ -63,10 +62,50 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
     }
   };
 
+  // Group items by name within a subgroup
+  const groupItemsByName = (items) => {
+    const groups = {};
+    items.forEach(item => {
+      const name = item.name.toLowerCase();
+      if (!groups[name]) {
+        groups[name] = [];
+      }
+      groups[name].push(item);
+    });
+    
+    // Sort each group by purchase_date (oldest first)
+    Object.keys(groups).forEach(name => {
+      groups[name].sort((a, b) => {
+        // Parse dates like "Feb 7" or "Feb 08"
+        const parseDate = (dateStr) => {
+          if (!dateStr) return new Date(0);
+          const months = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+          const parts = dateStr.split(' ');
+          if (parts.length >= 2) {
+            const month = months[parts[0]] || 0;
+            const day = parseInt(parts[1]) || 1;
+            return new Date(2026, month, day);
+          }
+          return new Date(0);
+        };
+        return parseDate(a.purchase_date) - parseDate(b.purchase_date);
+      });
+    });
+    
+    return groups;
+  };
+
   const toggleSubgroup = (subgroup) => {
     setCollapsedSubgroups(prev => ({
       ...prev,
       [subgroup]: !prev[subgroup]
+    }));
+  };
+
+  const toggleItemGroup = (groupKey) => {
+    setCollapsedItemGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
     }));
   };
 
@@ -276,10 +315,12 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                 const subItems = getItemsForSubgroup(subgroup);
                 const isSubCollapsed = collapsedSubgroups[subgroup];
                 const subgroupLabel = subgroup;
-                // In category view, subgroups are locations; in location view, subgroups are categories
                 const subgroupColor = groupBy === "category" 
                   ? STORAGE_COLORS[subgroup] || "#f5f5f5"
                   : CATEGORY_COLORS[subgroup] || "#f5f5f5";
+                
+                const itemGroups = groupItemsByName(subItems);
+                const itemGroupNames = Object.keys(itemGroups).sort();
                 
                 return (
                   <div key={subgroup} className="subgroup">
@@ -292,16 +333,42 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                         ? `${subgroupLabel} — ${subItems.length} items` 
                         : subgroupLabel}
                     </h4>
-                    {!isSubCollapsed && subItems.map((item) => {
-                      const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
+                    {!isSubCollapsed && itemGroupNames.map(itemName => {
+                      const itemsInGroup = itemGroups[itemName];
+                      const groupKey = `${subgroup}-${itemName}`;
+                      const isItemGroupCollapsed = collapsedItemGroups[groupKey] !== false; // Default to collapsed
+                      const categoryColor = CATEGORY_COLORS[itemsInGroup[0]?.category] || "#ddd";
+                      const displayName = itemsInGroup[0]?.name || itemName;
+                      
+                      // Calculate total amount
+                      const totalAmount = itemsInGroup.reduce((sum, item) => 
+                        sum + (item.acquired_amount || item.amount_left || 1), 0
+                      );
+                      const unit = itemsInGroup[0]?.purchase_unit || "items";
+                      
                       return (
-                        <div 
-                          className={`item ${expandedItem?._id === item._id ? 'item-expanded' : ''}`} 
-                          key={item._id}
-                          onClick={() => toggleExpand(item)}
-                          style={{ borderLeft: `4px solid ${categoryColor}` }}
-                        >
-                          {renderItem(item)}
+                        <div key={groupKey} className="item-group">
+                          <div 
+                            className="item-group-header"
+                            onClick={() => toggleItemGroup(groupKey)}
+                            style={{ borderLeftColor: categoryColor }}
+                          >
+                            {isItemGroupCollapsed 
+                              ? `${displayName} — ${totalAmount} ${unit}` 
+                              : displayName}
+                          </div>
+                          {!isItemGroupCollapsed && itemsInGroup.map((item) => {
+                            return (
+                              <div 
+                                className={`item ${expandedItem?._id === item._id ? 'item-expanded' : ''}`} 
+                                key={item._id}
+                                onClick={() => toggleExpand(item)}
+                                style={{ borderLeft: `4px solid ${categoryColor}` }}
+                              >
+                                {renderItem(item)}
+                              </div>
+                            );
+                          })}
                         </div>
                       );
                     })}

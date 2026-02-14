@@ -944,6 +944,31 @@
   .item {
     border-left: 4px solid #ddd;
   }
+
+  /* Item groups (same item name grouped together) */
+  .item-group {
+    margin: 0.3rem 0;
+  }
+
+  .item-group-header {
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.4rem 0.6rem;
+    margin: 0.2rem 0;
+    background-color: rgba(255,255,255,0.8);
+    border-left: 4px solid #ddd;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .item-group-header:hover {
+    background-color: rgba(255,255,255,1);
+  }
+
+  .item-group .item {
+    margin-left: 1rem;
+  }
 }
 
 /* =========================
