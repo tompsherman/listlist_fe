@@ -251,25 +251,25 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true });
   };
 
-  const backToSubstitutes = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
-  };
+  // const backToSubstitutes = () => {
+  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
+  // };
 
   const backToBrandMatters = () => {
     setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true });
   };
 
-  const backToBrand = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
-  };
+  // const backToBrand = () => {
+  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
+  // };
 
   const backToBreaksDown = () => {
     setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true });
   };
 
-  const backToBreaksInto = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true, breaks_into: true });
-  };
+  // const backToBreaksInto = () => {
+  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true, breaks_into: true });
+  // };
 
   const dupeCheck = itemDatabase.filter((item) =>
     item.name.toLowerCase().startsWith(newItem.name.toLowerCase())

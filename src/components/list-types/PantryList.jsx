@@ -140,8 +140,6 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   };
 
   const renderItem = (item) => {
-    const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
-    
     if (deletingItem && deletingItem._id === item._id) {
       return (
         <div className="delete-flow" onClick={(e) => e.stopPropagation()}>
