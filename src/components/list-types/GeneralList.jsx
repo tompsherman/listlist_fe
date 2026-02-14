@@ -82,6 +82,7 @@ const GeneralList = ({ array, keyword, onItemRemoved }) => {
                     </div>
                     <div className="item-card-details">
                       <p><strong>Need:</strong> {item.desired_amount} {item.purchase_unit}</p>
+                      <p><strong>Use unit:</strong> {item.use_unit || "—"}</p>
                       <p><strong>Category:</strong> {item.category}</p>
                       {item.cost && <p><strong>Est. cost:</strong> ${item.cost}</p>}
                       {item.storage_space && <p><strong>Store in:</strong> {item.storage_space}</p>}

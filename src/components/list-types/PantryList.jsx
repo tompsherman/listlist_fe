@@ -250,6 +250,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
           </div>
           <div className="item-card-details">
             <p><strong>Amount:</strong> {item.acquired_amount || item.amount_left} {item.purchase_unit}</p>
+            <p><strong>Use unit:</strong> {item.use_unit || "—"}</p>
             <p><strong>Category:</strong> {item.category}</p>
             <p><strong>Location:</strong> {item.storage_space || "fridge"}</p>
             <p><strong>Purchased:</strong> {item.purchase_date}</p>
