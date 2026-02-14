@@ -47,8 +47,12 @@ const List = ({ getList, flipNew }) => {
     setCountdown(30);
     
     axios
-      .get(`https://listlist-db.onrender.com/api/lists/${route}/items`)
+      .get(`https://listlist-db.onrender.com/api/lists/${route}/items`, {
+        params: { _t: Date.now() },  // Cache bust
+        headers: { 'Cache-Control': 'no-cache' }
+      })
       .then((response) => {
+        console.log("LIST: Got fresh data, items:", response.data.length);
         setItems(response.data);
         setIsLoading(false);
       })
