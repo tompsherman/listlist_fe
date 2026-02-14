@@ -164,20 +164,17 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   };
 
   const handleMoveToLocation = async (item, newLocation) => {
-    console.log("MOVE: Starting move for item", item._id, "to", newLocation);
     try {
-      const response = await axios.patch(`https://listlist-db.onrender.com/api/list_items/${item._id}`, {
+      await axios.patch(`https://listlist-db.onrender.com/api/list_items/${item._id}`, {
         storage_space: newLocation
       });
-      console.log("MOVE: Response received", response.status, response.data);
       setMovingItem(null);
       setExpandedItem(null);
       if (onItemRemoved) {
-        console.log("MOVE: Calling refresh");
         onItemRemoved();
       }
     } catch (error) {
-      console.error("MOVE: Error moving item:", error);
+      console.error("Error moving item:", error);
       alert("Error moving item. Please try again.");
     }
   };
