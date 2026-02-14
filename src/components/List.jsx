@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
@@ -15,9 +15,19 @@ const List = ({ getList, flipNew }) => {
   const [groupBy, setGroupBy] = useState("category"); // "category" or "storage"
   const [isLoading, setIsLoading] = useState(true);
   const [countdown, setCountdown] = useState(30);
-  const countdownRef = useRef(null);
 
   const exactList = GetListIdHook(getList);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let timer;
+    if (isLoading && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading, countdown]);
 
   console.log("EXACT LIST", items);
 
@@ -36,23 +46,15 @@ const List = ({ getList, flipNew }) => {
     setIsLoading(true);
     setCountdown(30);
     
-    // Start countdown timer
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    countdownRef.current = setInterval(() => {
-      setCountdown(prev => prev > 0 ? prev - 1 : 0);
-    }, 1000);
-    
     axios
       .get(`https://listlist-db.onrender.com/api/lists/${route}/items`)
       .then((response) => {
         setItems(response.data);
         setIsLoading(false);
-        if (countdownRef.current) clearInterval(countdownRef.current);
       })
       .catch((error) => {
         console.log(error.message, error.stack);
         setIsLoading(false);
-        if (countdownRef.current) clearInterval(countdownRef.current);
       });
   };
 
@@ -65,10 +67,6 @@ const List = ({ getList, flipNew }) => {
     if (testVar) {
       axiosCall(testVar);
     }
-    // Cleanup interval on unmount
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exactList, flipNew]);
 
