@@ -16,6 +16,14 @@ const CATEGORY_COLORS = {
   snack: "#FF6347",
 };
 
+const STORAGE_COLORS = {
+  counter: "#f5deb3",
+  pantry: "#d2b48c",
+  fridge: "#add8e6",
+  freezer: "#b0e0e6",
+  closet: "#dda0dd",
+};
+
 const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleteStep, setDeleteStep] = useState(null);
@@ -267,13 +275,18 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
               {subgroups.map(subgroup => {
                 const subItems = getItemsForSubgroup(subgroup);
                 const isSubCollapsed = collapsedSubgroups[subgroup];
-                const subgroupLabel = groupBy === "storage" ? subgroup : subgroup;
+                const subgroupLabel = subgroup;
+                // In category view, subgroups are locations; in location view, subgroups are categories
+                const subgroupColor = groupBy === "category" 
+                  ? STORAGE_COLORS[subgroup] || "#f5f5f5"
+                  : CATEGORY_COLORS[subgroup] || "#f5f5f5";
                 
                 return (
                   <div key={subgroup} className="subgroup">
                     <h4 
                       className="subgroup-header" 
                       onClick={() => toggleSubgroup(subgroup)}
+                      style={{ backgroundColor: subgroupColor }}
                     >
                       {isSubCollapsed 
                         ? `${subgroupLabel} — ${subItems.length} items` 
