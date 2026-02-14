@@ -262,7 +262,7 @@ const DupeAdd = ({
           </div>
           {editItem.cost && editItem.use_per_unit > 0 && (
             <div className="edit-field calculated">
-              <label>Cost per {editItem.use_unit}:</label>
+              <label>Cost per {editItem.use_unit === "self" ? editItem.name : editItem.use_unit}:</label>
               <span className="calculated-value">${(parseFloat(editItem.cost) / parseInt(editItem.use_per_unit)).toFixed(2)}</span>
             </div>
           )}

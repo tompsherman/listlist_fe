@@ -401,7 +401,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
       </form>
       {newItem.cost && newItem.use_per_unit > 0 && (
         <div className="item calculated">
-          <p>cost per {newItem.use_unit}:</p>
+          <p>cost per {newItem.use_unit === "self" ? newItem.name : newItem.use_unit}:</p>
           <p>${(parseFloat(newItem.cost) / parseInt(newItem.use_per_unit)).toFixed(2)}</p>
         </div>
       )}
