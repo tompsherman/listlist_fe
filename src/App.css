@@ -143,6 +143,7 @@
     font-weight: 600;
     font-size: 1rem;
     text-align: center;
+    white-space: nowrap;
   }
 
   .nav-btn:hover {
@@ -168,6 +169,7 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 1rem;
+    white-space: nowrap;
   }
 
   .nav button:hover {
