@@ -915,6 +915,33 @@
   .category-header:hover {
     opacity: 0.8;
   }
+
+  /* Subgroups within categories */
+  .subgroup {
+    margin: 0.5rem 0;
+    padding-left: 0.5rem;
+  }
+
+  .subgroup-header {
+    cursor: pointer;
+    user-select: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    padding: 0.3rem 0.5rem;
+    margin: 0.3rem 0;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 4px;
+  }
+
+  .subgroup-header:hover {
+    background-color: rgba(0,0,0,0.1);
+  }
+
+  /* Items with category color border */
+  .item {
+    border-left: 4px solid #ddd;
+  }
 }
 
 /* =========================
