@@ -31,6 +31,23 @@ const STORAGE_COLORS = {
   closet: "#dda0dd",
 };
 
+// Split options based on storage size
+const SPLIT_OPTIONS = {
+  gallon: [
+    { targetSize: "half_gallon", count: 2, label: "2 half-gallons" },
+    { targetSize: "quart", count: 4, label: "4 quarts" },
+    { targetSize: "pint", count: 8, label: "8 pints" },
+  ],
+  half_gallon: [
+    { targetSize: "quart", count: 2, label: "2 quarts" },
+    { targetSize: "pint", count: 4, label: "4 pints" },
+  ],
+  quart: [
+    { targetSize: "pint", count: 2, label: "2 pints" },
+  ],
+  pint: [], // Can't split further
+};
+
 const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleteStep, setDeleteStep] = useState(null);
@@ -41,6 +58,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
   const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
   const [usingItem, setUsingItem] = useState(null);
+  const [splittingItem, setSplittingItem] = useState(null);
 
   // Calculate uses remaining for an item
   const getUsesRemaining = (item) => {
@@ -81,6 +99,38 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
       setUsingItem(null);
       alert("Error using item. Please try again.");
     }
+  };
+
+  // Handle splitting an item into smaller storage sizes
+  const handleSplitClick = (item, e) => {
+    e.stopPropagation();
+    setSplittingItem(splittingItem?._id === item._id ? null : item);
+    setMovingItem(null);
+  };
+
+  const handleSplitItem = async (item, targetSize, count) => {
+    try {
+      const response = await axios.post(`https://listlist-db.onrender.com/api/list_items/${item._id}/split`, {
+        targetSize,
+        count
+      });
+      
+      console.log("SPLIT response:", response.data);
+      setSplittingItem(null);
+      setExpandedItem(null);
+      if (onItemRemoved) {
+        onItemRemoved(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error splitting item:", error);
+      alert("Error splitting item. Please try again.");
+    }
+  };
+
+  // Get split options for an item
+  const getSplitOptions = (item) => {
+    const size = item.storage_size;
+    return SPLIT_OPTIONS[size] || [];
   };
 
   // Filter by category or storage_space based on groupBy prop
@@ -329,6 +379,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
             <p><strong>Uses remaining:</strong> {usesRemaining} {useUnitDisplay}{usesRemaining !== 1 ? 's' : ''}</p>
             <p><strong>Category:</strong> {item.category}</p>
             <p><strong>Location:</strong> {item.storage_space || "fridge"}</p>
+            {item.storage_size && <p><strong>Container:</strong> {item.storage_size.replace('_', ' ')}</p>}
             <p><strong>Purchased:</strong> {item.purchase_date}</p>
             {item.time_to_expire && <p><strong>Expires:</strong> {item.time_to_expire}</p>}
           </div>
@@ -352,6 +403,14 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                 cook with this
               </button>
             )}
+            {getSplitOptions(item).length > 0 && (
+              <button 
+                className="split-btn"
+                onClick={(e) => handleSplitClick(item, e)}
+              >
+                split...
+              </button>
+            )}
             <button 
               className="move-btn"
               onClick={(e) => handleMoveClick(item, e)}
@@ -359,6 +418,20 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
               move to...
             </button>
           </div>
+          {splittingItem?._id === item._id && (
+            <div className="split-options">
+              <p className="split-label">Split into:</p>
+              {getSplitOptions(item).map(option => (
+                <button
+                  key={option.targetSize}
+                  className="split-option-btn"
+                  onClick={() => handleSplitItem(item, option.targetSize, option.count)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
           {movingItem?._id === item._id && (
             <div className="move-options">
               {STORAGE_LOCATIONS.filter(loc => loc !== (item.storage_space || "fridge").toLowerCase()).map(location => (
