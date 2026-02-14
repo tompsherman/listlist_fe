@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
@@ -13,6 +13,9 @@ const List = ({ getList, flipNew }) => {
 
   const [items, setItems] = useState([]);
   const [groupBy, setGroupBy] = useState("category"); // "category" or "storage"
+  const [isLoading, setIsLoading] = useState(true);
+  const [countdown, setCountdown] = useState(30);
+  const countdownRef = useRef(null);
 
   const exactList = GetListIdHook(getList);
 
@@ -30,15 +33,27 @@ const List = ({ getList, flipNew }) => {
 
   const axiosCall = (route) => {
     console.log("LIST 26 -- route", route);
+    setIsLoading(true);
+    setCountdown(30);
+    
+    // Start countdown timer
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    
     axios
-      // .get(`http://localhost:5505/api/lists/${route}/items`)
       .get(`https://listlist-db.onrender.com/api/lists/${route}/items`)
-      .then((response) =>
-        //console.log("LINE 35,", response.data))
-        setItems(response.data)
-      )
-      // .then(console.log("GET list", list))
-      .catch((error) => console.log(error.message, error.stack));
+      .then((response) => {
+        setItems(response.data);
+        setIsLoading(false);
+        if (countdownRef.current) clearInterval(countdownRef.current);
+      })
+      .catch((error) => {
+        console.log(error.message, error.stack);
+        setIsLoading(false);
+        if (countdownRef.current) clearInterval(countdownRef.current);
+      });
   };
 
   let testVar = undefined;
@@ -50,6 +65,10 @@ const List = ({ getList, flipNew }) => {
     if (testVar) {
       axiosCall(testVar);
     }
+    // Cleanup interval on unmount
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exactList, flipNew]);
 
@@ -59,6 +78,17 @@ const List = ({ getList, flipNew }) => {
       axiosCall(testVar);
     }
   };
+
+  // Show loading screen with countdown
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <h2>Loading...</h2>
+        <div className="countdown">{countdown}...</div>
+        <p>Waking up the database</p>
+      </div>
+    );
+  }
 
   return exactList && exactList.type === "grocery" && items[0] ? (
     items[0].name ? (
