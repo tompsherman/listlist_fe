@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const CATEGORY_COLORS = {
+  vegetable: "#228B22",
+  herbs: "#8B7355",
+  fruit: "#9ACD32",
+  grains: "#DAA520",
+  meat: "#F08080",
+  dairy: "#FFFFFF",
+  household: "#ADD8E6",
+  drinks: "#BDB76B",
+  snack: "#FF6347",
+};
+
 const DupeAdd = ({
   flipNew,
   setFlipNew,
@@ -12,7 +24,7 @@ const DupeAdd = ({
   item_id,
   list_id,
 }) => {
-  const [mode, setMode] = useState("suggestion"); // "suggestion" | "quantity" | "edit"
+  const [mode, setMode] = useState("row"); // "row" | "card" | "quantity" | "edit" | "delete"
   const [bullet, setBullet] = useState({
     desired_amount: 1,
     list_id: list_id,
@@ -30,7 +42,7 @@ const DupeAdd = ({
     storage_space: dupe.storage_space || "fridge",
   });
 
-  // Reset editItem and bullet when dupe/item_id changes (handles component reuse)
+  // Reset when dupe/item_id changes
   useEffect(() => {
     setEditItem({
       name: dupe.name,
@@ -48,21 +60,10 @@ const DupeAdd = ({
       item_id: item_id,
       acquired_amount: 0,
     });
-    setMode("suggestion");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dupe.item_id, item_id, list_id]);
+    setMode("row");
+  }, [dupe.item_id, item_id, list_id, dupe]);
 
-  const handleAddClick = () => {
-    setMode("quantity");
-  };
-
-  const handleEditClick = () => {
-    setMode("edit");
-  };
-
-  const handleCancelEdit = () => {
-    setMode("suggestion");
-  };
+  const categoryColor = CATEGORY_COLORS[dupe.category] || "#f5f5f5";
 
   const changeDesiredAmount = (event) => {
     event.preventDefault();
@@ -86,41 +87,99 @@ const DupeAdd = ({
 
   const submitEditedItem = (event) => {
     event.preventDefault();
-    console.log("=== SUBMIT EDIT ===");
-    console.log("item_id prop:", item_id);
-    console.log("dupe.item_id:", dupe.item_id);
-    console.log("editItem being sent:", editItem);
-    console.log("URL:", `https://listlist-db.onrender.com/api/items/${item_id}`);
-    
-    // Update the item in the database
     axios
       .put(`https://listlist-db.onrender.com/api/items/${item_id}`, editItem)
       .then((response) => {
-        console.log("SUCCESS - Item updated:", response);
-        setMode("quantity"); // Go to quantity selection after edit
+        console.log("Item updated:", response);
+        setMode("quantity");
       })
       .catch((error) => {
-        console.error("ERROR updating item:", error);
-        console.error("Error response:", error.response);
+        console.error("Error updating item:", error);
       });
   };
 
-  if (mode === "suggestion") {
+  const handleDeleteFromView = () => {
+    // Just close the suggestion (remove from current view, not from database)
+    setMode("row");
+    // Could hide this item from the list, but for now just reset
+  };
+
+  const handleDeleteFromPod = () => {
+    // Delete item from the pod's item database
+    axios
+      .delete(`https://listlist-db.onrender.com/api/items/${item_id}`)
+      .then((response) => {
+        console.log("Item deleted from pod:", response);
+        setNewItem(initialState);
+        setFormToggle(initialFormToggle);
+      })
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+      });
+  };
+
+  // ROW VIEW: [item name] | [+] | [edit] | [x]
+  if (mode === "row") {
     return (
-      <div className="dupe-suggestion">
-        <button className="dupe-add-btn" onClick={handleAddClick}>
-          add {dupe.name} to list?
-        </button>
-        <button className="dupe-edit-btn" onClick={handleEditClick}>
-          edit
-        </button>
+      <div className="item-row" style={{ backgroundColor: categoryColor }}>
+        <span className="item-row-name" onClick={() => setMode("card")}>
+          {dupe.name}
+        </span>
+        <button className="item-row-btn add-btn" onClick={() => setMode("quantity")}>+</button>
+        <button className="item-row-btn edit-btn" onClick={() => setMode("edit")}>edit</button>
+        <button className="item-row-btn delete-btn" onClick={() => setMode("delete")}>✕</button>
       </div>
     );
   }
 
+  // CARD VIEW: Full info with "add to list" and "edit" options
+  if (mode === "card") {
+    return (
+      <div className="item-card-full" style={{ borderColor: categoryColor }}>
+        <h4>{dupe.name}</h4>
+        <div className="item-card-info">
+          <p><strong>Category:</strong> {dupe.category}</p>
+          <p><strong>Purchase unit:</strong> {dupe.purchase_unit}</p>
+          <p><strong>Storage:</strong> {dupe.storage_space || "fridge"}</p>
+          {dupe.cost && <p><strong>Cost:</strong> ${dupe.cost}</p>}
+          <p><strong>Expires:</strong> {dupe.time_to_expire}</p>
+        </div>
+        <div className="item-card-actions">
+          <button className="card-action-btn" onClick={() => setMode("quantity")}>add to list</button>
+          <button className="card-action-btn" onClick={() => setMode("edit")}>edit</button>
+          <button className="card-action-btn cancel" onClick={() => setMode("row")}>back</button>
+        </div>
+      </div>
+    );
+  }
+
+  // QUANTITY VIEW: How many?
+  if (mode === "quantity") {
+    const displayName = editItem.name !== dupe.name ? editItem.name : dupe.name;
+    return (
+      <div className="item-quantity-form" style={{ borderColor: categoryColor }}>
+        <h4>How many {displayName}?</h4>
+        <form onSubmit={submitListItems}>
+          <input
+            name="desired_amount"
+            type="number"
+            value={bullet.desired_amount}
+            onChange={changeDesiredAmount}
+            min="1"
+          />
+          <div className="quantity-actions">
+            <button type="submit">add to list</button>
+            <button type="button" onClick={() => setMode("row")}>cancel</button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // EDIT VIEW: Editable card
   if (mode === "edit") {
     return (
-      <div className="dupe-edit-form">
+      <div className="item-edit-form" style={{ borderColor: categoryColor }}>
         <h4>Edit {dupe.name}</h4>
         <form onSubmit={submitEditedItem}>
           <div className="edit-field">
@@ -152,6 +211,7 @@ const DupeAdd = ({
               <option value="jar">jar</option>
               <option value="package">package</option>
               <option value="lb">lb</option>
+              <option value="unit">unit</option>
             </select>
           </div>
           <div className="edit-field">
@@ -170,31 +230,35 @@ const DupeAdd = ({
           </div>
           <div className="edit-buttons">
             <button type="submit">save</button>
-            <button type="button" onClick={handleCancelEdit}>cancel</button>
+            <button type="button" onClick={() => setMode("row")}>cancel</button>
           </div>
         </form>
       </div>
     );
   }
 
-  // mode === "quantity"
-  // Use editItem.name if we came from edit mode (has been modified), otherwise use dupe.name
-  const displayName = editItem.name !== dupe.name ? editItem.name : dupe.name;
-  return (
-    <div className="dupe-form">
-      <h4>how many {displayName}?</h4>
-      <form onSubmit={submitListItems}>
-        <input
-          name="desired_amount"
-          type="number"
-          value={bullet.desired_amount}
-          onChange={changeDesiredAmount}
-          placeholder={`enter amount`}
-        />
-        <button>submit</button>
-      </form>
-    </div>
-  );
+  // DELETE VIEW: Confirmation
+  if (mode === "delete") {
+    return (
+      <div className="item-delete-confirm" style={{ borderColor: categoryColor }}>
+        <h4>Remove {dupe.name}?</h4>
+        <p>Remove from your pod's database entirely?</p>
+        <div className="delete-actions">
+          <button className="delete-confirm-btn" onClick={handleDeleteFromPod}>
+            yes, delete from pod
+          </button>
+          <button className="delete-cancel-btn" onClick={handleDeleteFromView}>
+            no, just hide
+          </button>
+          <button className="delete-back-btn" onClick={() => setMode("row")}>
+            cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default DupeAdd;
