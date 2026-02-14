@@ -75,14 +75,29 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     console.log("ITEM ADDED TO DATABASE???", newItem);
     event.preventDefault();
     axios
-      // .post(`http://localhost:5505/api/items`, newItem)
       .post(`https://listlist-db.onrender.com/api/items`, newItem)
-
       .then((response) => console.log("item response:", response))
-      .then(() => setFormToggle({ ...formToggle, fuse_to_list: true }))
-      .then(() => setSearchTerm(newItem.name))
-      .then(() => setNewItem({ ...newItem, desired_amount: 1 }))
+      .then(() => setFormToggle({ ...formToggle, add_to_list_now: true }))
       .catch((error) => console.log(error));
+  };
+
+  const submitToDbOnly = (event) => {
+    event.preventDefault();
+    axios
+      .post(`https://listlist-db.onrender.com/api/items`, newItem)
+      .then((response) => {
+        console.log("Item added to DB only:", response);
+        setNewItem(initialState);
+        setFormToggle(initialFormToggle);
+        setFlipNew(!flipNew);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const proceedToQuantity = () => {
+    setSearchTerm(newItem.name);
+    setNewItem({ ...newItem, desired_amount: 1 });
+    setFormToggle({ ...formToggle, add_to_list_now: false, fuse_to_list: true });
   };
 
   const changeValue = (event) => {
@@ -352,6 +367,14 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <button>submit item</button>
       </form>
     </div>
+  ) : formToggle.add_to_list_now ? (
+    <div className="AddItem">
+      <h4>Add to list now?</h4>
+      <div className="add-to-list-options">
+        <button className="yes-btn" onClick={proceedToQuantity}>yes</button>
+        <button className="no-btn" onClick={submitToDbOnly}>no, save for later</button>
+      </div>
+    </div>
   ) : formToggle.cost ? (
     <div className="AddItem">
       <h4>Cost?</h4>
@@ -364,7 +387,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           placeholder={`enter item cost`}
         />
         <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
-        <button>submit item</button>
+        <button>next</button>
       </form>
       <div className="item">
         <p>name:</p>
