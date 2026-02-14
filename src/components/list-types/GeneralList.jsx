@@ -4,6 +4,7 @@ import axios from "axios";
 const GeneralList = ({ array, keyword, onItemRemoved }) => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const keyList = array.filter((item) => item.category === keyword);
 
@@ -39,8 +40,10 @@ const GeneralList = ({ array, keyword, onItemRemoved }) => {
     <>
       {keyList.length ? (
         <div className={keyword}>
-          <h3>{keyList[0].category}</h3>
-          <div className="list_container">
+          <h3 className="category-header" onClick={() => setIsCollapsed(!isCollapsed)}>
+            {isCollapsed ? `${keyList[0].category} — ${keyList.length} items` : keyList[0].category}
+          </h3>
+          {!isCollapsed && <div className="list_container">
             {keyList.map((item) => (
               <div 
                 className={`item ${expandedItem?._id === item._id ? 'item-expanded' : ''}`}
@@ -104,7 +107,7 @@ const GeneralList = ({ array, keyword, onItemRemoved }) => {
                 )}
               </div>
             ))}
-          </div>
+          </div>}
         </div>
       ) : null}
     </>

@@ -9,6 +9,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
   const [removalReason, setRemovalReason] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [movingItem, setMovingItem] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Filter by category or storage_space based on groupBy prop
   // Debug: log first item to see available fields
@@ -107,8 +108,10 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
     <>
       {keyList.length ? (
         <div className={groupBy === "storage" ? `storage-${keyword}` : keyword}>
-          <h3>{getTitle()}</h3>
-          <div className="list_container">
+          <h3 className="category-header" onClick={() => setIsCollapsed(!isCollapsed)}>
+            {isCollapsed ? `${getTitle()} — ${keyList.length} items` : getTitle()}
+          </h3>
+          {!isCollapsed && <div className="list_container">
             {keyList.map((item) => (
               <div 
                 className={`item ${expandedItem?._id === item._id ? 'item-expanded' : ''}`} 
@@ -222,7 +225,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category" }) => 
                 )}
               </div>
             ))}
-          </div>
+          </div>}
         </div>
       ) : null}
     </>
