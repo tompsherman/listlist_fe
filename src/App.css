@@ -1572,3 +1572,20 @@
 .add-item-btn:hover {
   background: #3d6a4a;
 }
+
+/* Calculated fields (auto-computed, not editable) */
+.item.calculated {
+  background-color: #e8f5e9;
+  border-left: 3px solid #4a7c59;
+}
+
+.edit-field.calculated {
+  background-color: #e8f5e9;
+  padding: 0.4rem;
+  border-radius: 4px;
+}
+
+.edit-field.calculated .calculated-value {
+  font-weight: 600;
+  color: #2e7d32;
+}

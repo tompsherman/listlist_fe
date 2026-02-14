@@ -260,6 +260,12 @@ const DupeAdd = ({
             <label>Cost ($):</label>
             <input name="cost" type="number" value={editItem.cost} onChange={changeEditField} />
           </div>
+          {editItem.cost && editItem.use_per_unit > 0 && (
+            <div className="edit-field calculated">
+              <label>Cost per {editItem.use_unit}:</label>
+              <span className="calculated-value">${(parseFloat(editItem.cost) / parseInt(editItem.use_per_unit)).toFixed(2)}</span>
+            </div>
+          )}
           <div className="edit-field">
             <label>Storage:</label>
             <select name="storage_space" value={editItem.storage_space} onChange={changeEditField}>

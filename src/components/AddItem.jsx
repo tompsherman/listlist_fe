@@ -399,6 +399,12 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
         <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
         <button>next</button>
       </form>
+      {newItem.cost && newItem.use_per_unit > 0 && (
+        <div className="item calculated">
+          <p>cost per {newItem.use_unit}:</p>
+          <p>${(parseFloat(newItem.cost) / parseInt(newItem.use_per_unit)).toFixed(2)}</p>
+        </div>
+      )}
       <div className="item">
         <p>name:</p>
         <p>{newItem.name}</p>
