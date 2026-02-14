@@ -35,6 +35,7 @@ const DupeAdd = ({
     name: dupe.name,
     purchase_unit: dupe.purchase_unit || "box",
     use_unit: dupe.use_unit || "self",
+    use_per_unit: dupe.use_per_unit || 1,
     category: dupe.category || "vegetable",
     perishable: dupe.perishable || "true",
     time_to_expire: dupe.time_to_expire || "thirty-six_days",
@@ -57,6 +58,7 @@ const DupeAdd = ({
       name: dupe.name,
       purchase_unit: dupe.purchase_unit || "box",
       use_unit: dupe.use_unit || "self",
+      use_per_unit: dupe.use_per_unit || 1,
       category: dupe.category || "vegetable",
       perishable: dupe.perishable || "true",
       time_to_expire: dupe.time_to_expire || "thirty-six_days",
@@ -249,6 +251,10 @@ const DupeAdd = ({
               <option value="self">one of itself</option>
               <option value="unit">unit</option>
             </select>
+          </div>
+          <div className="edit-field">
+            <label>Uses per unit:</label>
+            <input name="use_per_unit" type="number" min="1" value={editItem.use_per_unit} onChange={changeEditField} />
           </div>
           <div className="edit-field">
             <label>Cost ($):</label>

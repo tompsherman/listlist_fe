@@ -8,6 +8,7 @@ const initialState = {
   name: "",
   purchase_unit: "box",
   use_unit: "self",
+  use_per_unit: 1,
   category: "vegetable",
   perishable: "true",
   time_to_expire: "thirty-six_days",
@@ -134,6 +135,11 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
 
   const subUseUnit = (event) => {
     event.preventDefault();
+    setFormToggle({ ...formToggle, use_per_unit: true });
+  };
+
+  const subUsePerUnit = (event) => {
+    event.preventDefault();
     setFormToggle({ ...formToggle, perishable: true });
   };
 
@@ -227,44 +233,48 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true });
   };
 
+  const backToUsePerUnit = () => {
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true });
+  };
+
   const backToPerishable = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true });
   };
 
   const backToTimeToExpire = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true });
   };
 
   const backToStorageSpace = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true });
   };
 
   const backToStorageSize = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true });
   };
 
   const backToImageUrl = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true });
   };
 
   const backToHasSubstitutes = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true });
   };
 
   // const backToSubstitutes = () => {
-  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
+  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
   // };
 
   const backToBrandMatters = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true });
   };
 
   // const backToBrand = () => {
-  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
+  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
   // };
 
   const backToBreaksDown = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true });
+    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true });
   };
 
   // const backToBreaksInto = () => {
@@ -617,8 +627,45 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="true">true</option>
           <option value="false">false</option>
         </select>
+        <button type="button" className="back-btn" onClick={backToUsePerUnit}>back</button>
+        <button>next</button>
+      </form>
+      <div className="item">
+        <p>name:</p>
+        <p>{newItem.name}</p>
+      </div>
+      <div className="item">
+        <p>category:</p>
+        <p>{newItem.category}</p>
+      </div>
+      <div className="item">
+        <p>purchase unit:</p>
+        <p>{newItem.purchase_unit}</p>
+      </div>
+      <div className="item">
+        <p>use unit:</p>
+        <p>{newItem.use_unit}</p>
+      </div>
+      <div className="item">
+        <p>uses per unit:</p>
+        <p>{newItem.use_per_unit}</p>
+      </div>
+    </div>
+  ) : formToggle.use_per_unit ? (
+    <div className="AddItem">
+      <h4>Uses per {newItem.purchase_unit}:</h4>
+      <form onSubmit={subUsePerUnit}>
+        <input
+          name="use_per_unit"
+          type="number"
+          min="1"
+          value={newItem.use_per_unit}
+          onChange={changeValue}
+          placeholder="e.g. 12 eggs per carton"
+        />
         <button type="button" className="back-btn" onClick={backToUseUnit}>back</button>
         <button>next</button>
+        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
       </form>
       <div className="item">
         <p>name:</p>
