@@ -21,6 +21,19 @@ const STORAGE_OPTIONS = [
   { value: "gallon", label: "Gallon" },
 ];
 
+const DISH_TYPE_OPTIONS = [
+  { value: "main", label: "🍽️ Main Dish" },
+  { value: "side", label: "🥗 Side Dish" },
+  { value: "dessert", label: "🍰 Dessert" },
+];
+
+const MEAL_CATEGORY_OPTIONS = [
+  { value: "breakfast", label: "🌅 Breakfast" },
+  { value: "lunch", label: "☀️ Lunch" },
+  { value: "dinner", label: "🌙 Dinner" },
+  { value: "snack", label: "🍿 Snack" },
+];
+
 // Filter out household items
 const isEdible = (item) => item?.category !== "household";
 
@@ -30,6 +43,8 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
   const [ingredients, setIngredients] = useState([]);
   const [servings, setServings] = useState(1);
   const [leftoverStorage, setLeftoverStorage] = useState("none");
+  const [dishType, setDishType] = useState("main");
+  const [mealCategory, setMealCategory] = useState("dinner");
   const [searchIngredient, setSearchIngredient] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -102,6 +117,8 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
     setDishName(dish.name);
     setServings(dish.servings || 1);
     setLeftoverStorage(dish.leftover_storage || "none");
+    setDishType(dish.dish_type || "main");
+    setMealCategory(dish.meal_category || "dinner");
     setExistingDishes([]);
     // Could also pre-populate ingredients based on dish recipe
   };
@@ -129,6 +146,8 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
         })),
         servings,
         leftoverStorage,
+        dishType,
+        mealCategory,
         pantryListId,
       });
 
@@ -248,6 +267,44 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
             </div>
           </div>
 
+          {/* Dish Type */}
+          <div className="cook-field">
+            <label>Dish Type:</label>
+            <div className="radio-group">
+              {DISH_TYPE_OPTIONS.map(opt => (
+                <label key={opt.value} className={`radio-option ${dishType === opt.value ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="dishType"
+                    value={opt.value}
+                    checked={dishType === opt.value}
+                    onChange={(e) => setDishType(e.target.value)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Meal Category */}
+          <div className="cook-field">
+            <label>Meal Time:</label>
+            <div className="radio-group">
+              {MEAL_CATEGORY_OPTIONS.map(opt => (
+                <label key={opt.value} className={`radio-option ${mealCategory === opt.value ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="mealCategory"
+                    value={opt.value}
+                    checked={mealCategory === opt.value}
+                    onChange={(e) => setMealCategory(e.target.value)}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
           {/* Servings */}
           <div className="cook-field">
             <label>Total Servings Made:</label>
@@ -270,6 +327,7 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+            <p className="field-hint">Leftovers will appear in your fridge inventory</p>
           </div>
 
           {/* Submit */}

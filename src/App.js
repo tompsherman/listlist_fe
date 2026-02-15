@@ -6,6 +6,7 @@ import axios from "axios";
 import Marketing from "./pages/Marketing";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import MealsList from "./components/MealsList";
 import LoginButton from "./components/LoginButton";
 import LogoutButton from "./components/LogoutButton";
 
@@ -15,6 +16,7 @@ const App = () => {
   // All hooks must be called unconditionally at the top
   const { user, isLoading } = useAuth0();
   const [listsInitialized, setListsInitialized] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,6 +28,17 @@ const App = () => {
   
   // Debug logging - remove after fixing
   console.log("Current path (window):", currentPath, "React Router path:", location.pathname, "isAdminRoute:", isAdminRoute, "user:", user?.email);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuOpen && !e.target.closest('.hamburger-menu')) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [menuOpen]);
 
   // Initialize default lists (pantry) for new users
   useEffect(() => {
@@ -61,6 +74,7 @@ const App = () => {
   // const homeRoute = () => navigate(`/`); // Future feature
   const groceryRoute = () => navigate(`/grocery`);
   const pantryRoute = () => navigate(`/pantry`);
+  const mealsRoute = () => navigate(`/meals`);
 
   // Determine user status
   let isLegit = "";
@@ -142,13 +156,34 @@ const App = () => {
         >
           inventory
         </div>
-        {/* Future features: home button, add new list button */}
-        <LogoutButton />
+        <div 
+          className={`nav-btn ${location.pathname === '/meals' ? 'nav-btn-active' : ''}`} 
+          onClick={mealsRoute}
+        >
+          meals
+        </div>
+        {/* Hamburger menu */}
+        <div className="hamburger-menu">
+          <div 
+            className="hamburger-icon" 
+            onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          {menuOpen && (
+            <div className="hamburger-dropdown">
+              <LogoutButton />
+            </div>
+          )}
+        </div>
       </div>
       <Routes>
         <Route path="/" element={<Dashboard getList={"grocery"} />} />
         <Route path="/grocery" element={<Dashboard getList={"grocery"} />} />
         <Route path="/pantry" element={<Dashboard getList={"pantry"} />} />
+        <Route path="/meals" element={<MealsList />} />
       </Routes>
     </div>
   );
