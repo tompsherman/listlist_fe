@@ -2338,3 +2338,143 @@
   color: #dc3545;
   font-size: 0.8rem;
 }
+
+/* Quick Add styles for CookDish */
+.quick-add-form {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.quick-add-form h5 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.quick-add-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.quick-add-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.quick-add-field label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.quick-add-field input,
+.quick-add-field select {
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.quick-add-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.quick-add-btn {
+  flex: 1;
+  padding: 0.5rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.quick-add-btn:hover {
+  background: #218838;
+}
+
+.quick-add-cancel {
+  padding: 0.5rem 0.75rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.suggestion-header {
+  font-size: 0.75rem;
+  color: #888;
+  padding: 0.25rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.ingredient-suggestion.faded {
+  opacity: 0.7;
+}
+
+.ingredient-suggestion .add-anyway {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: auto;
+}
+
+.no-matches {
+  padding: 0.75rem;
+  text-align: center;
+  color: #666;
+}
+
+.no-matches p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.quick-add-start {
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.quick-add-start:hover {
+  background: #0056b3;
+}
+
+.quick-add-option {
+  padding: 0.5rem;
+  border-top: 1px solid #eee;
+}
+
+.quick-add-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+}
+
+.quick-add-link:hover {
+  text-decoration: underline;
+}
+
+.adhoc-badge {
+  font-size: 0.65rem;
+  background: #ffc107;
+  color: #333;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
