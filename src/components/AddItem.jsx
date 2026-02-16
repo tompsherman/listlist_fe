@@ -3,6 +3,8 @@ import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
 import GetItemIdHook from "../logic/GetItemIdHook";
 import DupeAdd from "./DupeAdd";
+import CreatableSelect from "./CreatableSelect";
+import useOptions from "../hooks/useOptions";
 
 const initialState = {
   name: "",
@@ -38,6 +40,7 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   console.log(newGroceryListId, getList);
   console.log(GetListIdHook(getList));
 
+  const { options, addOption } = useOptions();
   const [itemDatabase, setItemDatabase] = useState([]);
   const [newItem, setNewItem] = useState(initialState);
   const [searchTerm, setSearchTerm] = useState("");
@@ -531,13 +534,21 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Storage size?</h4>
       <form onSubmit={subStorageSize}>
-        <select name="storage_size" value={newItem.storage_size} onChange={changeValue}>
-          <option value="">-- select --</option>
-          <option value="pint">pint</option>
-          <option value="quart">quart</option>
-          <option value="half_gallon">1/2 gallon</option>
-          <option value="gallon">gallon</option>
-        </select>
+        <CreatableSelect
+          name="storage_size"
+          value={newItem.storage_size}
+          onChange={changeValue}
+          options={[
+            { value: "pint", label: "pint" },
+            { value: "quart", label: "quart" },
+            { value: "half_gallon", label: "1/2 gallon" },
+            { value: "gallon", label: "gallon" },
+            ...options.storage_size.filter(o => !["pint", "quart", "half_gallon", "gallon"].includes(o))
+          ]}
+          onAddOption={addOption}
+          allowEmpty
+          emptyLabel="-- select --"
+        />
         <button type="button" className="back-btn" onClick={backToStorageSpace}>back</button>
         <button>next</button>
       </form>
@@ -546,15 +557,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Storage space</h4>
       <form onSubmit={subStorageSpace}>
-        <select name="storage_space" onChange={changeValue}>
-          <option value="counter">counter</option>
-          <option value="pantry">pantry</option>
-          <option selected value="fridge">
-            fridge
-          </option>
-          <option value="freezer">freezer</option>
-          <option value="closet">closet</option>
-        </select>
+        <CreatableSelect
+          name="storage_space"
+          value={newItem.storage_space}
+          onChange={changeValue}
+          options={options.storage_space}
+          onAddOption={addOption}
+        />
         <button type="button" className="back-btn" onClick={backToTimeToExpire}>back</button>
         <button>next</button>
       </form>
@@ -694,21 +703,16 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Usage unit:</h4>
       <form onSubmit={subUseUnit}>
-        <select name="use_unit" onChange={changeValue}>
-          <option value="bag">bag</option>
-          <option value="box">box</option>
-          <option value="can">can</option>
-          <option value="cup">cup</option>
-          <option value="handful">handful</option>
-          <option value="package">package</option>
-          <option value="scoop">scoop</option>
-          <option value="tbsp">tbsp</option>
-          <option value="tsp">tsp</option>
-          <option value="slice">slice</option>
-          <option selected value="self">
-            one of itself (ex. apple)
-          </option>
-        </select>
+        <CreatableSelect
+          name="use_unit"
+          value={newItem.use_unit}
+          onChange={changeValue}
+          options={[
+            ...options.use_unit.filter(o => o !== "self"),
+            { value: "self", label: "one of itself (ex. apple)" }
+          ]}
+          onAddOption={addOption}
+        />
         <button type="button" className="back-btn" onClick={backToPurchaseUnit}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
@@ -730,18 +734,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Purchase unit:</h4>
       <form onSubmit={subPurchaseUnit}>
-        <select name="purchase_unit" onChange={changeValue}>
-          <option value="bag">bag</option>
-          <option selected value="box">
-            box
-          </option>
-          <option value="bunch">bunch</option>
-          <option value="can">can</option>
-          <option value="carton">carton</option>
-          <option value="jar">jar</option>
-          <option value="package">package</option>
-          <option value="lb">lb</option>
-        </select>
+        <CreatableSelect
+          name="purchase_unit"
+          value={newItem.purchase_unit}
+          onChange={changeValue}
+          options={options.purchase_unit}
+          onAddOption={addOption}
+        />
         <button type="button" className="back-btn" onClick={backToCategory}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
@@ -759,19 +758,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     <div className="AddItem">
       <h4>Category</h4>
       <form onSubmit={subCategory}>
-        <select name="category" onChange={changeValue}>
-          <option selected value="vegetable">
-            vegetable
-          </option>
-          <option value="herbs">herbs</option>
-          <option value="fruit">fruit</option>
-          <option value="grains">grains</option>
-          <option value="meat">meat</option>
-          <option value="dairy">dairy</option>
-          <option value="household">household</option>
-          <option value="drinks">drinks</option>
-          <option value="snack">snack</option>
-        </select>
+        <CreatableSelect
+          name="category"
+          value={newItem.category}
+          onChange={changeValue}
+          options={options.category}
+          onAddOption={addOption}
+        />
         <button type="button" className="back-btn" onClick={backToName}>back</button>
         <button>next</button>
         <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>

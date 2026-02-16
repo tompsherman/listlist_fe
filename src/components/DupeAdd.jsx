@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import CreatableSelect from "./CreatableSelect";
+import useOptions from "../hooks/useOptions";
 
 const CATEGORY_COLORS = {
   vegetable: "#228B22",
@@ -24,6 +26,7 @@ const DupeAdd = ({
   item_id,
   list_id,
 }) => {
+  const { options, addOption } = useOptions();
   const [mode, setMode] = useState("row"); // "row" | "card" | "quantity" | "edit" | "delete"
   const [bullet, setBullet] = useState({
     desired_amount: 1,
@@ -209,48 +212,36 @@ const DupeAdd = ({
           </div>
           <div className="edit-field">
             <label>Category:</label>
-            <select name="category" value={editItem.category} onChange={changeEditField}>
-              <option value="vegetable">vegetable</option>
-              <option value="herbs">herbs</option>
-              <option value="fruit">fruit</option>
-              <option value="grains">grains</option>
-              <option value="meat">meat</option>
-              <option value="dairy">dairy</option>
-              <option value="household">household</option>
-              <option value="drinks">drinks</option>
-              <option value="snack">snack</option>
-            </select>
+            <CreatableSelect
+              name="category"
+              value={editItem.category}
+              onChange={changeEditField}
+              options={options.category}
+              onAddOption={addOption}
+            />
           </div>
           <div className="edit-field">
             <label>Purchase unit:</label>
-            <select name="purchase_unit" value={editItem.purchase_unit} onChange={changeEditField}>
-              <option value="bag">bag</option>
-              <option value="box">box</option>
-              <option value="bunch">bunch</option>
-              <option value="can">can</option>
-              <option value="carton">carton</option>
-              <option value="jar">jar</option>
-              <option value="package">package</option>
-              <option value="lb">lb</option>
-              <option value="unit">unit</option>
-            </select>
+            <CreatableSelect
+              name="purchase_unit"
+              value={editItem.purchase_unit}
+              onChange={changeEditField}
+              options={options.purchase_unit}
+              onAddOption={addOption}
+            />
           </div>
           <div className="edit-field">
             <label>Use unit:</label>
-            <select name="use_unit" value={editItem.use_unit} onChange={changeEditField}>
-              <option value="bag">bag</option>
-              <option value="box">box</option>
-              <option value="can">can</option>
-              <option value="cup">cup</option>
-              <option value="handful">handful</option>
-              <option value="package">package</option>
-              <option value="scoop">scoop</option>
-              <option value="tbsp">tbsp</option>
-              <option value="tsp">tsp</option>
-              <option value="slice">slice</option>
-              <option value="self">one of itself</option>
-              <option value="unit">unit</option>
-            </select>
+            <CreatableSelect
+              name="use_unit"
+              value={editItem.use_unit}
+              onChange={changeEditField}
+              options={[
+                ...options.use_unit.filter(o => o !== "self"),
+                { value: "self", label: "one of itself" }
+              ]}
+              onAddOption={addOption}
+            />
           </div>
           <div className="edit-field">
             <label>Uses per unit:</label>
@@ -268,23 +259,31 @@ const DupeAdd = ({
           )}
           <div className="edit-field">
             <label>Storage:</label>
-            <select name="storage_space" value={editItem.storage_space} onChange={changeEditField}>
-              <option value="counter">counter</option>
-              <option value="pantry">pantry</option>
-              <option value="fridge">fridge</option>
-              <option value="freezer">freezer</option>
-              <option value="closet">closet</option>
-            </select>
+            <CreatableSelect
+              name="storage_space"
+              value={editItem.storage_space}
+              onChange={changeEditField}
+              options={options.storage_space}
+              onAddOption={addOption}
+            />
           </div>
           <div className="edit-field">
             <label>Size:</label>
-            <select name="storage_size" value={editItem.storage_size} onChange={changeEditField}>
-              <option value="">-- none --</option>
-              <option value="pint">pint</option>
-              <option value="quart">quart</option>
-              <option value="half_gallon">1/2 gallon</option>
-              <option value="gallon">gallon</option>
-            </select>
+            <CreatableSelect
+              name="storage_size"
+              value={editItem.storage_size}
+              onChange={changeEditField}
+              options={[
+                { value: "pint", label: "pint" },
+                { value: "quart", label: "quart" },
+                { value: "half_gallon", label: "1/2 gallon" },
+                { value: "gallon", label: "gallon" },
+                ...options.storage_size.filter(o => !["pint", "quart", "half_gallon", "gallon"].includes(o))
+              ]}
+              onAddOption={addOption}
+              allowEmpty
+              emptyLabel="-- none --"
+            />
           </div>
           <div className="edit-field">
             <label>Image URL:</label>
