@@ -7,13 +7,12 @@ import axios from "axios";
 import Marketing from "./pages/Marketing";
 import LoginButton from "./components/LoginButton";
 import LogoutButton from "./components/LogoutButton";
+import "./App.css";
 
 // Lazy load - only when needed (reduces initial bundle ~40%)
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const MealsList = lazy(() => import("./components/MealsList"));
-
-import "./App.css";
 
 // Loading fallback component
 const PageLoader = () => (
