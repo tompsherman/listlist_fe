@@ -2,42 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CreatableSelect from "./CreatableSelect";
 import useOptions from "../hooks/useOptions";
-
-const CATEGORY_COLORS = {
-  vegetable: "#228B22",
-  herbs: "#8B7355",
-  fruit: "#9ACD32",
-  grains: "#DAA520",
-  meat: "#F08080",
-  dairy: "#FFFAF0",
-  household: "#ADD8E6",
-  drinks: "#BDB76B",
-  snack: "#FF6347",
-};
-
-const STORAGE_OPTIONS = [
-  { value: "none", label: "No leftovers" },
-  { value: "pint", label: "Pint" },
-  { value: "quart", label: "Quart" },
-  { value: "half_gallon", label: "Half gallon" },
-  { value: "gallon", label: "Gallon" },
-];
-
-const DISH_TYPE_OPTIONS = [
-  { value: "main", label: "🍽️ Main Dish" },
-  { value: "side", label: "🥗 Side Dish" },
-  { value: "dessert", label: "🍰 Dessert" },
-];
-
-const MEAL_CATEGORY_OPTIONS = [
-  { value: "breakfast", label: "🌅 Breakfast" },
-  { value: "lunch", label: "☀️ Lunch" },
-  { value: "dinner", label: "🌙 Dinner" },
-  { value: "snack", label: "🍿 Snack" },
-];
-
-// Filter out household items
-const isEdible = (item) => item?.category !== "household";
+import {
+  CATEGORY_COLORS,
+  STORAGE_OPTIONS,
+  DISH_TYPE_OPTIONS,
+  MEAL_CATEGORY_OPTIONS,
+  isEdible,
+} from "../utils/categories";
 
 const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCooked }) => {
   const { options, addOption } = useOptions();

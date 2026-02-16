@@ -64,17 +64,13 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
     newItem
   );
 
+  // Fetch items database once on mount (not on every state change)
   useEffect(() => {
     axios
       .get(`https://listlist-db.onrender.com/api/items/`)
-      // .get(`http://localhost:5505/api/items`)
-      .then((response) =>
-        //console.log("LINE 35,", response.data))
-        setItemDatabase(response.data)
-      )
-      // .then(console.log("GET list", list))
-      .catch((error) => console.log(error.message, error.stack));
-  }, [formToggle.fuse_to_list, searchTerm]);
+      .then((response) => setItemDatabase(response.data))
+      .catch((error) => console.error("Error fetching items:", error.message));
+  }, []);  // Empty deps - fetch once
 
   const submitHandler = (event) => {
     console.log("ITEM ADDED TO DATABASE???", newItem);

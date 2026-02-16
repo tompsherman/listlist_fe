@@ -4,9 +4,7 @@ import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
 import PantryList from "./list-types/PantryList";
 import PantrySearch from "./PantrySearch";
-
-const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
-const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
+import { STORAGE_LOCATIONS, CATEGORIES } from "../utils/categories";
 
 const List = ({ getList, flipNew, onAddItem }) => {
   // PANTRY - different background color, no "goshopping" button

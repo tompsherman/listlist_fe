@@ -1,45 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  CATEGORY_COLORS,
+  DISH_TYPE_LABELS,
+  MEAL_CATEGORY_LABELS,
+  STORAGE_OPTIONS,
+  STORAGE_LOCATION_OPTIONS,
+} from "../utils/categories";
 
-const CATEGORY_COLORS = {
-  vegetable: "#228B22",
-  herbs: "#8B7355",
-  fruit: "#9ACD32",
-  grains: "#DAA520",
-  meat: "#F08080",
-  dairy: "#FFFAF0",
-  household: "#ADD8E6",
-  drinks: "#BDB76B",
-  snack: "#FF6347",
-  other: "#ddd",
-};
-
-const DISH_TYPE_LABELS = {
-  main: "🍽️ Main Dish",
-  side: "🥗 Side Dish",
-  dessert: "🍰 Dessert",
-};
-
-const MEAL_CATEGORY_LABELS = {
-  breakfast: "🌅 Breakfast",
-  lunch: "☀️ Lunch",
-  dinner: "🌙 Dinner",
-  snack: "🍿 Snack",
-};
-
-const STORAGE_OPTIONS = [
-  { value: "none", label: "No leftovers" },
-  { value: "pint", label: "Pint" },
-  { value: "quart", label: "Quart" },
-  { value: "half_gallon", label: "Half gallon" },
-  { value: "gallon", label: "Gallon" },
-];
-
-const STORAGE_LOCATIONS = [
-  { value: "fridge", label: "Fridge" },
-  { value: "freezer", label: "Freezer" },
-  { value: "counter", label: "Counter" },
-];
+// Alias for backwards compatibility in this file
+const STORAGE_LOCATIONS = STORAGE_LOCATION_OPTIONS;
 
 const MealsList = () => {
   const [dishes, setDishes] = useState([]);

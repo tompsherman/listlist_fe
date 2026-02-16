@@ -1,35 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import CookDish from "../CookDish";
-
-const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
-const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
-
-// Categories that can be used as meal ingredients (excludes household items)
-const NON_EDIBLE_CATEGORIES = ["household"];
-
-// Helper to check if an item can be used in meals
-const isEdible = (item) => !NON_EDIBLE_CATEGORIES.includes(item?.category);
-
-const CATEGORY_COLORS = {
-  vegetable: "#228B22",
-  herbs: "#8B7355",
-  fruit: "#9ACD32",
-  grains: "#DAA520",
-  meat: "#F08080",
-  dairy: "#FFFAF0",
-  household: "#ADD8E6",
-  drinks: "#BDB76B",
-  snack: "#FF6347",
-};
-
-const STORAGE_COLORS = {
-  counter: "#f5deb3",
-  pantry: "#d2b48c",
-  fridge: "#add8e6",
-  freezer: "#b0e0e6",
-  closet: "#dda0dd",
-};
+import {
+  STORAGE_LOCATIONS,
+  CATEGORIES,
+  CATEGORY_COLORS,
+  STORAGE_COLORS,
+  isEdible,
+} from "../../utils/categories";
 
 // Split options based on storage size
 const SPLIT_OPTIONS = {

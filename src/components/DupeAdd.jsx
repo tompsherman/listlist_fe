@@ -3,18 +3,7 @@ import axios from "axios";
 import CreatableSelect from "./CreatableSelect";
 import useOptions from "../hooks/useOptions";
 import SubstituteSelector from "./SubstituteSelector";
-
-const CATEGORY_COLORS = {
-  vegetable: "#228B22",
-  herbs: "#8B7355",
-  fruit: "#9ACD32",
-  grains: "#DAA520",
-  meat: "#F08080",
-  dairy: "#FFFFFF",
-  household: "#ADD8E6",
-  drinks: "#BDB76B",
-  snack: "#FF6347",
-};
+import { CATEGORY_COLORS } from "../utils/categories";
 
 const DupeAdd = ({
   flipNew,

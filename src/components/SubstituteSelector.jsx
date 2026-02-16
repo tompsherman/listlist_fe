@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-
-const CATEGORY_COLORS = {
-  vegetable: "#228B22",
-  herbs: "#8B7355",
-  fruit: "#9ACD32",
-  grains: "#DAA520",
-  meat: "#F08080",
-  dairy: "#FFFAF0",
-  household: "#ADD8E6",
-  drinks: "#BDB76B",
-  snack: "#FF6347",
-  other: "#ddd",
-};
+import { CATEGORY_COLORS } from "../utils/categories";
 
 /**
  * A multi-select search component for choosing substitute items.
