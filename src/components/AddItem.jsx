@@ -5,6 +5,7 @@ import GetItemIdHook from "../logic/GetItemIdHook";
 import DupeAdd from "./DupeAdd";
 import CreatableSelect from "./CreatableSelect";
 import useOptions from "../hooks/useOptions";
+import SubstituteSelector from "./SubstituteSelector";
 
 const initialState = {
   name: "",
@@ -20,7 +21,7 @@ const initialState = {
   storage_size: "",
   image_url: "",
   has_substitutes: "no",
-  substitutes: "",
+  substitutes: [],
   brand_matters: "no",
   brand: "",
   breaks_down: "no",
@@ -491,17 +492,15 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
   ) : formToggle.substitutes ? (
     <div className="AddItem">
       <h4>What substitutes?</h4>
-      <form onSubmit={subSubstitutes}>
-        <input
-          name="substitutes"
-          type="text"
-          value={newItem.substitutes}
-          onChange={changeValue}
-          placeholder="enter substitute item"
-        />
+      <SubstituteSelector
+        value={newItem.substitutes}
+        onChange={(subs) => setNewItem({ ...newItem, substitutes: subs })}
+        excludeItemName={newItem.name}
+      />
+      <div className="substitute-nav">
         <button type="button" className="back-btn" onClick={backToHasSubstitutes}>back</button>
-        <button>next</button>
-      </form>
+        <button type="button" onClick={subSubstitutes}>next</button>
+      </div>
     </div>
   ) : formToggle.has_substitutes ? (
     <div className="AddItem">

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import CreatableSelect from "./CreatableSelect";
 import useOptions from "../hooks/useOptions";
+import SubstituteSelector from "./SubstituteSelector";
 
 const CATEGORY_COLORS = {
   vegetable: "#228B22",
@@ -47,7 +48,7 @@ const DupeAdd = ({
     storage_size: dupe.storage_size || "",
     image_url: dupe.image_url || "",
     has_substitutes: dupe.has_substitutes || "no",
-    substitutes: dupe.substitutes || "",
+    substitutes: Array.isArray(dupe.substitutes) ? dupe.substitutes : (dupe.substitutes ? [{ name: dupe.substitutes }] : []),
     brand_matters: dupe.brand_matters || "no",
     brand: dupe.brand || "",
     breaks_down: dupe.breaks_down || "no",
@@ -70,7 +71,7 @@ const DupeAdd = ({
       storage_size: dupe.storage_size || "",
       image_url: dupe.image_url || "",
       has_substitutes: dupe.has_substitutes || "no",
-      substitutes: dupe.substitutes || "",
+      substitutes: Array.isArray(dupe.substitutes) ? dupe.substitutes : (dupe.substitutes ? [{ name: dupe.substitutes }] : []),
       brand_matters: dupe.brand_matters || "no",
       brand: dupe.brand || "",
       breaks_down: dupe.breaks_down || "no",
@@ -298,8 +299,12 @@ const DupeAdd = ({
           </div>
           {editItem.has_substitutes === "yes" && (
             <div className="edit-field">
-              <label>Substitute:</label>
-              <input name="substitutes" type="text" value={editItem.substitutes} onChange={changeEditField} />
+              <label>Substitutes:</label>
+              <SubstituteSelector
+                value={editItem.substitutes}
+                onChange={(subs) => setEditItem({ ...editItem, substitutes: subs })}
+                excludeItemName={editItem.name}
+              />
             </div>
           )}
           <div className="edit-field">
