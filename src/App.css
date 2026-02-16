@@ -2613,3 +2613,140 @@
   background: #007bff;
   color: white;
 }
+
+/* Meals List - Match Grocery/Inventory styling */
+.meals-list-container {
+  background-color: #e8f5e9;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.meals-list-container h2.centered {
+  text-align: center;
+  color: #2e7d32;
+  margin-bottom: 1rem;
+}
+
+.meals-group {
+  margin-bottom: 1rem;
+  background: rgba(255,255,255,0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.meals-group-header {
+  background-color: #4a7c59;
+  color: white;
+  padding: 0.75rem 1rem;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.1rem;
+  transition: background-color 0.2s;
+}
+
+.meals-group-header:hover {
+  background-color: #3d6a4a;
+}
+
+.meals-cards.list_container {
+  padding: 0.5rem;
+}
+
+/* View toggle styling */
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.view-toggle .toggle-btn,
+.group-toggle .toggle-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #4a7c59;
+  background: white;
+  color: #4a7c59;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.view-toggle .toggle-btn.active,
+.group-toggle .toggle-btn.active {
+  background: #4a7c59;
+  color: white;
+}
+
+.view-toggle .toggle-btn:hover,
+.group-toggle .toggle-btn:hover {
+  background: #3d6a4a;
+  color: white;
+}
+
+.group-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+/* Tracker view header */
+.tracker-header {
+  background-color: #4a7c59;
+  color: white;
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.5rem 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.tracker-view {
+  background: rgba(255,255,255,0.5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tracker-view .meals-cards {
+  padding: 0.5rem;
+}
+
+/* Dish cards */
+.dish-card {
+  background: white;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.dish-card:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.dish-card.expanded {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Empty state */
+.empty-meals {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-meals .hint {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Loading state */
+.loading-screen {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

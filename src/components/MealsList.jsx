@@ -49,6 +49,14 @@ const MealsList = () => {
   const [expandedDish, setExpandedDish] = useState(null);
   const [editingDish, setEditingDish] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [collapsedGroups, setCollapsedGroups] = useState({});
+
+  const toggleGroupCollapse = (groupKey) => {
+    setCollapsedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  };
 
   useEffect(() => {
     fetchDishes();
@@ -426,13 +434,23 @@ const MealsList = () => {
             if (groupKey === "uncategorized" && groupDishes.length === 0) return null;
             
             const label = labels[groupKey] || "📋 Other";
+            const isCollapsed = collapsedGroups[groupKey];
+            const dishCount = groupDishes.length;
+            const dishWord = dishCount === 1 ? "dish" : "dishes";
             
             return (
               <div key={groupKey} className="meals-group">
-                <h3 className="meals-group-header">{label}</h3>
-                <div className="meals-cards">
-                  {groupDishes.map(dish => renderDishCard(dish, false))}
-                </div>
+                <h3 
+                  className="meals-group-header category-header"
+                  onClick={() => toggleGroupCollapse(groupKey)}
+                >
+                  {isCollapsed ? `${label} — ${dishCount} ${dishWord}` : label}
+                </h3>
+                {!isCollapsed && (
+                  <div className="meals-cards list_container">
+                    {groupDishes.map(dish => renderDishCard(dish, false))}
+                  </div>
+                )}
               </div>
             );
           })}
