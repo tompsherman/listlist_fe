@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 
 const CATEGORY_COLORS = {
@@ -29,9 +29,11 @@ const SubstituteSelector = ({ value = [], onChange, excludeItemName = "" }) => {
   const [showResults, setShowResults] = useState(false);
 
   // Normalize value to array of objects with at least { name }
-  const substitutes = Array.isArray(value) 
-    ? value.map(v => typeof v === "string" ? { name: v } : v)
-    : [];
+  const substitutes = useMemo(() => {
+    return Array.isArray(value) 
+      ? value.map(v => typeof v === "string" ? { name: v } : v)
+      : [];
+  }, [value]);
 
   // Search items as user types
   useEffect(() => {
