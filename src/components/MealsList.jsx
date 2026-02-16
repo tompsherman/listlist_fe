@@ -66,12 +66,11 @@ const MealsList = () => {
   };
 
   // Calculate total ingredient cost for a dish
+  // Note: ing.cost is already the cost for the amount used (calculated on backend)
   const calculateDishCost = (dish) => {
     if (!dish.ingredients) return 0;
     return dish.ingredients.reduce((total, ing) => {
-      const cost = parseFloat(ing.cost) || 0;
-      const amount = parseFloat(ing.amount_used) || 1;
-      return total + (cost * amount);
+      return total + (parseFloat(ing.cost) || 0);
     }, 0);
   };
 
