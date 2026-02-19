@@ -1432,10 +1432,9 @@
 
 .search-result-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   padding: 0.6rem 0.8rem;
   border-bottom: 1px solid #eee;
-  cursor: pointer;
   background: #fafafa;
 }
 
@@ -1452,8 +1451,125 @@
   border-radius: 6px;
 }
 
-.search-result-item:hover {
-  background: #f0f0f0;
+.search-result-item.expanded {
+  background: #f5f5f5;
+}
+
+/* Main clickable row */
+.result-main-row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.result-main-row:hover {
+  opacity: 0.85;
+}
+
+.expand-icon {
+  font-size: 0.7rem;
+  color: #999;
+  margin-left: 0.5rem;
+}
+
+/* Action buttons row */
+.result-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+}
+
+.result-action-btn {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.result-action-btn.use {
+  background: #6c757d;
+  color: white;
+}
+
+.result-action-btn.use:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.result-action-btn.cook {
+  background: #fd7e14;
+  color: white;
+}
+
+.result-action-btn.move {
+  background: #17a2b8;
+  color: white;
+}
+
+.result-action-btn.move.active {
+  background: #138496;
+}
+
+.result-action-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+/* Move to dropdown */
+.move-options {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.move-option-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  border: 1px solid #17a2b8;
+  border-radius: 4px;
+  background: white;
+  color: #17a2b8;
+  cursor: pointer;
+}
+
+.move-option-btn:hover {
+  background: #17a2b8;
+  color: white;
+}
+
+/* Expanded details */
+.result-details {
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.detail-row:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #333;
 }
 
 .result-name {

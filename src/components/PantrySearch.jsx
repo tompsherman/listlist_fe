@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CATEGORY_COLORS } from "../utils/categories";
+import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS } from "../utils/categories";
 
-const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => {
+const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCookItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [itemDatabase, setItemDatabase] = useState([]);
-  const [expandedItem, setExpandedItem] = useState(null);
+  const [expandedItemId, setExpandedItemId] = useState(null);
+  const [movingItemId, setMovingItemId] = useState(null);
   
   // For inline add flow on DB items
   const [addingItem, setAddingItem] = useState(null); // { item, mode: 'pantry' | 'grocery' }
@@ -47,6 +48,8 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
     setSearchTerm(e.target.value);
     setAddingItem(null);
     setAmount(1);
+    setExpandedItemId(null);
+    setMovingItemId(null);
   };
 
   const formatDate = () => {
@@ -139,8 +142,58 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
     }
   };
 
-  const toggleExpandItem = (item) => {
-    setExpandedItem(expandedItem?._id === item._id ? null : item);
+  const toggleExpandItem = (itemId) => {
+    setExpandedItemId(expandedItemId === itemId ? null : itemId);
+    setMovingItemId(null);
+  };
+
+  // Use 1 - decrement uses_remaining
+  const handleUseOne = async (item, e) => {
+    e.stopPropagation();
+    
+    const currentUses = item.uses_remaining ?? (item.acquired_amount || 1);
+    if (currentUses <= 0) return;
+    
+    try {
+      await axios.patch(`https://listlist-db.onrender.com/api/list_items/${item._id}`, {
+        uses_remaining: currentUses - 1
+      });
+      if (onItemAdded) onItemAdded(); // Refresh the list
+    } catch (error) {
+      console.error("Error using item:", error);
+      alert("Error updating item. Please try again.");
+    }
+  };
+
+  // Cook it - open CookDish with this item
+  const handleCookIt = (item, e) => {
+    e.stopPropagation();
+    if (onCookItem) {
+      onCookItem(item);
+    }
+    setSearchTerm("");
+    setExpandedItemId(null);
+  };
+
+  // Move to - change storage location
+  const handleStartMove = (itemId, e) => {
+    e.stopPropagation();
+    setMovingItemId(movingItemId === itemId ? null : itemId);
+  };
+
+  const handleMoveTo = async (item, newLocation, e) => {
+    e.stopPropagation();
+    
+    try {
+      await axios.patch(`https://listlist-db.onrender.com/api/list_items/${item._id}`, {
+        storage_space: newLocation
+      });
+      setMovingItemId(null);
+      if (onItemAdded) onItemAdded(); // Refresh the list
+    } catch (error) {
+      console.error("Error moving item:", error);
+      alert("Error moving item. Please try again.");
+    }
   };
 
   return (
@@ -160,18 +213,93 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
         <div className="search-results">
           {matchingPantryItems.map((item) => {
             const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
+            const isExpanded = expandedItemId === item._id;
+            const isMoving = movingItemId === item._id;
+            const usesRemaining = item.uses_remaining ?? (item.acquired_amount || 1);
+            const useUnit = item.use_unit === "self" ? item.name : (item.use_unit || "use");
+            
             return (
               <div
                 key={item._id}
-                className="search-result-item"
+                className={`search-result-item ${isExpanded ? 'expanded' : ''}`}
                 style={{ borderLeft: `4px solid ${categoryColor}` }}
-                onClick={() => toggleExpandItem(item)}
               >
-                <span className="result-name">{item.name}</span>
-                <span className="result-amount">
-                  {item.acquired_amount || item.amount_left} {item.purchase_unit}
-                </span>
-                <span className="result-location">{item.storage_space || "fridge"}</span>
+                {/* Main row - clickable to expand */}
+                <div className="result-main-row" onClick={() => toggleExpandItem(item._id)}>
+                  <span className="result-name">{item.name}</span>
+                  <span className="result-amount">
+                    {item.acquired_amount || item.amount_left} {item.purchase_unit}
+                  </span>
+                  <span className="result-location">{item.storage_space || "fridge"}</span>
+                  <span className="expand-icon">{isExpanded ? '▼' : '▶'}</span>
+                </div>
+
+                {/* Action buttons - always visible */}
+                <div className="result-actions">
+                  <button 
+                    className="result-action-btn use"
+                    onClick={(e) => handleUseOne(item, e)}
+                    disabled={usesRemaining <= 0}
+                    title={`${usesRemaining} ${useUnit}${usesRemaining !== 1 ? 's' : ''} remaining`}
+                  >
+                    use 1
+                  </button>
+                  <button 
+                    className="result-action-btn cook"
+                    onClick={(e) => handleCookIt(item, e)}
+                  >
+                    cook it
+                  </button>
+                  <button 
+                    className={`result-action-btn move ${isMoving ? 'active' : ''}`}
+                    onClick={(e) => handleStartMove(item._id, e)}
+                  >
+                    move to
+                  </button>
+                </div>
+
+                {/* Move to dropdown */}
+                {isMoving && (
+                  <div className="move-options" onClick={(e) => e.stopPropagation()}>
+                    {STORAGE_LOCATION_OPTIONS.filter(opt => opt.value !== item.storage_space).map(opt => (
+                      <button
+                        key={opt.value}
+                        className="move-option-btn"
+                        onClick={(e) => handleMoveTo(item, opt.value, e)}
+                      >
+                        → {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Expanded details */}
+                {isExpanded && (
+                  <div className="result-details" onClick={(e) => e.stopPropagation()}>
+                    <div className="detail-row">
+                      <span className="detail-label">Category:</span>
+                      <span className="detail-value">{item.category}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Uses remaining:</span>
+                      <span className="detail-value">{usesRemaining} {useUnit}{usesRemaining !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Purchased:</span>
+                      <span className="detail-value">{item.purchase_date || "Unknown"}</span>
+                    </div>
+                    {item.expiration_date && (
+                      <div className="detail-row">
+                        <span className="detail-label">Expires:</span>
+                        <span className="detail-value">{item.expiration_date}</span>
+                      </div>
+                    )}
+                    <div className="detail-row">
+                      <span className="detail-label">Storage:</span>
+                      <span className="detail-value">{item.storage_space || "fridge"}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

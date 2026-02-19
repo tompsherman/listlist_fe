@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import CookDish from "../CookDish";
 import {
   STORAGE_LOCATIONS,
   CATEGORIES,
@@ -26,7 +25,7 @@ const SPLIT_OPTIONS = {
   pint: [], // Can't split further
 };
 
-const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPantryItems, pantryListId }) => {
+const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPantryItems, pantryListId, onCookItem }) => {
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleteStep, setDeleteStep] = useState(null);
   const [removalReason, setRemovalReason] = useState(null);
@@ -37,7 +36,6 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
   const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
   const [usingItem, setUsingItem] = useState(null);
   const [splittingItem, setSplittingItem] = useState(null);
-  const [cookingItem, setCookingItem] = useState(null);
 
   // Calculate uses remaining for an item
   const getUsesRemaining = (item) => {
@@ -403,12 +401,12 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
             >
               {usingItem === item._id ? "using..." : `use 1 ${useUnitDisplay}`}
             </button>
-            {isEdible(item) && (
+            {isEdible(item) && onCookItem && (
               <button 
                 className="cook-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setCookingItem(item);
+                  onCookItem(item);
                 }}
               >
                 cook with this
@@ -568,20 +566,6 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
         </div>
       ) : null}
 
-      {/* Cook Dish Modal */}
-      {cookingItem && (
-        <CookDish
-          initialIngredient={cookingItem}
-          pantryItems={allPantryItems || array}
-          pantryListId={pantryListId}
-          onClose={() => setCookingItem(null)}
-          onCooked={() => {
-            setCookingItem(null);
-            setExpandedItem(null);
-            if (onItemRemoved) onItemRemoved();
-          }}
-        />
-      )}
     </>
   );
 };

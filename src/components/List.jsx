@@ -4,6 +4,7 @@ import GetListIdHook from "../logic/GetListIdHook";
 import GeneralList from "./list-types/GeneralList";
 import PantryList from "./list-types/PantryList";
 import PantrySearch from "./PantrySearch";
+import CookDish from "./CookDish";
 import { STORAGE_LOCATIONS, CATEGORIES } from "../utils/categories";
 
 const List = ({ getList, flipNew, onAddItem }) => {
@@ -14,6 +15,7 @@ const List = ({ getList, flipNew, onAddItem }) => {
   const [groupBy, setGroupBy] = useState("category"); // "category" or "storage"
   const [isLoading, setIsLoading] = useState(true);
   const [countdown, setCountdown] = useState(30);
+  const [cookingItem, setCookingItem] = useState(null); // For CookDish modal
 
   const exactList = GetListIdHook(getList);
 
@@ -120,6 +122,7 @@ const List = ({ getList, flipNew, onAddItem }) => {
           pantryListId={testVar}
           onItemAdded={refreshList}
           onAddItem={onAddItem}
+          onCookItem={setCookingItem}
         />
         
         {/* Group by toggle */}
@@ -142,15 +145,26 @@ const List = ({ getList, flipNew, onAddItem }) => {
         {groupBy === "category" ? (
           <>
             {CATEGORIES.map(cat => (
-              <PantryList key={cat} array={items} keyword={cat} onItemRemoved={refreshList} groupBy="category" allPantryItems={items} pantryListId={testVar} />
+              <PantryList key={cat} array={items} keyword={cat} onItemRemoved={refreshList} groupBy="category" allPantryItems={items} pantryListId={testVar} onCookItem={setCookingItem} />
             ))}
           </>
         ) : (
           <>
             {STORAGE_LOCATIONS.map(loc => (
-              <PantryList key={loc} array={items} keyword={loc} onItemRemoved={refreshList} groupBy="storage" allPantryItems={items} pantryListId={testVar} />
+              <PantryList key={loc} array={items} keyword={loc} onItemRemoved={refreshList} groupBy="storage" allPantryItems={items} pantryListId={testVar} onCookItem={setCookingItem} />
             ))}
           </>
+        )}
+
+        {/* CookDish Modal */}
+        {cookingItem && (
+          <CookDish
+            initialIngredient={cookingItem}
+            pantryItems={items}
+            pantryListId={testVar}
+            onClose={() => setCookingItem(null)}
+            onCooked={refreshList}
+          />
         )}
       </div>
     ) : (
