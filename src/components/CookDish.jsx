@@ -428,8 +428,8 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
                     </div>
                   )}
 
-                  {/* Database items not in pantry */}
-                  {filteredDatabaseItems.length > 0 && (
+                  {/* Database items not in pantry - only show when NO pantry matches */}
+                  {filteredDatabaseItems.length > 0 && filteredPantryItems.length === 0 && (
                     <div className="ingredient-suggestions not-in-pantry">
                       <div className="suggestion-header">Not in Pantry:</div>
                       {filteredDatabaseItems.slice(0, 3).map(item => {
