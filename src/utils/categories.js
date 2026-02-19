@@ -1,10 +1,10 @@
 // Category constants and helpers
 // CENTRALIZED - import from here instead of defining locally
 
-export const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "household", "snack", "drinks"];
+export const CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "leftovers", "household", "snack", "drinks"];
 
 // Categories that can be used as meal ingredients (excludes household items)
-export const EDIBLE_CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "snack", "drinks"];
+export const EDIBLE_CATEGORIES = ["vegetable", "herbs", "fruit", "grains", "meat", "dairy", "leftovers", "snack", "drinks"];
 export const NON_EDIBLE_CATEGORIES = ["household"];
 
 // Helper to check if an item can be used in meals
@@ -20,6 +20,7 @@ export const CATEGORY_COLORS = {
   grains: "#DAA520",
   meat: "#F08080",
   dairy: "#FFFAF0",
+  leftovers: "#9370DB",
   household: "#ADD8E6",
   drinks: "#BDB76B",
   snack: "#FF6347",
