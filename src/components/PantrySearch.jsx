@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS } from "../utils/categories";
+import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS, isEdible } from "../utils/categories";
 
 const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCookItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,10 +21,17 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
   }, []);
 
   // Filter pantry items based on search term (case insensitive)
+  // Sort so edible items appear before household items
   const matchingPantryItems = searchTerm.length > 0
-    ? pantryItems.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? pantryItems
+        .filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        .sort((a, b) => {
+          const aEdible = isEdible(a);
+          const bEdible = isEdible(b);
+          if (aEdible && !bEdible) return -1;
+          if (!aEdible && bEdible) return 1;
+          return 0;
+        })
     : [];
 
   // Filter DB items that are NOT in pantry
@@ -244,12 +251,14 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
                   >
                     use 1
                   </button>
-                  <button 
-                    className="result-action-btn cook"
-                    onClick={(e) => handleCookIt(item, e)}
-                  >
-                    cook it
-                  </button>
+                  {isEdible(item) && (
+                    <button 
+                      className="result-action-btn cook"
+                      onClick={(e) => handleCookIt(item, e)}
+                    >
+                      cook it
+                    </button>
+                  )}
                   <button 
                     className={`result-action-btn move ${isMoving ? 'active' : ''}`}
                     onClick={(e) => handleStartMove(item._id, e)}
