@@ -768,10 +768,13 @@
   .item-row {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
     margin: 0.3rem 0;
     border-radius: 6px;
     gap: 0.5rem;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #ddd;
   }
 
   .item-row-name {

@@ -134,7 +134,7 @@ const DupeAdd = ({
   // ROW VIEW: [item name] | [+] | [edit] | [x]
   if (mode === "row") {
     return (
-      <div className="item-row" style={{ backgroundColor: categoryColor }}>
+      <div className="item-row" style={{ borderLeftColor: categoryColor }}>
         <span className="item-row-name" onClick={() => setMode("card")}>
           {dupe.name}
         </span>
