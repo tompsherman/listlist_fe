@@ -1567,6 +1567,181 @@
   font-size: 0.9rem;
 }
 
+/* DB suggestions - orange cards for items not in pantry */
+.db-suggestions {
+  margin-bottom: 1rem;
+}
+
+.db-suggestions-header {
+  font-size: 0.9rem;
+  color: #856404;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.db-item-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.db-item-card {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-left: 4px solid #ffc107;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.db-item-card.adding {
+  background: #fff8e1;
+  border-color: #ffb300;
+}
+
+.db-item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.db-item-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.db-item-card .db-item-unit {
+  color: #856404;
+  font-size: 0.85rem;
+}
+
+.db-item-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.db-card-btn {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.db-card-btn.pantry {
+  background: #4a7c59;
+  color: white;
+}
+
+.db-card-btn.grocery {
+  background: #17a2b8;
+  color: white;
+}
+
+.db-card-btn:hover {
+  opacity: 0.85;
+}
+
+/* Inline add form on DB card */
+.db-item-add-form {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #ffe082;
+}
+
+.db-item-add-form .amount-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.db-item-add-form .amount-row label {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.db-item-add-form .amount-row input {
+  width: 60px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-form-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  color: white;
+}
+
+.confirm-btn.pantry {
+  background: #4a7c59;
+}
+
+.confirm-btn.grocery {
+  background: #17a2b8;
+}
+
+.confirm-btn:hover {
+  opacity: 0.85;
+}
+
+.cancel-btn-small {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn-small:hover {
+  opacity: 0.85;
+}
+
+/* Not in database - create new item */
+.not-in-db {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.not-in-db .not-found-message {
+  color: #721c24;
+  margin-bottom: 0.75rem;
+}
+
+.add-new-item-btn {
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  background: #4a7c59;
+  color: white;
+}
+
+.add-new-item-btn:hover {
+  opacity: 0.85;
+}
+
 /* Amount input */
 .amount-input {
   background: #f8f9fa;

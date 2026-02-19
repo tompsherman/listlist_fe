@@ -5,10 +5,11 @@ import { CATEGORY_COLORS } from "../utils/categories";
 const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [itemDatabase, setItemDatabase] = useState([]);
-  const [mode, setMode] = useState("search"); // "search" | "addToPantry" | "addToGrocery" | "addNewItem"
-  const [selectedDbItem, setSelectedDbItem] = useState(null);
-  const [amount, setAmount] = useState(1);
   const [expandedItem, setExpandedItem] = useState(null);
+  
+  // For inline add flow on DB items
+  const [addingItem, setAddingItem] = useState(null); // { item, mode: 'pantry' | 'grocery' }
+  const [amount, setAmount] = useState(1);
 
   // Load item database for checking if item exists
   useEffect(() => {
@@ -25,44 +26,27 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
       )
     : [];
 
-  // Check if search term matches any items in the database (for add flow)
+  // Filter DB items that are NOT in pantry
   const matchingDbItems = searchTerm.length > 0
     ? itemDatabase.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !pantryItems.some(pi => 
+          pi.item_id?.toString() === item._id?.toString() || 
+          pi.name?.toLowerCase() === item.name?.toLowerCase()
+        )
       )
     : [];
 
-  // Check if item is NOT in pantry but IS in database
-  const notInPantry = searchTerm.length > 0 && matchingPantryItems.length === 0;
+  // Determine what state we're in
+  const hasPantryMatches = matchingPantryItems.length > 0;
+  const hasDbMatches = matchingDbItems.length > 0;
+  const isSearching = searchTerm.length >= 2;
+  const noMatchesAtAll = isSearching && !hasPantryMatches && !hasDbMatches;
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setMode("search");
-    setSelectedDbItem(null);
+    setAddingItem(null);
     setAmount(1);
-  };
-
-  const handleAddToPantry = () => {
-    if (matchingDbItems.length > 0) {
-      // Item exists in DB - show selection or go straight to amount
-      setMode("addToPantry");
-    } else {
-      // Item doesn't exist - need to create it first
-      setMode("addNewItem");
-    }
-  };
-
-  const handleAddToGrocery = () => {
-    if (matchingDbItems.length > 0) {
-      setMode("addToGrocery");
-    } else {
-      // Need to create item first, then add to grocery
-      setMode("addNewItem");
-    }
-  };
-
-  const handleSelectDbItem = (item) => {
-    setSelectedDbItem(item);
   };
 
   const formatDate = () => {
@@ -71,29 +55,44 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
     return `${months[now.getMonth()]} ${now.getDate().toString().padStart(2, '0')}`;
   };
 
+  const handleStartAddToPantry = (item) => {
+    setAddingItem({ item, mode: 'pantry' });
+    setAmount(1);
+  };
+
+  const handleStartAddToGrocery = (item) => {
+    setAddingItem({ item, mode: 'grocery' });
+    setAmount(1);
+  };
+
+  const handleCancelAdd = () => {
+    setAddingItem(null);
+    setAmount(1);
+  };
+
   const submitToPantry = async () => {
-    if (!selectedDbItem) return;
+    if (!addingItem?.item) return;
+    const item = addingItem.item;
     
     try {
       const acquiredAmount = parseInt(amount);
-      const usePerUnit = selectedDbItem.use_per_unit || 1;
+      const usePerUnit = item.use_per_unit || 1;
       
       const listItem = {
         list_id: pantryListId,
-        item_id: selectedDbItem._id || selectedDbItem.item_id,
+        item_id: item._id || item.item_id,
         desired_amount: 0,
         acquired_amount: acquiredAmount,
         uses_remaining: acquiredAmount * usePerUnit,
         purchase_date: formatDate(),
-        storage_space: selectedDbItem.storage_space || "fridge",
+        storage_space: item.storage_space || "fridge",
       };
 
       await axios.post("https://listlist-db.onrender.com/api/list_items", listItem);
       
       // Reset and refresh
       setSearchTerm("");
-      setMode("search");
-      setSelectedDbItem(null);
+      setAddingItem(null);
       setAmount(1);
       if (onItemAdded) onItemAdded();
     } catch (error) {
@@ -103,7 +102,8 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
   };
 
   const submitToGrocery = async () => {
-    if (!selectedDbItem) return;
+    if (!addingItem?.item) return;
+    const item = addingItem.item;
     
     try {
       // Find the most recent starred grocery list
@@ -121,7 +121,7 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
 
       const listItem = {
         list_id: groceryListId,
-        item_id: selectedDbItem._id || selectedDbItem.item_id,
+        item_id: item._id || item.item_id,
         desired_amount: parseInt(amount),
         acquired_amount: 0,
       };
@@ -130,20 +130,13 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
       
       // Reset
       setSearchTerm("");
-      setMode("search");
-      setSelectedDbItem(null);
+      setAddingItem(null);
       setAmount(1);
-      alert(`Added ${amount} ${selectedDbItem.name} to grocery list!`);
+      alert(`Added ${amount} ${item.name} to grocery list!`);
     } catch (error) {
       console.error("Error adding to grocery:", error);
       alert("Error adding item. Please try again.");
     }
-  };
-
-  const handleCancel = () => {
-    setMode("search");
-    setSelectedDbItem(null);
-    setAmount(1);
   };
 
   const toggleExpandItem = (item) => {
@@ -163,7 +156,7 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
       </div>
 
       {/* Show matching pantry items */}
-      {mode === "search" && matchingPantryItems.length > 0 && (
+      {hasPantryMatches && (
         <div className="search-results">
           {matchingPantryItems.map((item) => {
             const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
@@ -185,153 +178,83 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem }) => 
         </div>
       )}
 
-      {/* Not in pantry message */}
-      {mode === "search" && notInPantry && (
-        <div className="not-in-pantry">
-          <p className="not-found-message">"{searchTerm}" is not in pantry</p>
-          <div className="not-found-actions">
-            <button className="action-btn pantry-btn" onClick={handleAddToPantry}>
-              add to pantry?
-            </button>
-            <button className="action-btn grocery-btn" onClick={handleAddToGrocery}>
-              add to grocery list?
-            </button>
+      {/* Show DB matches when no pantry matches - orange cards with buttons */}
+      {isSearching && !hasPantryMatches && hasDbMatches && (
+        <div className="db-suggestions">
+          <p className="db-suggestions-header">Not in pantry — add from database:</p>
+          <div className="db-item-cards">
+            {matchingDbItems.slice(0, 5).map((item) => {
+              const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
+              const isAddingThis = addingItem?.item?._id === item._id;
+              
+              return (
+                <div
+                  key={item._id}
+                  className={`db-item-card ${isAddingThis ? 'adding' : ''}`}
+                  style={{ borderLeftColor: categoryColor }}
+                >
+                  <div className="db-item-card-header">
+                    <span className="db-item-name">{item.name}</span>
+                    <span className="db-item-unit">{item.purchase_unit}</span>
+                  </div>
+                  
+                  {isAddingThis ? (
+                    <div className="db-item-add-form">
+                      <div className="amount-row">
+                        <label>How many?</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div className="add-form-actions">
+                        {addingItem.mode === 'pantry' ? (
+                          <button className="confirm-btn pantry" onClick={submitToPantry}>
+                            add to pantry
+                          </button>
+                        ) : (
+                          <button className="confirm-btn grocery" onClick={submitToGrocery}>
+                            add to grocery
+                          </button>
+                        )}
+                        <button className="cancel-btn-small" onClick={handleCancelAdd}>
+                          cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="db-item-card-actions">
+                      <button 
+                        className="db-card-btn pantry"
+                        onClick={() => handleStartAddToPantry(item)}
+                      >
+                        + pantry
+                      </button>
+                      <button 
+                        className="db-card-btn grocery"
+                        onClick={() => handleStartAddToGrocery(item)}
+                      >
+                        + grocery
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Add to pantry flow - select from DB or show not found */}
-      {mode === "addToPantry" && (
-        <div className="add-flow">
-          {matchingDbItems.length > 0 ? (
-            <>
-              <p className="flow-title">Select item to add to pantry:</p>
-              <div className="db-item-list">
-                {matchingDbItems.map((item) => {
-                  const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
-                  const isSelected = selectedDbItem?._id === item._id || selectedDbItem?.item_id === item.item_id;
-                  return (
-                    <div
-                      key={item._id || item.item_id}
-                      className={`db-item ${isSelected ? "selected" : ""}`}
-                      style={{ borderLeft: `4px solid ${categoryColor}` }}
-                      onClick={() => handleSelectDbItem(item)}
-                    >
-                      <span>{item.name}</span>
-                      <span className="db-item-unit">{item.purchase_unit}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              {selectedDbItem && (
-                <div className="amount-input">
-                  <label>How many {selectedDbItem.purchase_unit}?</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                  <div className="amount-actions">
-                    <button className="submit-btn" onClick={submitToPantry}>
-                      add to pantry
-                    </button>
-                    <button className="cancel-btn" onClick={handleCancel}>
-                      cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-              {!selectedDbItem && (
-                <button className="cancel-btn" onClick={handleCancel}>cancel</button>
-              )}
-            </>
-          ) : (
-            <div className="item-not-in-db">
-              <p>"{searchTerm}" is not in your item database.</p>
-              <div className="not-in-db-actions">
-                <button className="add-item-btn" onClick={onAddItem}>
-                  add item
-                </button>
-                <button className="cancel-btn" onClick={handleCancel}>back</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Add to grocery flow */}
-      {mode === "addToGrocery" && (
-        <div className="add-flow">
-          {matchingDbItems.length > 0 ? (
-            <>
-              <p className="flow-title">Select item to add to grocery list:</p>
-              <div className="db-item-list">
-                {matchingDbItems.map((item) => {
-                  const categoryColor = CATEGORY_COLORS[item.category] || "#ddd";
-                  const isSelected = selectedDbItem?._id === item._id || selectedDbItem?.item_id === item.item_id;
-                  return (
-                    <div
-                      key={item._id || item.item_id}
-                      className={`db-item ${isSelected ? "selected" : ""}`}
-                      style={{ borderLeft: `4px solid ${categoryColor}` }}
-                      onClick={() => handleSelectDbItem(item)}
-                    >
-                      <span>{item.name}</span>
-                      <span className="db-item-unit">{item.purchase_unit}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              {selectedDbItem && (
-                <div className="amount-input">
-                  <label>How many {selectedDbItem.purchase_unit}?</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                  <div className="amount-actions">
-                    <button className="submit-btn" onClick={submitToGrocery}>
-                      add to grocery
-                    </button>
-                    <button className="cancel-btn" onClick={handleCancel}>
-                      cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-              {!selectedDbItem && (
-                <button className="cancel-btn" onClick={handleCancel}>cancel</button>
-              )}
-            </>
-          ) : (
-            <div className="item-not-in-db">
-              <p>"{searchTerm}" is not in your item database.</p>
-              <div className="not-in-db-actions">
-                <button className="add-item-btn" onClick={onAddItem}>
-                  add item
-                </button>
-                <button className="cancel-btn" onClick={handleCancel}>back</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Add new item flow - redirect to AddItem */}
-      {mode === "addNewItem" && (
-        <div className="add-flow">
-          <div className="item-not-in-db">
-            <p>"{searchTerm}" is not in your item database.</p>
-            <div className="not-in-db-actions">
-              <button className="add-item-btn" onClick={onAddItem}>
-                add item
-              </button>
-              <button className="cancel-btn" onClick={handleCancel}>back</button>
-            </div>
-          </div>
+      {/* No matches at all - offer to create new item */}
+      {noMatchesAtAll && (
+        <div className="not-in-db">
+          <p className="not-found-message">"{searchTerm}" not found in pantry or database</p>
+          <button className="add-new-item-btn" onClick={onAddItem}>
+            + Add "{searchTerm}" as new item
+          </button>
         </div>
       )}
     </div>
