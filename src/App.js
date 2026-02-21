@@ -2,6 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { useUser } from "./context/UserContext";
 
 // Eager load - needed immediately
 import Marketing from "./pages/Marketing";
@@ -13,6 +14,7 @@ import "./App.css";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const MealsList = lazy(() => import("./components/MealsList"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -24,8 +26,10 @@ const PageLoader = () => (
 const App = () => {
   // All hooks must be called unconditionally at the top
   const { user, isLoading } = useAuth0();
+  const { currentPod, isLoading: userLoading } = useUser();
   const [listsInitialized, setListsInitialized] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -187,11 +191,29 @@ const App = () => {
           </div>
           {menuOpen && (
             <div className="hamburger-dropdown">
+              <div 
+                className="dropdown-item"
+                onClick={() => { setShowSettings(true); setMenuOpen(false); }}
+              >
+                ⚙️ Settings
+              </div>
               <LogoutButton />
             </div>
           )}
         </div>
+        {currentPod && (
+          <div className="current-pod-indicator">
+            {currentPod.pod_name}
+          </div>
+        )}
       </div>
+      
+      {/* Settings Modal */}
+      {showSettings && (
+        <Suspense fallback={<PageLoader />}>
+          <Settings onClose={() => setShowSettings(false)} />
+        </Suspense>
+      )}
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Dashboard getList={"grocery"} />} />

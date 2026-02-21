@@ -4,9 +4,11 @@ import "./index.css";
 import App from "./App";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { BrowserRouter as Router } from "react-router-dom";
+import { UserProvider } from "./context/UserContext";
 
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
 
 // Handle redirect after Auth0 login - restore the original URL
 const onRedirectCallback = (appState) => {
@@ -21,12 +23,17 @@ ReactDOM.render(
   <Auth0Provider
     domain={domain}
     clientId={clientId}
-    redirectUri={window.location.origin}
+    authorizationParams={{
+      redirect_uri: window.location.origin,
+      audience: audience,
+    }}
     onRedirectCallback={onRedirectCallback}
   >
-    <Router>
-      <App />
-    </Router>
+    <UserProvider>
+      <Router>
+        <App />
+      </Router>
+    </UserProvider>
   </Auth0Provider>,
   document.getElementById("root")
 );
