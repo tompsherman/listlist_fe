@@ -26,62 +26,249 @@
   }
 
   .AddItem {
-    background-color: lightyellow;
+    background-color: #fffef0;
     font-size: 1rem;
-    padding: 0.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
   }
 
   .AddItem h4 {
     font-size: 1.2rem;
-    margin: 0.5rem 0;
+    margin: 0 0 0.5rem 0;
+  }
+
+  /* Add Item Form Styles */
+  .add-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .mode-toggle {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .mode-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border: 1px solid #ced4da;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .mode-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
   }
 
   .AddItem form {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .AddItem input {
-    flex: 1;
-    min-width: 120px;
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .form-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .form-field input,
+  .form-field select {
     padding: 0.5rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+  }
+
+  .form-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .form-field.half {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-divider {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 0.5rem 0;
+  }
+
+  .cost-hint {
+    font-size: 0.85rem;
+    color: #28a745;
+    padding: 0.5rem;
+    background: #d4edda;
     border-radius: 4px;
   }
 
-  .AddItem button {
-    padding: 0.5rem 1rem;
+  .form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .form-actions .submit-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
     font-size: 1rem;
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    white-space: nowrap;
   }
 
-  .AddItem select {
-    flex: 1;
-    min-width: 120px;
-    padding: 0.5rem;
+  .form-actions .submit-btn:hover {
+    background-color: #218838;
+  }
+
+  .form-actions .submit-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .form-actions .cancel-btn {
+    padding: 0.6rem 1rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .form-actions .cancel-btn:hover {
+    background-color: #5a6268;
+  }
+
+  /* Dupe suggestions */
+  .dupe-suggestions {
+    background: #fff3cd;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+
+  .dupe-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #856404;
+  }
+
+  .dupe-or {
+    font-size: 0.8rem;
+    color: #856404;
+    text-align: center;
+    margin: 0.5rem 0 0 0;
+  }
+
+  /* Quantity step */
+  .add-item-quantity {
+    text-align: center;
+  }
+
+  .add-item-quantity h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  .item-created-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 1rem;
+  }
+
+  .quantity-input {
+    margin-bottom: 1rem;
+  }
+
+  .quantity-input label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    color: #495057;
+  }
+
+  .quantity-input input {
+    width: 100px;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 1px solid #ced4da;
     border-radius: 4px;
   }
 
+  .quantity-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .add-to-list-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .add-to-list-btn:hover {
+    background-color: #218838;
+  }
+
+  .add-to-list-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .save-later-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .save-later-btn:hover {
+    background-color: #5a6268;
+  }
+
+  /* Legacy AddItem styles (for DupeAdd compatibility) */
   .AddItem .item {
     font-size: 0.9rem;
     padding: 0.3rem;
     margin: 0.2rem 0;
-  }
-
-  /* Dupe add buttons (existing items matching search) */
-  .AddItem > div {
-    margin-top: 0.5rem;
   }
 
   input {

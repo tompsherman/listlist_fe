@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
-import GetItemIdHook from "../logic/GetItemIdHook";
 import DupeAdd from "./DupeAdd";
 import CreatableSelect from "./CreatableSelect";
 import useOptions from "../hooks/useOptions";
 import SubstituteSelector from "./SubstituteSelector";
+import { EXPIRATION_OPTIONS } from "../utils/categories";
 
 const initialState = {
   name: "",
-  purchase_unit: "box",
+  purchase_unit: "unit",
   use_unit: "self",
   use_per_unit: 1,
   category: "vegetable",
   perishable: "true",
-  time_to_expire: "thirty-six_days",
+  time_to_expire: "nine_days",
   priority: 5,
   cost: "",
   storage_space: "fridge",
@@ -29,773 +29,454 @@ const initialState = {
   breaks_into_2: "",
 };
 
-const initialFormToggle = {
-  name: true,
-  category: false,
-  cost: false,
-  fuse_to_list: false,
-};
-
 const AddItem = ({ getList, flipNew, setFlipNew }) => {
   const newGroceryListId = GetListIdHook(getList);
-  console.log(newGroceryListId, getList);
-  console.log(GetListIdHook(getList));
-
   const { options, addOption } = useOptions();
+  
   const [itemDatabase, setItemDatabase] = useState([]);
   const [newItem, setNewItem] = useState(initialState);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [formToggle, setFormToggle] = useState({
-    name: true,
-    category: false,
-    cost: false,
-    fuse_to_list: false,
-    add_dupe: false,
-  });
+  const [mode, setMode] = useState("quick"); // "quick" or "full"
+  const [step, setStep] = useState("form"); // "form", "quantity", "saving"
+  const [desiredAmount, setDesiredAmount] = useState(1);
+  const [createdItemId, setCreatedItemId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log(
-    "SEARCH TERM",
-    searchTerm,
-    "ITEM DATABASE",
-    itemDatabase,
-    "FORM TOGGLE.FUSETOLIST",
-    formToggle.fuse_to_list,
-    "NEW ITEM",
-    newItem
-  );
-
-  // Fetch items database once on mount (not on every state change)
+  // Fetch items database for duplicate checking
   useEffect(() => {
     axios
       .get(`https://listlist-db.onrender.com/api/items/`)
       .then((response) => setItemDatabase(response.data))
       .catch((error) => console.error("Error fetching items:", error.message));
-  }, []);  // Empty deps - fetch once
+  }, []);
 
-  const submitHandler = (event) => {
-    console.log("ITEM ADDED TO DATABASE???", newItem);
-    event.preventDefault();
-    axios
-      .post(`https://listlist-db.onrender.com/api/items`, newItem)
-      .then((response) => console.log("item response:", response))
-      .then(() => setFormToggle({ ...formToggle, add_to_list_now: true }))
-      .catch((error) => console.log(error));
-  };
+  // Check for duplicates as user types
+  const dupeCheck = newItem.name.length >= 2
+    ? itemDatabase.filter((item) =>
+        item.name.toLowerCase().startsWith(newItem.name.toLowerCase())
+      )
+    : [];
 
-  const submitToDbOnly = (event) => {
-    event.preventDefault();
-    axios
-      .post(`https://listlist-db.onrender.com/api/items`, newItem)
-      .then((response) => {
-        console.log("Item added to DB only:", response);
-        setNewItem(initialState);
-        setFormToggle(initialFormToggle);
-        setFlipNew(!flipNew);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const proceedToQuantity = () => {
-    setSearchTerm(newItem.name);
-    setNewItem({ ...newItem, desired_amount: 1 });
-    setFormToggle({ ...formToggle, add_to_list_now: false, fuse_to_list: true });
-  };
-
-  const changeValue = (event) => {
-    console.log(
-      "hello from change value:",
-      event,
-      "also from new item",
-      newItem
-    );
-    event.preventDefault();
-    setNewItem({ ...newItem, [event.target.name]: event.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewItem({ ...newItem, [name]: value });
   };
 
   const handleCancel = () => {
     setNewItem(initialState);
-    setFormToggle(initialFormToggle);
+    setStep("form");
+    setMode("quick");
+    setDesiredAmount(1);
+    setCreatedItemId(null);
     setFlipNew(false);
   };
 
-  const subName = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, category: true });
-  };
+  const handleSubmitItem = async (e) => {
+    e.preventDefault();
+    
+    if (!newItem.name.trim()) {
+      alert("Please enter an item name");
+      return;
+    }
 
-  const subCategory = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, purchase_unit: true });
-  };
+    setIsSubmitting(true);
 
-  const subPurchaseUnit = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, use_unit: true });
-  };
-
-  const subUseUnit = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, use_per_unit: true });
-  };
-
-  const subUsePerUnit = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, perishable: true });
-  };
-
-  const subPerishable = (event) => {
-    event.preventDefault();
-    // If not perishable, auto-set expiration to "never" and skip to storage_space
-    if (newItem.perishable === "false") {
-      setNewItem({ ...newItem, time_to_expire: "never" });
-      setFormToggle({ ...formToggle, storage_space: true });
-    } else {
-      setFormToggle({ ...formToggle, time_to_expire: true });
+    try {
+      const response = await axios.post(
+        `https://listlist-db.onrender.com/api/items`,
+        newItem
+      );
+      console.log("Item created:", response.data);
+      setCreatedItemId(response.data.item_id || response.data._id);
+      setStep("quantity");
+    } catch (error) {
+      console.error("Error creating item:", error);
+      alert("Error creating item. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const subTimeToExpire = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, storage_space: true });
-  };
+  const handleAddToList = async () => {
+    if (!createdItemId || !newGroceryListId?.list_id) {
+      alert("Error: Missing item or list ID");
+      return;
+    }
 
-  const subStorageSpace = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, storage_size: true });
-  };
+    setIsSubmitting(true);
 
-  const subStorageSize = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, image_url: true });
-  };
+    try {
+      const listItem = {
+        list_id: newGroceryListId.list_id,
+        item_id: createdItemId,
+        desired_amount: parseInt(desiredAmount) || 1,
+        acquired_amount: 0,
+      };
 
-  const subImageUrl = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, has_substitutes: true });
-  };
+      await axios.post(
+        `https://listlist-db.onrender.com/api/list_items`,
+        listItem
+      );
 
-  const subHasSubstitutes = (event) => {
-    event.preventDefault();
-    if (newItem.has_substitutes === "yes") {
-      setFormToggle({ ...formToggle, substitutes: true });
-    } else {
-      setFormToggle({ ...formToggle, brand_matters: true });
+      console.log("Added to list:", listItem);
+      
+      // Reset and close
+      setNewItem(initialState);
+      setStep("form");
+      setDesiredAmount(1);
+      setCreatedItemId(null);
+      setFlipNew(!flipNew);
+    } catch (error) {
+      console.error("Error adding to list:", error);
+      alert("Error adding to list. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const subSubstitutes = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, brand_matters: true });
+  const handleSaveForLater = () => {
+    // Item already saved to DB, just close
+    setNewItem(initialState);
+    setStep("form");
+    setDesiredAmount(1);
+    setCreatedItemId(null);
+    setFlipNew(!flipNew);
   };
 
-  const subBrandMatters = (event) => {
-    event.preventDefault();
-    if (newItem.brand_matters === "yes") {
-      setFormToggle({ ...formToggle, brand: true });
-    } else {
-      setFormToggle({ ...formToggle, breaks_down: true });
-    }
+  // If user clicks on a duplicate item
+  const handleSelectDupe = (dupe) => {
+    // Item already exists, go straight to quantity
+    setCreatedItemId(dupe.item_id || dupe._id);
+    setNewItem({ ...newItem, name: dupe.name, purchase_unit: dupe.purchase_unit });
+    setStep("quantity");
   };
 
-  const subBrand = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, breaks_down: true });
-  };
+  // Render the "Add to List?" step
+  if (step === "quantity") {
+    return (
+      <div className="AddItem add-item-quantity">
+        <h4>Add to {getList} list?</h4>
+        <p className="item-created-name">{newItem.name}</p>
+        
+        <div className="quantity-input">
+          <label>How many {newItem.purchase_unit}?</label>
+          <input
+            type="number"
+            min="1"
+            value={desiredAmount}
+            onChange={(e) => setDesiredAmount(e.target.value)}
+            autoFocus
+          />
+        </div>
 
-  const subBreaksDown = (event) => {
-    event.preventDefault();
-    if (newItem.breaks_down === "yes") {
-      setFormToggle({ ...formToggle, breaks_into: true });
-    } else {
-      setFormToggle({ ...formToggle, cost: true });
-    }
-  };
+        <div className="quantity-actions">
+          <button 
+            className="add-to-list-btn"
+            onClick={handleAddToList}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Adding..." : `Add ${desiredAmount} to list`}
+          </button>
+          <button 
+            className="save-later-btn"
+            onClick={handleSaveForLater}
+          >
+            Save for later
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const subBreaksInto = (event) => {
-    event.preventDefault();
-    setFormToggle({ ...formToggle, cost: true });
-  };
+  // Render the main form
+  return (
+    <div className="AddItem add-item-form">
+      <div className="add-item-header">
+        <h4>Add New Item</h4>
+        <div className="mode-toggle">
+          <button 
+            className={`mode-btn ${mode === "quick" ? "active" : ""}`}
+            onClick={() => setMode("quick")}
+            type="button"
+          >
+            Quick Add
+          </button>
+          <button 
+            className={`mode-btn ${mode === "full" ? "active" : ""}`}
+            onClick={() => setMode("full")}
+            type="button"
+          >
+            Full Details
+          </button>
+        </div>
+      </div>
 
-  // Back button handlers
-  const backToName = () => {
-    setFormToggle({ ...initialFormToggle, name: true });
-  };
-
-  const backToCategory = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true });
-  };
-
-  const backToPurchaseUnit = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true });
-  };
-
-  const backToUseUnit = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true });
-  };
-
-  const backToUsePerUnit = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true });
-  };
-
-  const backToPerishable = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true });
-  };
-
-  const backToTimeToExpire = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true });
-  };
-
-  const backToStorageSpace = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true });
-  };
-
-  const backToStorageSize = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true });
-  };
-
-  const backToImageUrl = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true });
-  };
-
-  const backToHasSubstitutes = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true });
-  };
-
-  // const backToSubstitutes = () => {
-  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, substitutes: true });
-  // };
-
-  const backToBrandMatters = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true });
-  };
-
-  // const backToBrand = () => {
-  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, brand: true });
-  // };
-
-  const backToBreaksDown = () => {
-    setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, use_per_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true });
-  };
-
-  // const backToBreaksInto = () => {
-  //   setFormToggle({ ...initialFormToggle, name: true, category: true, purchase_unit: true, use_unit: true, perishable: true, time_to_expire: true, storage_space: true, storage_size: true, image_url: true, has_substitutes: true, brand_matters: true, breaks_down: true, breaks_into: true });
-  // };
-
-  const dupeCheck = itemDatabase.filter((item) =>
-    item.name.toLowerCase().startsWith(newItem.name.toLowerCase())
-  );
-
-  const item_id = GetItemIdHook(searchTerm);
-  // console.log(newGroceryListId);
-  let getTheId = "";
-  newGroceryListId ? (getTheId = newGroceryListId.list_id) : (getTheId = "");
-  const bulletPoint = {
-    list_id: getTheId,
-    item_id: item_id,
-    desired_amount: newItem.desired_amount,
-    acquired_amount: 0,
-  };
-
-  console.log(
-    "bulletpoint",
-    bulletPoint,
-    "newGroceryList",
-    newGroceryListId,
-    "Get the ID",
-    getTheId,
-    "item_iD",
-    item_id
-  );
-  console.log("dupecheck", dupeCheck, "itemdatabase", itemDatabase);
-
-  const submitListItems = (event) => {
-    event.preventDefault();
-    axios
-      // .post(`http://localhost:5505/api/list_items`, bulletPoint)
-      .post(`https://listlist-db.onrender.com/api/list_items`, bulletPoint)
-
-      .then(
-        (response) => console.log("item response:", response),
-        setNewItem(initialState),
-        setFormToggle(initialFormToggle),
-        setFlipNew(!flipNew)
-      )
-      .catch((error) => console.log(error));
-  };
-
-  return dupeCheck.length && newItem.name.length ? (
-    <div>
-      <div className="AddItem">
-        <h4>Add Item:</h4>
-        <form onSubmit={subName}>
+      <form onSubmit={handleSubmitItem}>
+        {/* NAME - always shown */}
+        <div className="form-field">
+          <label>Name *</label>
           <input
             name="name"
             type="text"
             value={newItem.name}
-            onChange={changeValue}
-            placeholder={`enter item name`}
-            ref={(ref) => ref && ref.focus()}
-            onFocus={(e) =>
-              e.currentTarget.setSelectionRange(
-                e.currentTarget.value.length,
-                e.currentTarget.value.length
-              )
-            }
+            onChange={handleChange}
+            placeholder="e.g., eggs, milk, bread"
+            autoFocus
           />
-          <button>next</button>
-          <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-        </form>
-        {dupeCheck.map((dupe) => (
-          <DupeAdd
-            key={dupe.item_id}
-            item_id={dupe.item_id}
-            list_id={newGroceryListId.list_id}
-            dupe={dupe}
-            flipNew={flipNew}
-            setFlipNew={setFlipNew}
-            setFormToggle={setFormToggle}
-            initialFormToggle={initialFormToggle}
-            setNewItem={setNewItem}
-            initialState={initialState}
-          />
-        ))}
-      </div>
-    </div>
-  ) : formToggle.fuse_to_list ? (
-    <div className="AddItem">
-      <h4>
-        how many {newItem.purchase_unit} of {newItem.name} do we need?
-      </h4>
-      <form onSubmit={submitListItems}>
-        <input
-          name="desired_amount"
-          type="number"
-          value={newItem.desired_amount}
-          onChange={changeValue}
-          placeholder={`enter amount to purchase`}
-        />
-        <button>submit item</button>
-      </form>
-    </div>
-  ) : formToggle.add_to_list_now ? (
-    <div className="AddItem">
-      <h4>Add to list now?</h4>
-      <div className="add-to-list-options">
-        <button className="yes-btn" onClick={proceedToQuantity}>yes</button>
-        <button className="no-btn" onClick={submitToDbOnly}>no, save for later</button>
-      </div>
-    </div>
-  ) : formToggle.cost ? (
-    <div className="AddItem">
-      <h4>Cost?</h4>
-      <form onSubmit={submitHandler}>
-        <input
-          name="cost"
-          type="number"
-          value={newItem.cost}
-          onChange={changeValue}
-          placeholder={`enter item cost`}
-        />
-        <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
-        <button>next</button>
-      </form>
-      {newItem.cost && newItem.use_per_unit > 0 && (
-        <div className="item calculated">
-          <p>cost per {newItem.use_unit === "self" ? newItem.name : newItem.use_unit}:</p>
-          <p>${(parseFloat(newItem.cost) / parseInt(newItem.use_per_unit)).toFixed(2)}</p>
         </div>
-      )}
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>storage space:</p>
-        <p>{newItem.storage_space}</p>
-      </div>
-      {newItem.storage_size && (
-        <div className="item">
-          <p>storage size:</p>
-          <p>{newItem.storage_size}</p>
+
+        {/* Show duplicates if found */}
+        {dupeCheck.length > 0 && (
+          <div className="dupe-suggestions">
+            <p className="dupe-label">Already exists:</p>
+            {dupeCheck.slice(0, 5).map((dupe) => (
+              <DupeAdd
+                key={dupe.item_id || dupe._id}
+                item_id={dupe.item_id || dupe._id}
+                list_id={newGroceryListId?.list_id}
+                dupe={dupe}
+                flipNew={flipNew}
+                setFlipNew={setFlipNew}
+                setFormToggle={() => {}}
+                initialFormToggle={{}}
+                setNewItem={setNewItem}
+                initialState={initialState}
+                onSelect={() => handleSelectDupe(dupe)}
+              />
+            ))}
+            <p className="dupe-or">— or create new —</p>
+          </div>
+        )}
+
+        {/* QUICK ADD FIELDS */}
+        <div className="form-row">
+          <div className="form-field half">
+            <label>Category</label>
+            <CreatableSelect
+              name="category"
+              value={newItem.category}
+              onChange={handleChange}
+              options={options.category}
+              onAddOption={addOption}
+            />
+          </div>
+          <div className="form-field half">
+            <label>Purchase Unit</label>
+            <CreatableSelect
+              name="purchase_unit"
+              value={newItem.purchase_unit}
+              onChange={handleChange}
+              options={options.purchase_unit}
+              onAddOption={addOption}
+            />
+          </div>
         </div>
-      )}
-    </div>
-  ) : formToggle.breaks_into ? (
-    <div className="AddItem">
-      <h4>What does it break into?</h4>
-      <form onSubmit={subBreaksInto}>
-        <input
-          name="breaks_into_1"
-          type="text"
-          value={newItem.breaks_into_1}
-          onChange={changeValue}
-          placeholder="component 1"
-        />
-        <input
-          name="breaks_into_2"
-          type="text"
-          value={newItem.breaks_into_2}
-          onChange={changeValue}
-          placeholder="component 2"
-        />
-        <button type="button" className="back-btn" onClick={backToBreaksDown}>back</button>
-        <button>next</button>
+
+        <div className="form-row">
+          <div className="form-field half">
+            <label>Cost ($)</label>
+            <input
+              name="cost"
+              type="number"
+              step="0.01"
+              value={newItem.cost}
+              onChange={handleChange}
+              placeholder="0.00"
+            />
+          </div>
+          <div className="form-field half">
+            <label>Storage</label>
+            <CreatableSelect
+              name="storage_space"
+              value={newItem.storage_space}
+              onChange={handleChange}
+              options={options.storage_space}
+              onAddOption={addOption}
+            />
+          </div>
+        </div>
+
+        {/* FULL DETAILS - only in full mode */}
+        {mode === "full" && (
+          <>
+            <hr className="form-divider" />
+            
+            <div className="form-row">
+              <div className="form-field half">
+                <label>Use Unit</label>
+                <CreatableSelect
+                  name="use_unit"
+                  value={newItem.use_unit}
+                  onChange={handleChange}
+                  options={[
+                    { value: "self", label: "whole item" },
+                    ...options.use_unit.filter(o => o !== "self"),
+                  ]}
+                  onAddOption={addOption}
+                />
+              </div>
+              <div className="form-field half">
+                <label>Uses per {newItem.purchase_unit}</label>
+                <input
+                  name="use_per_unit"
+                  type="number"
+                  min="1"
+                  value={newItem.use_per_unit}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field half">
+                <label>Perishable?</label>
+                <select name="perishable" value={newItem.perishable} onChange={handleChange}>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div className="form-field half">
+                <label>Expires after</label>
+                <select name="time_to_expire" value={newItem.time_to_expire} onChange={handleChange}>
+                  {EXPIRATION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field half">
+                <label>Storage Size</label>
+                <CreatableSelect
+                  name="storage_size"
+                  value={newItem.storage_size}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "— none —" },
+                    { value: "pint", label: "pint" },
+                    { value: "quart", label: "quart" },
+                    { value: "half_gallon", label: "half gallon" },
+                    { value: "gallon", label: "gallon" },
+                  ]}
+                  onAddOption={addOption}
+                  allowEmpty
+                />
+              </div>
+              <div className="form-field half">
+                <label>Brand matters?</label>
+                <select name="brand_matters" value={newItem.brand_matters} onChange={handleChange}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            {newItem.brand_matters === "yes" && (
+              <div className="form-field">
+                <label>Preferred Brand</label>
+                <input
+                  name="brand"
+                  type="text"
+                  value={newItem.brand}
+                  onChange={handleChange}
+                  placeholder="e.g., Organic Valley"
+                />
+              </div>
+            )}
+
+            <div className="form-row">
+              <div className="form-field half">
+                <label>Has substitutes?</label>
+                <select name="has_substitutes" value={newItem.has_substitutes} onChange={handleChange}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+              <div className="form-field half">
+                <label>Breaks down?</label>
+                <select name="breaks_down" value={newItem.breaks_down} onChange={handleChange}>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            {newItem.has_substitutes === "yes" && (
+              <div className="form-field">
+                <label>Substitutes</label>
+                <SubstituteSelector
+                  value={newItem.substitutes}
+                  onChange={(subs) => setNewItem({ ...newItem, substitutes: subs })}
+                  excludeItemName={newItem.name}
+                />
+              </div>
+            )}
+
+            {newItem.breaks_down === "yes" && (
+              <div className="form-row">
+                <div className="form-field half">
+                  <label>Breaks into #1</label>
+                  <input
+                    name="breaks_into_1"
+                    type="text"
+                    value={newItem.breaks_into_1}
+                    onChange={handleChange}
+                    placeholder="e.g., chicken meat"
+                  />
+                </div>
+                <div className="form-field half">
+                  <label>Breaks into #2</label>
+                  <input
+                    name="breaks_into_2"
+                    type="text"
+                    value={newItem.breaks_into_2}
+                    onChange={handleChange}
+                    placeholder="e.g., chicken broth"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="form-field">
+              <label>Image URL (optional)</label>
+              <input
+                name="image_url"
+                type="text"
+                value={newItem.image_url}
+                onChange={handleChange}
+                placeholder="https://..."
+              />
+            </div>
+          </>
+        )}
+
+        {/* Cost per use hint */}
+        {newItem.cost && newItem.use_per_unit > 0 && (
+          <div className="cost-hint">
+            Cost per {newItem.use_unit === "self" ? newItem.name || "use" : newItem.use_unit}: 
+            ${(parseFloat(newItem.cost) / parseInt(newItem.use_per_unit)).toFixed(2)}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="form-actions">
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={isSubmitting || !newItem.name.trim()}
+          >
+            {isSubmitting ? "Saving..." : mode === "quick" ? "Quick Add" : "Create Item"}
+          </button>
+          <button 
+            type="button" 
+            className="cancel-btn"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
     </div>
-  ) : formToggle.breaks_down ? (
-    <div className="AddItem">
-      <h4>Breaks down into components?</h4>
-      <form onSubmit={subBreaksDown}>
-        <select name="breaks_down" value={newItem.breaks_down} onChange={changeValue}>
-          <option value="no">no</option>
-          <option value="yes">yes</option>
-        </select>
-        <button type="button" className="back-btn" onClick={backToBrandMatters}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.brand ? (
-    <div className="AddItem">
-      <h4>What brand?</h4>
-      <form onSubmit={subBrand}>
-        <input
-          name="brand"
-          type="text"
-          value={newItem.brand}
-          onChange={changeValue}
-          placeholder="enter brand name"
-        />
-        <button type="button" className="back-btn" onClick={backToBrandMatters}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.brand_matters ? (
-    <div className="AddItem">
-      <h4>Specific brand matters?</h4>
-      <form onSubmit={subBrandMatters}>
-        <select name="brand_matters" value={newItem.brand_matters} onChange={changeValue}>
-          <option value="no">no</option>
-          <option value="yes">yes</option>
-        </select>
-        <button type="button" className="back-btn" onClick={backToHasSubstitutes}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.substitutes ? (
-    <div className="AddItem">
-      <h4>What substitutes?</h4>
-      <SubstituteSelector
-        value={newItem.substitutes}
-        onChange={(subs) => setNewItem({ ...newItem, substitutes: subs })}
-        excludeItemName={newItem.name}
-      />
-      <div className="substitute-nav">
-        <button type="button" className="back-btn" onClick={backToHasSubstitutes}>back</button>
-        <button type="button" onClick={subSubstitutes}>next</button>
-      </div>
-    </div>
-  ) : formToggle.has_substitutes ? (
-    <div className="AddItem">
-      <h4>Has substitutes?</h4>
-      <form onSubmit={subHasSubstitutes}>
-        <select name="has_substitutes" value={newItem.has_substitutes} onChange={changeValue}>
-          <option value="no">no</option>
-          <option value="yes">yes</option>
-        </select>
-        <button type="button" className="back-btn" onClick={backToImageUrl}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.image_url ? (
-    <div className="AddItem">
-      <h4>Image URL (optional)</h4>
-      <form onSubmit={subImageUrl}>
-        <input
-          name="image_url"
-          type="text"
-          value={newItem.image_url}
-          onChange={changeValue}
-          placeholder="paste image URL"
-        />
-        <button type="button" className="back-btn" onClick={backToStorageSize}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.storage_size ? (
-    <div className="AddItem">
-      <h4>Storage size?</h4>
-      <form onSubmit={subStorageSize}>
-        <CreatableSelect
-          name="storage_size"
-          value={newItem.storage_size}
-          onChange={changeValue}
-          options={[
-            { value: "pint", label: "pint" },
-            { value: "quart", label: "quart" },
-            { value: "half_gallon", label: "1/2 gallon" },
-            { value: "gallon", label: "gallon" },
-            ...options.storage_size.filter(o => !["pint", "quart", "half_gallon", "gallon"].includes(o))
-          ]}
-          onAddOption={addOption}
-          allowEmpty
-          emptyLabel="-- select --"
-        />
-        <button type="button" className="back-btn" onClick={backToStorageSpace}>back</button>
-        <button>next</button>
-      </form>
-    </div>
-  ) : formToggle.storage_space ? (
-    <div className="AddItem">
-      <h4>Storage space</h4>
-      <form onSubmit={subStorageSpace}>
-        <CreatableSelect
-          name="storage_space"
-          value={newItem.storage_space}
-          onChange={changeValue}
-          options={options.storage_space}
-          onAddOption={addOption}
-        />
-        <button type="button" className="back-btn" onClick={backToTimeToExpire}>back</button>
-        <button>next</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-      <div className="item">
-        <p>use unit:</p>
-        <p>{newItem.use_unit}</p>
-      </div>
-      <div className="item">
-        <p>perishable:</p>
-        <p>{newItem.perishable}</p>
-      </div>
-      <div className="item">
-        <p>expires after:</p>
-        <p>{newItem.time_to_expire}</p>
-      </div>
-    </div>
-  ) : formToggle.time_to_expire ? (
-    <div className="AddItem">
-      <h4>Expiration</h4>
-      <form onSubmit={subTimeToExpire}>
-        <select name="time_to_expire" onChange={changeValue}>
-          <option value="three_days">3 days</option>
-          <option value="six_days">6 days</option>
-          <option selected value="nine_days">
-            1 week (9 days)
-          </option>
-          <option value="eighteen_days">2 weeks (18 days)</option>
-          <option value="thirty-six_days">1 month (36 days)</option>
-          <option value="seventy-three_days">1 season (73 days)</option>
-          <option value="one-hundred-forty-six_days">2 season (146 days)</option>
-          <option value="two-hundred-nineteen_days">3 season (219 days)</option>
-          <option value="two-hundred-ninety-two_days">4 season (292 days)</option>
-          <option value="three-hundred-sixty-five_days">
-            1 year (365 days)
-          </option>
-          <option value="never">never</option>
-        </select>
-        <button type="button" className="back-btn" onClick={backToPerishable}>back</button>
-        <button>next</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-      <div className="item">
-        <p>use unit:</p>
-        <p>{newItem.use_unit}</p>
-      </div>
-      <div className="item">
-        <p>perishable:</p>
-        <p>{newItem.perishable}</p>
-      </div>
-    </div>
-  ) : formToggle.perishable ? (
-    <div className="AddItem">
-      <h4>Perishable?</h4>
-      <form onSubmit={subPerishable}>
-        <select name="perishable" onChange={changeValue}>
-          <option value="true">true</option>
-          <option value="false">false</option>
-        </select>
-        <button type="button" className="back-btn" onClick={backToUsePerUnit}>back</button>
-        <button>next</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-      <div className="item">
-        <p>use unit:</p>
-        <p>{newItem.use_unit}</p>
-      </div>
-      <div className="item">
-        <p>uses per unit:</p>
-        <p>{newItem.use_per_unit}</p>
-      </div>
-    </div>
-  ) : formToggle.use_per_unit ? (
-    <div className="AddItem">
-      <h4>Uses per {newItem.purchase_unit}:</h4>
-      <form onSubmit={subUsePerUnit}>
-        <input
-          name="use_per_unit"
-          type="number"
-          min="1"
-          value={newItem.use_per_unit}
-          onChange={changeValue}
-          placeholder="e.g. 12 eggs per carton"
-        />
-        <button type="button" className="back-btn" onClick={backToUseUnit}>back</button>
-        <button>next</button>
-        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-      <div className="item">
-        <p>use unit:</p>
-        <p>{newItem.use_unit}</p>
-      </div>
-    </div>
-  ) : formToggle.use_unit ? (
-    <div className="AddItem">
-      <h4>Usage unit:</h4>
-      <form onSubmit={subUseUnit}>
-        <CreatableSelect
-          name="use_unit"
-          value={newItem.use_unit}
-          onChange={changeValue}
-          options={[
-            ...options.use_unit.filter(o => o !== "self"),
-            { value: "self", label: "one of itself (ex. apple)" }
-          ]}
-          onAddOption={addOption}
-        />
-        <button type="button" className="back-btn" onClick={backToPurchaseUnit}>back</button>
-        <button>next</button>
-        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-      <div className="item">
-        <p>purchase unit:</p>
-        <p>{newItem.purchase_unit}</p>
-      </div>
-    </div>
-  ) : formToggle.purchase_unit ? (
-    <div className="AddItem">
-      <h4>Purchase unit:</h4>
-      <form onSubmit={subPurchaseUnit}>
-        <CreatableSelect
-          name="purchase_unit"
-          value={newItem.purchase_unit}
-          onChange={changeValue}
-          options={options.purchase_unit}
-          onAddOption={addOption}
-        />
-        <button type="button" className="back-btn" onClick={backToCategory}>back</button>
-        <button>next</button>
-        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-      <div className="item">
-        <p>category:</p>
-        <p>{newItem.category}</p>
-      </div>
-    </div>
-  ) : formToggle.category ? (
-    <div className="AddItem">
-      <h4>Category</h4>
-      <form onSubmit={subCategory}>
-        <CreatableSelect
-          name="category"
-          value={newItem.category}
-          onChange={changeValue}
-          options={options.category}
-          onAddOption={addOption}
-        />
-        <button type="button" className="back-btn" onClick={backToName}>back</button>
-        <button>next</button>
-        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-      </form>
-      <div className="item">
-        <p>name:</p>
-        <p>{newItem.name}</p>
-      </div>
-    </div>
-  ) : formToggle.name ? (
-    <div className="AddItem">
-      <h4>Add Item:</h4>
-      <form onSubmit={subName}>
-        <input
-          name="name"
-          type="text"
-          value={newItem.name.toLowerCase()}
-          onChange={changeValue}
-          placeholder={`enter item name`}
-          ref={(ref) => ref && ref.focus()}
-          onFocus={(e) =>
-            e.currentTarget.setSelectionRange(
-              e.currentTarget.value.length,
-              e.currentTarget.value.length
-            )
-          }
-        />
-        <button>next</button>
-        <button type="button" className="cancel-btn" onClick={handleCancel}>cancel</button>
-      </form>
-    </div>
-  ) : (
-    <div>somethings wrong</div>
   );
 };
 
