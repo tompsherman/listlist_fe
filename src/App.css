@@ -903,6 +903,126 @@
     background: #c82333;
   }
 
+  /* Edit Item button */
+  .edit-item-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background-color: #6f42c1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .edit-item-btn:hover {
+    background-color: #5a32a3;
+  }
+
+  /* Item Edit Card Styles */
+  .item-edit-card {
+    background: #f8f9fa;
+  }
+
+  .edit-mode-toggle {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .edit-mode-toggle .mode-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    border: 1px solid #ced4da;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .edit-mode-toggle .mode-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .item-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .edit-field label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .edit-field input,
+  .edit-field select {
+    padding: 0.4rem;
+    font-size: 0.9rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .edit-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .edit-field.half {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .edit-divider {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 0.5rem 0;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .save-edit-btn {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .save-edit-btn:hover {
+    background: #218838;
+  }
+
+  .cancel-edit-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .cancel-edit-btn:hover {
+    background: #5a6268;
+  }
+
   .cook-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;

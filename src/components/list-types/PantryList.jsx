@@ -11,6 +11,8 @@ import {
   formatExpiration,
   EXPIRATION_OPTIONS,
 } from "../../utils/categories";
+import useOptions from "../../hooks/useOptions";
+import CreatableSelect from "../CreatableSelect";
 
 // Split options based on storage size
 const SPLIT_OPTIONS = {
@@ -30,6 +32,7 @@ const SPLIT_OPTIONS = {
 };
 
 const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPantryItems, pantryListId, onCookItem }) => {
+  const { options, addOption } = useOptions();
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleteStep, setDeleteStep] = useState(null);
   const [removalReason, setRemovalReason] = useState(null);
@@ -43,6 +46,9 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
   const [openingItem, setOpeningItem] = useState(null);
   const [editingExpiration, setEditingExpiration] = useState(null); // item_id being edited
   const [newExpiration, setNewExpiration] = useState("");
+  const [editingItem, setEditingItem] = useState(null); // Full item edit mode
+  const [editMode, setEditMode] = useState("quick"); // "quick" or "full"
+  const [editForm, setEditForm] = useState({});
 
   // Handle editing expiration
   const handleStartEditExpiration = (item, e) => {
@@ -75,6 +81,59 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
     e.stopPropagation();
     setEditingExpiration(null);
     setNewExpiration("");
+  };
+
+  // Full item edit handlers
+  const handleStartEditItem = (item, e) => {
+    e.stopPropagation();
+    setEditingItem(item.item_id);
+    setEditMode("quick");
+    setEditForm({
+      name: item.name || "",
+      category: item.category || "vegetable",
+      purchase_unit: item.purchase_unit || "unit",
+      cost: item.cost || "",
+      storage_space: item.storage_space || "fridge",
+      use_unit: item.use_unit || "self",
+      use_per_unit: item.use_per_unit || 1,
+      perishable: item.perishable || "true",
+      time_to_expire: item.time_to_expire || "nine_days",
+      storage_size: item.storage_size || "",
+      brand_matters: item.brand_matters || "no",
+      brand: item.brand || "",
+      has_substitutes: item.has_substitutes || "no",
+      breaks_down: item.breaks_down || "no",
+      breaks_into_1: item.breaks_into_1 || "",
+      breaks_into_2: item.breaks_into_2 || "",
+    });
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm({ ...editForm, [name]: value });
+  };
+
+  const handleSaveEditItem = async (item, e) => {
+    e.stopPropagation();
+    
+    try {
+      await axios.put(`https://listlist-db.onrender.com/api/items/${item.item_id}`, editForm);
+      
+      setEditingItem(null);
+      setEditForm({});
+      if (onItemRemoved) {
+        onItemRemoved(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error updating item:", error);
+      alert("Error updating item. Please try again.");
+    }
+  };
+
+  const handleCancelEditItem = (e) => {
+    e.stopPropagation();
+    setEditingItem(null);
+    setEditForm({});
   };
 
   // Handle marking an item as "open"
@@ -463,7 +522,223 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
       const usesRemaining = getUsesRemaining(item);
       const useUnitDisplay = item.use_unit === "self" ? item.name : item.use_unit;
       const isOpen = !!item.opened_date;
+      const isEditing = editingItem === item.item_id;
       
+      // Edit mode - show form
+      if (isEditing) {
+        return (
+          <div className="item-card item-edit-card" onClick={(e) => e.stopPropagation()}>
+            <div className="item-card-header">
+              <h4>Edit: {item.name}</h4>
+              <button className="delete-x-btn" onClick={handleCancelEditItem}>✕</button>
+            </div>
+            
+            <div className="edit-mode-toggle">
+              <button 
+                className={`mode-btn ${editMode === "quick" ? "active" : ""}`}
+                onClick={() => setEditMode("quick")}
+              >
+                Quick Edit
+              </button>
+              <button 
+                className={`mode-btn ${editMode === "full" ? "active" : ""}`}
+                onClick={() => setEditMode("full")}
+              >
+                Full Details
+              </button>
+            </div>
+
+            <div className="item-edit-form">
+              {/* Quick Edit Fields */}
+              <div className="edit-field">
+                <label>Name</label>
+                <input
+                  name="name"
+                  type="text"
+                  value={editForm.name}
+                  onChange={handleEditFormChange}
+                />
+              </div>
+
+              <div className="edit-row">
+                <div className="edit-field half">
+                  <label>Category</label>
+                  <CreatableSelect
+                    name="category"
+                    value={editForm.category}
+                    onChange={handleEditFormChange}
+                    options={options.category}
+                    onAddOption={addOption}
+                  />
+                </div>
+                <div className="edit-field half">
+                  <label>Purchase Unit</label>
+                  <CreatableSelect
+                    name="purchase_unit"
+                    value={editForm.purchase_unit}
+                    onChange={handleEditFormChange}
+                    options={options.purchase_unit}
+                    onAddOption={addOption}
+                  />
+                </div>
+              </div>
+
+              <div className="edit-row">
+                <div className="edit-field half">
+                  <label>Cost ($)</label>
+                  <input
+                    name="cost"
+                    type="number"
+                    step="0.01"
+                    value={editForm.cost}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+                <div className="edit-field half">
+                  <label>Storage</label>
+                  <CreatableSelect
+                    name="storage_space"
+                    value={editForm.storage_space}
+                    onChange={handleEditFormChange}
+                    options={options.storage_space}
+                    onAddOption={addOption}
+                  />
+                </div>
+              </div>
+
+              {/* Full Details Fields */}
+              {editMode === "full" && (
+                <>
+                  <hr className="edit-divider" />
+                  
+                  <div className="edit-row">
+                    <div className="edit-field half">
+                      <label>Use Unit</label>
+                      <CreatableSelect
+                        name="use_unit"
+                        value={editForm.use_unit}
+                        onChange={handleEditFormChange}
+                        options={[
+                          { value: "self", label: "whole item" },
+                          ...options.use_unit.filter(o => o !== "self"),
+                        ]}
+                        onAddOption={addOption}
+                      />
+                    </div>
+                    <div className="edit-field half">
+                      <label>Uses per {editForm.purchase_unit}</label>
+                      <input
+                        name="use_per_unit"
+                        type="number"
+                        min="1"
+                        value={editForm.use_per_unit}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-row">
+                    <div className="edit-field half">
+                      <label>Perishable?</label>
+                      <select name="perishable" value={editForm.perishable} onChange={handleEditFormChange}>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                    </div>
+                    <div className="edit-field half">
+                      <label>Expires after</label>
+                      <select name="time_to_expire" value={editForm.time_to_expire} onChange={handleEditFormChange}>
+                        {EXPIRATION_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="edit-row">
+                    <div className="edit-field half">
+                      <label>Storage Size</label>
+                      <select name="storage_size" value={editForm.storage_size} onChange={handleEditFormChange}>
+                        <option value="">— none —</option>
+                        <option value="pint">pint</option>
+                        <option value="quart">quart</option>
+                        <option value="half_gallon">half gallon</option>
+                        <option value="gallon">gallon</option>
+                      </select>
+                    </div>
+                    <div className="edit-field half">
+                      <label>Brand matters?</label>
+                      <select name="brand_matters" value={editForm.brand_matters} onChange={handleEditFormChange}>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {editForm.brand_matters === "yes" && (
+                    <div className="edit-field">
+                      <label>Preferred Brand</label>
+                      <input
+                        name="brand"
+                        type="text"
+                        value={editForm.brand}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  )}
+
+                  <div className="edit-row">
+                    <div className="edit-field half">
+                      <label>Breaks down?</label>
+                      <select name="breaks_down" value={editForm.breaks_down} onChange={handleEditFormChange}>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                      </select>
+                    </div>
+                    <div className="edit-field half">
+                      {/* Placeholder for alignment */}
+                    </div>
+                  </div>
+
+                  {editForm.breaks_down === "yes" && (
+                    <div className="edit-row">
+                      <div className="edit-field half">
+                        <label>Breaks into #1</label>
+                        <input
+                          name="breaks_into_1"
+                          type="text"
+                          value={editForm.breaks_into_1}
+                          onChange={handleEditFormChange}
+                        />
+                      </div>
+                      <div className="edit-field half">
+                        <label>Breaks into #2</label>
+                        <input
+                          name="breaks_into_2"
+                          type="text"
+                          value={editForm.breaks_into_2}
+                          onChange={handleEditFormChange}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="edit-actions">
+                <button className="save-edit-btn" onClick={(e) => handleSaveEditItem(item, e)}>
+                  Save Changes
+                </button>
+                <button className="cancel-edit-btn" onClick={handleCancelEditItem}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
+      // View mode - show details
       return (
         <div className="item-card" onClick={(e) => e.stopPropagation()}>
           <div className="item-card-header">
@@ -483,29 +758,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
             {item.storage_size && <p><strong>Container:</strong> {item.storage_size.replace('_', ' ')}</p>}
             <p><strong>Purchased:</strong> {item.purchase_date}</p>
             {item.time_to_expire && (
-              <div className="expiration-row">
-                <strong>Expires:</strong>{" "}
-                {editingExpiration === item.item_id ? (
-                  <span className="expiration-edit">
-                    <select 
-                      value={newExpiration} 
-                      onChange={(e) => setNewExpiration(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {EXPIRATION_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                    <button className="save-exp-btn" onClick={(e) => handleSaveExpiration(item, e)}>✓</button>
-                    <button className="cancel-exp-btn" onClick={handleCancelEditExpiration}>✕</button>
-                  </span>
-                ) : (
-                  <span className="expiration-display">
-                    {formatExpiration(item.time_to_expire, item.opened_date)}
-                    <button className="edit-exp-btn" onClick={(e) => handleStartEditExpiration(item, e)}>edit</button>
-                  </span>
-                )}
-              </div>
+              <p><strong>Expires:</strong> {formatExpiration(item.time_to_expire, item.opened_date)}</p>
             )}
           </div>
           <div className="item-card-actions">
@@ -557,6 +810,12 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
               onClick={(e) => handleMoveClick(item, e)}
             >
               move to...
+            </button>
+            <button 
+              className="edit-item-btn"
+              onClick={(e) => handleStartEditItem(item, e)}
+            >
+              edit item
             </button>
           </div>
           {splittingItem?._id === item._id && (
