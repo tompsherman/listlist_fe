@@ -44,44 +44,9 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
   const [usingItem, setUsingItem] = useState(null);
   const [splittingItem, setSplittingItem] = useState(null);
   const [openingItem, setOpeningItem] = useState(null);
-  const [editingExpiration, setEditingExpiration] = useState(null); // item_id being edited
-  const [newExpiration, setNewExpiration] = useState("");
   const [editingItem, setEditingItem] = useState(null); // Full item edit mode
   const [editMode, setEditMode] = useState("quick"); // "quick" or "full"
   const [editForm, setEditForm] = useState({});
-
-  // Handle editing expiration
-  const handleStartEditExpiration = (item, e) => {
-    e.stopPropagation();
-    setEditingExpiration(item.item_id);
-    setNewExpiration(item.time_to_expire || "nine_days");
-  };
-
-  const handleSaveExpiration = async (item, e) => {
-    e.stopPropagation();
-    
-    try {
-      // Update the item's time_to_expire
-      await axios.put(`https://listlist-db.onrender.com/api/items/${item.item_id}`, {
-        time_to_expire: newExpiration
-      });
-      
-      setEditingExpiration(null);
-      setNewExpiration("");
-      if (onItemRemoved) {
-        onItemRemoved(); // Refresh the list
-      }
-    } catch (error) {
-      console.error("Error updating expiration:", error);
-      alert("Error updating expiration. Please try again.");
-    }
-  };
-
-  const handleCancelEditExpiration = (e) => {
-    e.stopPropagation();
-    setEditingExpiration(null);
-    setNewExpiration("");
-  };
 
   // Full item edit handlers
   const handleStartEditItem = (item, e) => {
