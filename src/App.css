@@ -3812,3 +3812,17 @@
   margin-left: auto;
   margin-right: 0.5rem;
 }
+
+/* Disabled button state */
+.list-button.disabled,
+.btn.disabled,
+button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.action-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useUser } from "../../context/UserContext";
 
 const GeneralList = ({ array, keyword, onItemRemoved }) => {
+  const { canModifyItems } = useUser();
   const [deletingItem, setDeletingItem] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -73,12 +75,14 @@ const GeneralList = ({ array, keyword, onItemRemoved }) => {
                   <div className="item-card" onClick={(e) => e.stopPropagation()}>
                     <div className="item-card-header">
                       <h4>{item.name}</h4>
-                      <button 
-                        className="delete-x-btn"
-                        onClick={(e) => handleDeleteClick(item, e)}
-                      >
-                        ✕
-                      </button>
+                      {canModifyItems() && (
+                        <button 
+                          className="delete-x-btn"
+                          onClick={(e) => handleDeleteClick(item, e)}
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
                     <div className="item-card-details">
                       <p><strong>Need:</strong> {item.desired_amount} {item.purchase_unit}</p>
@@ -98,12 +102,14 @@ const GeneralList = ({ array, keyword, onItemRemoved }) => {
                   // Collapsed item display
                   <>
                     <p>{item.desired_amount} {item.purchase_unit} of {item.name}</p>
-                    <button 
-                      className="delete-x-btn"
-                      onClick={(e) => handleDeleteClick(item, e)}
-                    >
-                      ✕
-                    </button>
+                    {canModifyItems() && (
+                      <button 
+                        className="delete-x-btn"
+                        onClick={(e) => handleDeleteClick(item, e)}
+                      >
+                        ✕
+                      </button>
+                    )}
                   </>
                 )}
               </div>

@@ -13,6 +13,7 @@ import {
 } from "../../utils/categories";
 import useOptions from "../../hooks/useOptions";
 import CreatableSelect from "../CreatableSelect";
+import { useUser } from "../../context/UserContext";
 
 // Split options based on storage size
 const SPLIT_OPTIONS = {
@@ -33,6 +34,8 @@ const SPLIT_OPTIONS = {
 
 const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPantryItems, pantryListId, onCookItem }) => {
   const { options, addOption } = useOptions();
+  const { canModifyItems, canShop, canCook, hasPermission } = useUser();
+  const canMove = () => hasPermission("MOVE_ITEMS");
   const [deletingItem, setDeletingItem] = useState(null);
   const [deleteStep, setDeleteStep] = useState(null);
   const [removalReason, setRemovalReason] = useState(null);
@@ -708,12 +711,14 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
         <div className="item-card" onClick={(e) => e.stopPropagation()}>
           <div className="item-card-header">
             <h4>{item.name} {renderOpenTag(item)}</h4>
-            <button 
-              className="delete-x-btn"
-              onClick={(e) => handleDeleteClick(item, e)}
-            >
-              ✕
-            </button>
+            {canModifyItems() && (
+              <button 
+                className="delete-x-btn"
+                onClick={(e) => handleDeleteClick(item, e)}
+              >
+                ✕
+              </button>
+            )}
           </div>
           <div className="item-card-details">
             <p><strong>Amount:</strong> {item.acquired_amount || item.amount_left} {item.purchase_unit}</p>
@@ -727,7 +732,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
             )}
           </div>
           <div className="item-card-actions">
-            {!isOpen && (
+            {!isOpen && canShop() && (
               <button 
                 className="open-btn"
                 onClick={(e) => handleOpenItem(item, e)}
@@ -736,14 +741,16 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
                 {openingItem === item._id ? "opening..." : "mark as open"}
               </button>
             )}
-            <button 
-              className="use-btn"
-              onClick={(e) => handleUseItem(item, e)}
-              disabled={usingItem === item._id}
-            >
-              {usingItem === item._id ? "using..." : `use 1 ${useUnitDisplay}`}
-            </button>
-            {isEdible(item) && onCookItem && (
+            {canShop() && (
+              <button 
+                className="use-btn"
+                onClick={(e) => handleUseItem(item, e)}
+                disabled={usingItem === item._id}
+              >
+                {usingItem === item._id ? "using..." : `use 1 ${useUnitDisplay}`}
+              </button>
+            )}
+            {isEdible(item) && onCookItem && canCook() && (
               <button 
                 className="cook-btn"
                 onClick={(e) => {
@@ -754,7 +761,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
                 cook with this
               </button>
             )}
-            {getSplitOptions(item).length > 0 && (
+            {getSplitOptions(item).length > 0 && canMove() && (
               <button 
                 className="split-btn"
                 onClick={(e) => handleSplitClick(item, e)}
@@ -762,7 +769,7 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
                 split...
               </button>
             )}
-            {canBreakDown(item) && (
+            {canBreakDown(item) && canMove() && (
               <button 
                 className="breakdown-btn"
                 onClick={(e) => handleBreakDown(item, e)}
@@ -770,18 +777,22 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
                 break down
               </button>
             )}
-            <button 
-              className="move-btn"
-              onClick={(e) => handleMoveClick(item, e)}
-            >
-              move to...
-            </button>
-            <button 
-              className="edit-item-btn"
-              onClick={(e) => handleStartEditItem(item, e)}
-            >
-              edit item
-            </button>
+            {canMove() && (
+              <button 
+                className="move-btn"
+                onClick={(e) => handleMoveClick(item, e)}
+              >
+                move to...
+              </button>
+            )}
+            {canModifyItems() && (
+              <button 
+                className="edit-item-btn"
+                onClick={(e) => handleStartEditItem(item, e)}
+              >
+                edit item
+              </button>
+            )}
           </div>
           {splittingItem?._id === item._id && (
             <div className="split-options">
@@ -827,12 +838,14 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
           {renderOpenTag(item)}
         </p>
         <p>{item.purchase_date}</p>
-        <button 
-          className="delete-x-btn"
-          onClick={(e) => handleDeleteClick(item, e)}
-        >
-          ✕
-        </button>
+        {canModifyItems() && (
+          <button 
+            className="delete-x-btn"
+            onClick={(e) => handleDeleteClick(item, e)}
+          >
+            ✕
+          </button>
+        )}
       </>
     );
   };

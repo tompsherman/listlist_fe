@@ -4,11 +4,13 @@ import List from "../components/List";
 import GoShop from "../components/GoShop";
 import axios from "axios";
 import GetListIdHook from "../logic/GetListIdHook";
+import { useUser } from "../context/UserContext";
 
 const Dashboard = ({ getList }) => {
   const [list, setList] = useState([]);
   const [flipNew, setFlipNew] = useState(false);
   const [shopping, setShopping] = useState(false);
+  const { canModifyItems, canShop } = useUser();
 
   // console.log("get list:", getList);
   //
@@ -19,6 +21,10 @@ const Dashboard = ({ getList }) => {
   console.log("DASHBOARD current list::", currentList);
 
   const flipper = () => {
+    if (!canModifyItems()) {
+      alert("You don't have permission to add items.");
+      return;
+    }
     setFlipNew(!flipNew);
   };
 
@@ -26,6 +32,10 @@ const Dashboard = ({ getList }) => {
 
   const goShopping = (event) => {
     event.preventDefault();
+    if (!canShop()) {
+      alert("You don't have permission to go shopping.");
+      return;
+    }
     const newGroceryList = {
       created_timestamp: `${currentTime[1]} ${currentTime[2]} ${currentTime[3]}`,
       list_open: true,
@@ -56,10 +66,16 @@ const Dashboard = ({ getList }) => {
         />
       ) : getList === "pantry" ? null : (
         <div className="flex-row fullwide">
-          <h3 className="halfwide list-button" onClick={flipper}>
+          <h3 
+            className={`halfwide list-button ${!canModifyItems() ? 'disabled' : ''}`} 
+            onClick={flipper}
+          >
             add item
           </h3>
-          <h3 className="halfwide list-button" onClick={goShopping}>
+          <h3 
+            className={`halfwide list-button ${!canShop() ? 'disabled' : ''}`} 
+            onClick={goShopping}
+          >
             Go Shop
           </h3>
         </div>

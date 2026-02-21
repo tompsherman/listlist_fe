@@ -7,11 +7,13 @@ import {
   STORAGE_OPTIONS,
   STORAGE_LOCATION_OPTIONS,
 } from "../utils/categories";
+import { useUser } from "../context/UserContext";
 
 // Alias for backwards compatibility in this file
 const STORAGE_LOCATIONS = STORAGE_LOCATION_OPTIONS;
 
 const MealsList = () => {
+  const { canModifyItems } = useUser();
   const [dishes, setDishes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grouped"); // "grouped" or "tracker"
@@ -265,10 +267,12 @@ const MealsList = () => {
           <>
             <div className="dish-card-header">
               <h4 className="dish-name">{dish.name}</h4>
-              <div className="dish-actions">
-                <button className="edit-btn" onClick={(e) => handleEditClick(e, dish)}>✏️</button>
-                <button className="delete-btn" onClick={(e) => handleDelete(e, dish._id)}>🗑️</button>
-              </div>
+              {canModifyItems() && (
+                <div className="dish-actions">
+                  <button className="edit-btn" onClick={(e) => handleEditClick(e, dish)}>✏️</button>
+                  <button className="delete-btn" onClick={(e) => handleDelete(e, dish._id)}>🗑️</button>
+                </div>
+              )}
             </div>
             
             <div className="dish-card-meta">

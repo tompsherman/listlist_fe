@@ -11,8 +11,10 @@ import {
   getOpenTagColor,
   OPEN_TAG_COLORS,
 } from "../utils/categories";
+import { useUser } from "../context/UserContext";
 
 const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCooked }) => {
+  const { canCook } = useUser();
   const { options, addOption } = useOptions();
   const [dishName, setDishName] = useState("");
   const [existingDishes, setExistingDishes] = useState([]);
@@ -221,6 +223,10 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!canCook()) {
+      alert("You don't have permission to cook dishes");
+      return;
+    }
     if (!dishName.trim()) {
       alert("Please enter a dish name");
       return;
