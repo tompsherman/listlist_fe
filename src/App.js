@@ -26,7 +26,7 @@ const PageLoader = () => (
 const App = () => {
   // All hooks must be called unconditionally at the top
   const { user, isLoading } = useAuth0();
-  const { currentPod, isLoading: userLoading } = useUser();
+  const { currentPod } = useUser();
   const [listsInitialized, setListsInitialized] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

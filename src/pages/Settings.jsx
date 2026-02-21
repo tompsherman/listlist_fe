@@ -10,13 +10,6 @@ const ROLE_LABELS = {
   restricted: "👀 View Only",
 };
 
-const ROLE_DESCRIPTIONS = {
-  admin: "Full access + manage members",
-  unrestricted: "Can add items, shop, cook",
-  helper: "Can help shop & cook, but not add items",
-  restricted: "Can view only",
-};
-
 const Settings = ({ onClose }) => {
   const { 
     user, 
@@ -24,7 +17,6 @@ const Settings = ({ onClose }) => {
     switchPod, 
     apiCall, 
     refreshProfile,
-    isAdmin,
     canManageMembers 
   } = useUser();
   const { user: auth0User } = useAuth0();
@@ -36,13 +28,6 @@ const Settings = ({ onClose }) => {
   const [inviting, setInviting] = useState(false);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [message, setMessage] = useState(null);
-
-  // Fetch pod members
-  useEffect(() => {
-    if (currentPod) {
-      fetchMembers();
-    }
-  }, [currentPod]);
 
   const fetchMembers = async () => {
     if (!currentPod) return;
@@ -56,6 +41,14 @@ const Settings = ({ onClose }) => {
       setLoadingMembers(false);
     }
   };
+
+  // Fetch pod members
+  useEffect(() => {
+    if (currentPod) {
+      fetchMembers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPod]);
 
   const handleInvite = async (e) => {
     e.preventDefault();
