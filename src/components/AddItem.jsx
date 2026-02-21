@@ -600,6 +600,9 @@ const AddItem = ({ getList, flipNew, setFlipNew }) => {
           <option value="eighteen_days">2 weeks (18 days)</option>
           <option value="thirty-six_days">1 month (36 days)</option>
           <option value="seventy-three_days">1 season (73 days)</option>
+          <option value="one-hundred-forty-six_days">2 season (146 days)</option>
+          <option value="two-hundred-nineteen_days">3 season (219 days)</option>
+          <option value="two-hundred-ninety-two_days">4 season (292 days)</option>
           <option value="three-hundred-sixty-five_days">
             1 year (365 days)
           </option>

@@ -111,7 +111,52 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
     setDishType(dish.dish_type || "main");
     setMealCategory(dish.meal_category || "dinner");
     setExistingDishes([]);
-    // Could also pre-populate ingredients based on dish recipe
+    
+    // Pre-populate ingredients from the existing dish
+    if (dish.ingredients && dish.ingredients.length > 0) {
+      const populatedIngredients = dish.ingredients.map(dishIng => {
+        // Try to find this ingredient in current pantry
+        const pantryMatch = ediblePantryItems.find(pi => {
+          // Match by item_id if available
+          if (dishIng.item_id && pi.item_id) {
+            return pi.item_id.toString() === dishIng.item_id.toString();
+          }
+          // Fall back to name match
+          return pi.name?.toLowerCase() === dishIng.name?.toLowerCase();
+        });
+
+        if (pantryMatch) {
+          // Found in pantry - use pantry item
+          const usePerUnit = pantryMatch.use_per_unit || 1;
+          const usesRemaining = pantryMatch.uses_remaining ?? 
+            ((pantryMatch.acquired_amount || 1) * usePerUnit);
+          
+          return {
+            listItemId: pantryMatch._id,
+            name: pantryMatch.name,
+            amountUsed: Math.min(dishIng.amount_used || 1, usesRemaining),
+            maxAmount: usesRemaining,
+            useUnit: pantryMatch.use_unit === "self" ? pantryMatch.name : pantryMatch.use_unit,
+            category: pantryMatch.category,
+            inPantry: true,
+          };
+        } else {
+          // Not in pantry - add as adhoc with "missing" flag
+          return {
+            adhoc: true,
+            name: dishIng.name,
+            category: dishIng.category || "other",
+            amountUsed: dishIng.amount_used || 1,
+            useUnit: dishIng.use_unit === "self" ? dishIng.name : (dishIng.use_unit || "unit"),
+            maxAmount: 999,
+            inPantry: false,
+            missing: true,
+          };
+        }
+      });
+
+      setIngredients(populatedIngredients);
+    }
   };
 
   // Quick-add handlers
@@ -273,12 +318,27 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
                     className="existing-dish"
                     onClick={() => handleSelectExistingDish(dish)}
                   >
-                    {dish.name} ({dish.servings} servings)
+                    <span className="dish-name">{dish.name}</span>
+                    <span className="dish-meta">
+                      {dish.servings} servings • {dish.ingredients?.length || 0} ingredients
+                    </span>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Ingredient availability summary - show when dish was loaded from template */}
+          {ingredients.length > 0 && ingredients.some(ing => ing.missing) && (
+            <div className="ingredient-summary">
+              <span className="summary-available">
+                ✓ {ingredients.filter(ing => !ing.missing).length} in pantry
+              </span>
+              <span className="summary-missing">
+                ✗ {ingredients.filter(ing => ing.missing).length} missing
+              </span>
+            </div>
+          )}
 
           {/* Ingredients */}
           <div className="cook-field">
@@ -287,11 +347,13 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
               {ingredients.map((ing, idx) => {
                 const color = CATEGORY_COLORS[ing.category] || "#ddd";
                 const key = ing.adhoc ? `adhoc-${idx}` : ing.listItemId;
+                const isMissing = ing.missing === true;
                 return (
-                  <div key={key} className="ingredient-row" style={{ borderLeftColor: color }}>
+                  <div key={key} className={`ingredient-row ${isMissing ? 'ingredient-missing' : ''}`} style={{ borderLeftColor: color }}>
                     <span className="ingredient-name">
                       {ing.name}
-                      {ing.adhoc && <span className="adhoc-badge">quick add</span>}
+                      {ing.adhoc && !isMissing && <span className="adhoc-badge">quick add</span>}
+                      {isMissing && <span className="missing-badge">not in pantry</span>}
                     </span>
                     <div className="ingredient-amount">
                       <button 
