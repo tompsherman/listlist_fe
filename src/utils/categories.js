@@ -122,3 +122,71 @@ export const OPEN_TAG_COLORS = {
   red: { border: "#dc3545", background: "#f8d7da", text: "#dc3545" },
   black: { border: "#212529", background: "#e9ecef", text: "#212529" },
 };
+
+// Convert word-number to numeral (e.g., "thirty-six" → 36)
+const wordToNumber = {
+  three: 3,
+  six: 6,
+  nine: 9,
+  eighteen: 18,
+  "thirty-six": 36,
+  "seventy-three": 73,
+  "three-hundred-sixty-five": 365,
+};
+
+// Format time_to_expire for display
+// If not open: "18 days (after opening)"
+// If open: "in X days; Feb 24"
+export const formatExpiration = (timeToExpire, openedDate = null) => {
+  if (!timeToExpire || timeToExpire === "never") {
+    return "never expires";
+  }
+  
+  // Parse the format: "eighteen_days" → ["eighteen", "days"]
+  const parts = timeToExpire.split("_");
+  if (parts.length !== 2 || parts[1] !== "days") {
+    return timeToExpire; // fallback to raw value
+  }
+  
+  const wordNum = parts[0];
+  const days = wordToNumber[wordNum] || EXPIRATION_DAYS[timeToExpire] || 0;
+  
+  if (!openedDate) {
+    // Not open - show base expiration
+    return `${days} days (after opening)`;
+  }
+  
+  // Item is open - calculate countdown
+  const opened = new Date(openedDate);
+  const now = new Date();
+  const daysSinceOpened = Math.floor((now - opened) / (1000 * 60 * 60 * 24));
+  const daysLeft = days - daysSinceOpened;
+  
+  // Calculate expiration date
+  const expirationDate = new Date(opened);
+  expirationDate.setDate(expirationDate.getDate() + days);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const expDateStr = `${months[expirationDate.getMonth()]} ${expirationDate.getDate()}`;
+  
+  if (daysLeft < 0) {
+    return `expired ${Math.abs(daysLeft)} days ago`;
+  } else if (daysLeft === 0) {
+    return `expires today; ${expDateStr}`;
+  } else if (daysLeft === 1) {
+    return `in 1 day; ${expDateStr}`;
+  } else {
+    return `in ${daysLeft} days; ${expDateStr}`;
+  }
+};
+
+// Expiration options for dropdown
+export const EXPIRATION_OPTIONS = [
+  { value: "three_days", label: "3 days" },
+  { value: "six_days", label: "6 days" },
+  { value: "nine_days", label: "9 days (1 week)" },
+  { value: "eighteen_days", label: "18 days (2 weeks)" },
+  { value: "thirty-six_days", label: "36 days (1 month)" },
+  { value: "seventy-three_days", label: "73 days (1 season)" },
+  { value: "three-hundred-sixty-five_days", label: "365 days (1 year)" },
+  { value: "never", label: "Never expires" },
+];

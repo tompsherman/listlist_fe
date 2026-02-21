@@ -8,6 +8,8 @@ import {
   isEdible,
   getOpenTagColor,
   OPEN_TAG_COLORS,
+  formatExpiration,
+  EXPIRATION_OPTIONS,
 } from "../../utils/categories";
 
 // Split options based on storage size
@@ -39,6 +41,41 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
   const [usingItem, setUsingItem] = useState(null);
   const [splittingItem, setSplittingItem] = useState(null);
   const [openingItem, setOpeningItem] = useState(null);
+  const [editingExpiration, setEditingExpiration] = useState(null); // item_id being edited
+  const [newExpiration, setNewExpiration] = useState("");
+
+  // Handle editing expiration
+  const handleStartEditExpiration = (item, e) => {
+    e.stopPropagation();
+    setEditingExpiration(item.item_id);
+    setNewExpiration(item.time_to_expire || "nine_days");
+  };
+
+  const handleSaveExpiration = async (item, e) => {
+    e.stopPropagation();
+    
+    try {
+      // Update the item's time_to_expire
+      await axios.put(`https://listlist-db.onrender.com/api/items/${item.item_id}`, {
+        time_to_expire: newExpiration
+      });
+      
+      setEditingExpiration(null);
+      setNewExpiration("");
+      if (onItemRemoved) {
+        onItemRemoved(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error updating expiration:", error);
+      alert("Error updating expiration. Please try again.");
+    }
+  };
+
+  const handleCancelEditExpiration = (e) => {
+    e.stopPropagation();
+    setEditingExpiration(null);
+    setNewExpiration("");
+  };
 
   // Handle marking an item as "open"
   const handleOpenItem = async (item, e) => {
@@ -445,7 +482,31 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
             <p><strong>Location:</strong> {item.storage_space || "fridge"}</p>
             {item.storage_size && <p><strong>Container:</strong> {item.storage_size.replace('_', ' ')}</p>}
             <p><strong>Purchased:</strong> {item.purchase_date}</p>
-            {item.time_to_expire && <p><strong>Expires:</strong> {item.time_to_expire}</p>}
+            {item.time_to_expire && (
+              <div className="expiration-row">
+                <strong>Expires:</strong>{" "}
+                {editingExpiration === item.item_id ? (
+                  <span className="expiration-edit">
+                    <select 
+                      value={newExpiration} 
+                      onChange={(e) => setNewExpiration(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {EXPIRATION_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <button className="save-exp-btn" onClick={(e) => handleSaveExpiration(item, e)}>✓</button>
+                    <button className="cancel-exp-btn" onClick={handleCancelEditExpiration}>✕</button>
+                  </span>
+                ) : (
+                  <span className="expiration-display">
+                    {formatExpiration(item.time_to_expire, item.opened_date)}
+                    <button className="edit-exp-btn" onClick={(e) => handleStartEditExpiration(item, e)}>edit</button>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="item-card-actions">
             {!isOpen && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS, isEdible, getOpenTagColor, OPEN_TAG_COLORS } from "../utils/categories";
+import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS, isEdible, getOpenTagColor, OPEN_TAG_COLORS, formatExpiration } from "../utils/categories";
 
 const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCookItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -324,10 +324,10 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
                       <span className="detail-label">Purchased:</span>
                       <span className="detail-value">{item.purchase_date || "Unknown"}</span>
                     </div>
-                    {item.expiration_date && (
+                    {item.time_to_expire && (
                       <div className="detail-row">
                         <span className="detail-label">Expires:</span>
-                        <span className="detail-value">{item.expiration_date}</span>
+                        <span className="detail-value">{formatExpiration(item.time_to_expire, item.opened_date)}</span>
                       </div>
                     )}
                     <div className="detail-row">
