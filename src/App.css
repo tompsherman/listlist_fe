@@ -607,6 +607,49 @@
     cursor: not-allowed;
   }
 
+  /* Open button - mark item as opened */
+  .open-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .open-btn:hover {
+    background-color: #138496;
+  }
+
+  .open-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  /* Open tag - shows on opened items */
+  .open-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .open-tag-small {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+  }
+
   .cook-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;

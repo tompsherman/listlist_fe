@@ -8,6 +8,8 @@ import {
   DISH_TYPE_OPTIONS,
   MEAL_CATEGORY_OPTIONS,
   isEdible,
+  getOpenTagColor,
+  OPEN_TAG_COLORS,
 } from "../utils/categories";
 
 const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCooked }) => {
@@ -268,13 +270,42 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
     }
   };
 
-  // Filter pantry items for search
+  // Filter pantry items for search - OPEN items first
   const filteredPantryItems = searchIngredient.length > 0
-    ? ediblePantryItems.filter(item => 
-        item.name.toLowerCase().includes(searchIngredient.toLowerCase()) &&
-        !ingredients.some(ing => ing.listItemId === item._id)
-      )
+    ? ediblePantryItems
+        .filter(item => 
+          item.name.toLowerCase().includes(searchIngredient.toLowerCase()) &&
+          !ingredients.some(ing => ing.listItemId === item._id)
+        )
+        .sort((a, b) => {
+          // Open items come first
+          const aOpen = !!a.opened_date;
+          const bOpen = !!b.opened_date;
+          if (aOpen && !bOpen) return -1;
+          if (!aOpen && bOpen) return 1;
+          return 0;
+        })
     : [];
+
+  // Helper to render open tag in ingredient suggestions
+  const renderOpenTagSmall = (item) => {
+    if (!item.opened_date) return null;
+    const color = getOpenTagColor(item.opened_date, item.time_to_expire);
+    if (!color) return null;
+    const colorStyle = OPEN_TAG_COLORS[color];
+    return (
+      <span 
+        className="open-tag-small"
+        style={{
+          border: `1px solid ${colorStyle.border}`,
+          backgroundColor: colorStyle.background,
+          color: colorStyle.text,
+        }}
+      >
+        open
+      </span>
+    );
+  };
 
   // Filter database items that aren't in pantry (for "not in pantry" suggestions)
   const filteredDatabaseItems = searchIngredient.length > 0
@@ -470,7 +501,7 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
                     placeholder="Add another ingredient..."
                   />
                   
-                  {/* Pantry items (in stock) */}
+                  {/* Pantry items (in stock) - open items first */}
                   {filteredPantryItems.length > 0 && (
                     <div className="ingredient-suggestions">
                       <div className="suggestion-header">In Pantry:</div>
@@ -483,7 +514,7 @@ const CookDish = ({ initialIngredient, pantryItems, pantryListId, onClose, onCoo
                             style={{ borderLeftColor: color }}
                             onClick={() => handleAddIngredient(item)}
                           >
-                            {item.name}
+                            {item.name} {renderOpenTagSmall(item)}
                           </div>
                         );
                       })}

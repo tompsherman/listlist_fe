@@ -77,3 +77,48 @@ export const MEAL_CATEGORY_OPTIONS = [
   { value: "dinner", label: "🌙 Dinner" },
   { value: "snack", label: "🍿 Snack" },
 ];
+
+// Expiration time constants (in days)
+export const EXPIRATION_DAYS = {
+  three_days: 3,
+  six_days: 6,
+  nine_days: 9,
+  eighteen_days: 18,
+  "thirty-six_days": 36,
+  "seventy-three_days": 73,
+  "three-hundred-sixty-five_days": 365,
+  never: Infinity,
+};
+
+// Convert time_to_expire string to days
+export const getExpirationDays = (timeToExpire) => {
+  return EXPIRATION_DAYS[timeToExpire] || 9; // Default to 9 days
+};
+
+// Calculate "open" tag color based on how far along to expiration
+// Returns: "green" (fresh), "yellow" (1/3), "red" (2/3), "black" (expired)
+export const getOpenTagColor = (openedDate, timeToExpire) => {
+  if (!openedDate) return null;
+  
+  const expirationDays = getExpirationDays(timeToExpire);
+  if (expirationDays === Infinity) return "green"; // Never expires
+  
+  const opened = new Date(openedDate);
+  const now = new Date();
+  const daysSinceOpened = Math.floor((now - opened) / (1000 * 60 * 60 * 24));
+  
+  const progress = daysSinceOpened / expirationDays;
+  
+  if (progress >= 1) return "black";      // Past expiration
+  if (progress >= 2/3) return "red";      // 2/3 to expiration
+  if (progress >= 1/3) return "yellow";   // 1/3 to expiration
+  return "green";                          // Fresh
+};
+
+// Open tag color styles
+export const OPEN_TAG_COLORS = {
+  green: { border: "#28a745", background: "#d4edda", text: "#28a745" },
+  yellow: { border: "#ffc107", background: "#fff3cd", text: "#856404" },
+  red: { border: "#dc3545", background: "#f8d7da", text: "#dc3545" },
+  black: { border: "#212529", background: "#e9ecef", text: "#212529" },
+};

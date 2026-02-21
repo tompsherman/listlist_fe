@@ -6,6 +6,8 @@ import {
   CATEGORY_COLORS,
   STORAGE_COLORS,
   isEdible,
+  getOpenTagColor,
+  OPEN_TAG_COLORS,
 } from "../../utils/categories";
 
 // Split options based on storage size
@@ -36,6 +38,51 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
   const [collapsedItemGroups, setCollapsedItemGroups] = useState({});
   const [usingItem, setUsingItem] = useState(null);
   const [splittingItem, setSplittingItem] = useState(null);
+  const [openingItem, setOpeningItem] = useState(null);
+
+  // Handle marking an item as "open"
+  const handleOpenItem = async (item, e) => {
+    e.stopPropagation();
+    setOpeningItem(item._id);
+    
+    try {
+      await axios.patch(`https://listlist-db.onrender.com/api/list_items/${item._id}`, {
+        opened_date: new Date().toISOString()
+      });
+      
+      setOpeningItem(null);
+      if (onItemRemoved) {
+        onItemRemoved(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error opening item:", error);
+      setOpeningItem(null);
+      alert("Error marking item as open. Please try again.");
+    }
+  };
+
+  // Render the "open" tag with appropriate color
+  const renderOpenTag = (item) => {
+    if (!item.opened_date) return null;
+    
+    const color = getOpenTagColor(item.opened_date, item.time_to_expire);
+    if (!color) return null;
+    
+    const colorStyle = OPEN_TAG_COLORS[color];
+    
+    return (
+      <span 
+        className="open-tag"
+        style={{
+          border: `1px solid ${colorStyle.border}`,
+          backgroundColor: colorStyle.background,
+          color: colorStyle.text,
+        }}
+      >
+        open
+      </span>
+    );
+  };
 
   // Calculate uses remaining for an item
   const getUsesRemaining = (item) => {
@@ -182,10 +229,16 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
       groups[name].push(item);
     });
     
-    // Sort each group by purchase_date (oldest first)
+    // Sort each group: OPEN items first, then by purchase_date (oldest first)
     Object.keys(groups).forEach(name => {
       groups[name].sort((a, b) => {
-        // Parse dates like "Feb 7" or "Feb 08"
+        // Open items come first
+        const aOpen = !!a.opened_date;
+        const bOpen = !!b.opened_date;
+        if (aOpen && !bOpen) return -1;
+        if (!aOpen && bOpen) return 1;
+        
+        // Then sort by purchase_date (oldest first)
         const parseDate = (dateStr) => {
           if (!dateStr) return new Date(0);
           const months = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
@@ -372,11 +425,12 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
     if (expandedItem?._id === item._id) {
       const usesRemaining = getUsesRemaining(item);
       const useUnitDisplay = item.use_unit === "self" ? item.name : item.use_unit;
+      const isOpen = !!item.opened_date;
       
       return (
         <div className="item-card" onClick={(e) => e.stopPropagation()}>
           <div className="item-card-header">
-            <h4>{item.name}</h4>
+            <h4>{item.name} {renderOpenTag(item)}</h4>
             <button 
               className="delete-x-btn"
               onClick={(e) => handleDeleteClick(item, e)}
@@ -394,6 +448,15 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
             {item.time_to_expire && <p><strong>Expires:</strong> {item.time_to_expire}</p>}
           </div>
           <div className="item-card-actions">
+            {!isOpen && (
+              <button 
+                className="open-btn"
+                onClick={(e) => handleOpenItem(item, e)}
+                disabled={openingItem === item._id}
+              >
+                {openingItem === item._id ? "opening..." : "mark as open"}
+              </button>
+            )}
             <button 
               className="use-btn"
               onClick={(e) => handleUseItem(item, e)}
@@ -474,7 +537,10 @@ const PantryList = ({ array, keyword, onItemRemoved, groupBy = "category", allPa
     
     return (
       <>
-        <p>{item.acquired_amount || item.amount_left} {item.purchase_unit} of {item.name}</p>
+        <p>
+          {item.acquired_amount || item.amount_left} {item.purchase_unit} of {item.name}
+          {renderOpenTag(item)}
+        </p>
         <p>{item.purchase_date}</p>
         <button 
           className="delete-x-btn"

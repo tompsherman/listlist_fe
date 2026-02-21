@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS, isEdible } from "../utils/categories";
+import { CATEGORY_COLORS, STORAGE_LOCATION_OPTIONS, isEdible, getOpenTagColor, OPEN_TAG_COLORS } from "../utils/categories";
 
 const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCookItem }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,11 +21,18 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
   }, []);
 
   // Filter pantry items based on search term (case insensitive)
-  // Sort so edible items appear before household items
+  // Sort: OPEN items first, then edible before household
   const matchingPantryItems = searchTerm.length > 0
     ? pantryItems
         .filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
         .sort((a, b) => {
+          // Open items come first
+          const aOpen = !!a.opened_date;
+          const bOpen = !!b.opened_date;
+          if (aOpen && !bOpen) return -1;
+          if (!aOpen && bOpen) return 1;
+          
+          // Then edible items before household
           const aEdible = isEdible(a);
           const bEdible = isEdible(b);
           if (aEdible && !bEdible) return -1;
@@ -33,6 +40,26 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
           return 0;
         })
     : [];
+
+  // Helper to render open tag
+  const renderOpenTag = (item) => {
+    if (!item.opened_date) return null;
+    const color = getOpenTagColor(item.opened_date, item.time_to_expire);
+    if (!color) return null;
+    const colorStyle = OPEN_TAG_COLORS[color];
+    return (
+      <span 
+        className="open-tag-small"
+        style={{
+          border: `1px solid ${colorStyle.border}`,
+          backgroundColor: colorStyle.background,
+          color: colorStyle.text,
+        }}
+      >
+        open
+      </span>
+    );
+  };
 
   // Filter DB items that are NOT in pantry
   const matchingDbItems = searchTerm.length > 0
@@ -233,7 +260,7 @@ const PantrySearch = ({ pantryItems, pantryListId, onItemAdded, onAddItem, onCoo
               >
                 {/* Main row - clickable to expand */}
                 <div className="result-main-row" onClick={() => toggleExpandItem(item._id)}>
-                  <span className="result-name">{item.name}</span>
+                  <span className="result-name">{item.name} {renderOpenTag(item)}</span>
                   <span className="result-amount">
                     {item.acquired_amount || item.amount_left} {item.purchase_unit}
                   </span>
