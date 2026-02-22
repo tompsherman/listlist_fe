@@ -19,14 +19,19 @@ const onRedirectCallback = (appState) => {
   );
 };
 
+// Build authorizationParams - only include audience if configured
+const authorizationParams = {
+  redirect_uri: window.location.origin,
+};
+if (audience) {
+  authorizationParams.audience = audience;
+}
+
 ReactDOM.render(
   <Auth0Provider
     domain={domain}
     clientId={clientId}
-    authorizationParams={{
-      redirect_uri: window.location.origin,
-      audience: audience,
-    }}
+    authorizationParams={authorizationParams}
     onRedirectCallback={onRedirectCallback}
   >
     <UserProvider>
