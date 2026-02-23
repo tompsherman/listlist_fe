@@ -111,7 +111,8 @@ export const UserProvider = ({ children }) => {
   // Permission helpers
   const hasPermission = (permission) => {
     if (!currentPod) return false;
-    const role = currentPod.role;
+    // Default to "unrestricted" if role is missing - new users should have full access
+    const role = currentPod.role || "unrestricted";
     
     const permissions = {
       MANAGE_MEMBERS: ["admin"],
