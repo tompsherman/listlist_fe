@@ -3826,3 +3826,86 @@ button.disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* Invite Modal Standalone */
+.invite-panel {
+  max-width: 400px;
+}
+
+.invite-form-standalone {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.invite-form-standalone .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.invite-form-standalone label {
+  font-weight: 500;
+  color: #333;
+}
+
+.invite-form-standalone input,
+.invite-form-standalone select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.invite-form-standalone input:focus,
+.invite-form-standalone select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.invite-form-standalone .invite-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.primary-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.primary-btn:hover {
+  background: #0056b3;
+}
+
+.primary-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.secondary-btn:hover {
+  background: #e0e0e0;
+}
+
+.no-permission {
+  padding: 1rem;
+  color: #666;
+  text-align: center;
+}

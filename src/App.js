@@ -15,6 +15,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
 const MealsList = lazy(() => import("./components/MealsList"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Household = lazy(() => import("./components/Household"));
+const InviteModal = lazy(() => import("./components/InviteModal"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -30,6 +32,8 @@ const App = () => {
   const [listsInitialized, setListsInitialized] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHousehold, setShowHousehold] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -193,6 +197,18 @@ const App = () => {
             <div className="hamburger-dropdown">
               <div 
                 className="dropdown-item"
+                onClick={() => { setShowHousehold(true); setMenuOpen(false); }}
+              >
+                👥 My Household
+              </div>
+              <div 
+                className="dropdown-item"
+                onClick={() => { setShowInvite(true); setMenuOpen(false); }}
+              >
+                ✉️ Invite
+              </div>
+              <div 
+                className="dropdown-item"
                 onClick={() => { setShowSettings(true); setMenuOpen(false); }}
               >
                 ⚙️ Settings
@@ -207,6 +223,23 @@ const App = () => {
           </div>
         )}
       </div>
+      
+      {/* Household Modal */}
+      {showHousehold && (
+        <Suspense fallback={<PageLoader />}>
+          <Household 
+            onClose={() => setShowHousehold(false)} 
+            onInvite={() => setShowInvite(true)}
+          />
+        </Suspense>
+      )}
+      
+      {/* Invite Modal */}
+      {showInvite && (
+        <Suspense fallback={<PageLoader />}>
+          <InviteModal onClose={() => setShowInvite(false)} />
+        </Suspense>
+      )}
       
       {/* Settings Modal */}
       {showSettings && (
