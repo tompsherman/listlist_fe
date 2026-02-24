@@ -1,0 +1,145 @@
+/**
+ * Grocery List Styles
+ */
+
+.grocery-list {
+  padding: 1rem;
+}
+
+.grocery-list.loading,
+.grocery-list.error {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+/* Add Item */
+.add-item {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.add-item input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.add-item input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+
+.search-results li {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-results li:hover {
+  background: #3a3a3a;
+}
+
+.search-results .category {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
+/* Items List */
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #333;
+}
+
+.item label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  cursor: pointer;
+}
+
+.item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.item .name {
+  font-size: 1rem;
+}
+
+.item .qty {
+  font-size: 0.875rem;
+  color: #888;
+  margin-left: 0.5rem;
+}
+
+.item .remove {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.item .remove:hover {
+  color: #f44336;
+}
+
+/* Checked items */
+.checked-header {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 1.5rem 0 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.items.checked .item {
+  opacity: 0.5;
+}
+
+.items.checked .name {
+  text-decoration: line-through;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}

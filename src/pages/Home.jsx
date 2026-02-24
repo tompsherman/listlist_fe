@@ -4,10 +4,11 @@
 
 import { useState } from 'react';
 import { useUser } from '../context/UserContext';
+import GroceryList from '../components/GroceryList';
 import './Home.css';
 
 export default function Home({ tab = 'grocery' }) {
-  const { user, currentPod, loading, error } = useUser();
+  const { user, currentPod, loading, error, logout } = useUser();
   const [activeTab, setActiveTab] = useState(tab);
 
   if (loading) {
@@ -32,10 +33,10 @@ export default function Home({ tab = 'grocery' }) {
   return (
     <div className="home">
       <header className="home-header">
-        <h1>ListList</h1>
+        <h1>🥕 ListList</h1>
         <div className="header-info">
           <span className="pod-name">{currentPod?.podName}</span>
-          <span className="user-name">{user?.username}</span>
+          <button className="logout-btn" onClick={logout}>Log out</button>
         </div>
       </header>
 
@@ -61,22 +62,17 @@ export default function Home({ tab = 'grocery' }) {
       </nav>
 
       <main className="content">
-        {activeTab === 'grocery' && (
-          <div className="tab-content">
-            <h2>Grocery List</h2>
-            <p className="placeholder">Grocery list will be here. Building in M3-M4...</p>
-          </div>
-        )}
+        {activeTab === 'grocery' && <GroceryList />}
         {activeTab === 'pantry' && (
           <div className="tab-content">
             <h2>Pantry</h2>
-            <p className="placeholder">Pantry inventory will be here. Building in M5...</p>
+            <p className="placeholder">Pantry inventory coming soon...</p>
           </div>
         )}
         {activeTab === 'meals' && (
           <div className="tab-content">
             <h2>Meals</h2>
-            <p className="placeholder">Meal history will be here. Building in M6...</p>
+            <p className="placeholder">Meal planning coming soon...</p>
           </div>
         )}
       </main>
