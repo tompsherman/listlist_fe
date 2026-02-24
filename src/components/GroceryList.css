@@ -69,6 +69,12 @@
   text-transform: capitalize;
 }
 
+.search-results .create-new {
+  color: #4CAF50;
+  font-weight: 500;
+  border-top: 1px solid #444;
+}
+
 /* Items List */
 .items {
   list-style: none;

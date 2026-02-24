@@ -70,6 +70,14 @@
   font-weight: 500;
 }
 
+.pantry-list .search-results .create-new {
+  border-top: 1px solid #444;
+}
+
+.pantry-list .search-results .create-new .item-name {
+  color: #4CAF50;
+}
+
 .location-btns {
   display: flex;
   gap: 0.25rem;

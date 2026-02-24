@@ -79,6 +79,21 @@ export default function PantryList() {
     }
   };
 
+  const handleCreateAndAdd = async (name, location) => {
+    if (!list || !currentPod) return;
+    
+    try {
+      const newItem = await itemsApi.create({
+        name: name.trim(),
+        podId: currentPod.podId,
+        defaultLocation: location,
+      });
+      await handleAddItem(newItem, location);
+    } catch (err) {
+      console.error('Failed to create item:', err);
+    }
+  };
+
   const handleAddItem = async (catalogItem, location) => {
     if (!list) return;
     
@@ -146,7 +161,7 @@ export default function PantryList() {
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => setAddingTo('pantry')}
         />
-        {searchResults.length > 0 && (
+        {(searchResults.length > 0 || searchQuery.length >= 2) && (
           <div className="search-dropdown">
             <ul className="search-results">
               {searchResults.map(item => (
@@ -165,6 +180,22 @@ export default function PantryList() {
                   </div>
                 </li>
               ))}
+              {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && (
+                <li className="create-new">
+                  <span className="item-name">+ "{searchQuery}"</span>
+                  <div className="location-btns">
+                    {LOCATIONS.map(loc => (
+                      <button
+                        key={loc.id}
+                        onClick={() => handleCreateAndAdd(searchQuery, loc.id)}
+                        title={loc.label}
+                      >
+                        {loc.label.split(' ')[0]}
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
         )}

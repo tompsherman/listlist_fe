@@ -76,6 +76,21 @@ export default function GroceryList() {
     }
   };
 
+  // Create custom item and add to list
+  const handleCreateAndAdd = async (name) => {
+    if (!list || !currentPod) return;
+    
+    try {
+      const newItem = await itemsApi.create({
+        name: name.trim(),
+        podId: currentPod.podId,
+      });
+      await handleAddItem(newItem);
+    } catch (err) {
+      console.error('Failed to create item:', err);
+    }
+  };
+
   // Add item to list
   const handleAddItem = async (catalogItem) => {
     if (!list) return;
@@ -150,7 +165,7 @@ export default function GroceryList() {
           value={searchQuery}
           onChange={(e) => handleSearch(e.target.value)}
         />
-        {searchResults.length > 0 && (
+        {(searchResults.length > 0 || searchQuery.length >= 2) && (
           <ul className="search-results">
             {searchResults.map(item => (
               <li key={item._id} onClick={() => handleAddItem(item)}>
@@ -158,6 +173,11 @@ export default function GroceryList() {
                 <span className="category">{item.category}</span>
               </li>
             ))}
+            {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && (
+              <li className="create-new" onClick={() => handleCreateAndAdd(searchQuery)}>
+                + Create "{searchQuery}"
+              </li>
+            )}
           </ul>
         )}
       </div>
