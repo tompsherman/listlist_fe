@@ -22,4 +22,7 @@ export const listsApi = {
   
   // Remove item from list
   removeItem: (listId, itemId) => api.delete(`/api/lists/${listId}/items/${itemId}`),
+  
+  // Move checked items to pantry
+  checkout: (listId) => api.post(`/api/lists/${listId}/checkout`),
 };

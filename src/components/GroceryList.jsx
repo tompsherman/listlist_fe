@@ -115,6 +115,20 @@ export default function GroceryList() {
     }
   };
 
+  // Move checked items to pantry
+  const handleCheckout = async () => {
+    if (!list || checked.length === 0) return;
+    
+    try {
+      const result = await listsApi.checkout(list._id);
+      // Remove checked items from local state
+      setItems(prev => prev.filter(i => !i.checked));
+      alert(result.message || `Moved ${checked.length} items to pantry!`);
+    } catch (err) {
+      console.error('Checkout failed:', err);
+    }
+  };
+
   if (loading) {
     return <div className="grocery-list loading">Loading...</div>;
   }
@@ -173,7 +187,12 @@ export default function GroceryList() {
           {/* Checked Items */}
           {checked.length > 0 && (
             <>
-              <h3 className="checked-header">Checked ({checked.length})</h3>
+              <div className="checked-header">
+                <span>Checked ({checked.length})</span>
+                <button className="checkout-btn" onClick={handleCheckout}>
+                  ✓ Add to Pantry
+                </button>
+              </div>
               <ul className="items checked">
                 {checked.map(item => (
                   <li key={item._id} className="item">
