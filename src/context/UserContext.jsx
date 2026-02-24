@@ -1,6 +1,6 @@
 /**
  * User Context
- * Manages user profile, current pod, and permissions
+ * Manages user profile, onboarding state, current pod, and permissions
  */
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -10,10 +10,11 @@ import api, { setTokenGetter } from '../services/api';
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
-  const { getAccessTokenSilently, user: auth0User, isAuthenticated } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
   
   const [user, setUser] = useState(null);
   const [currentPod, setCurrentPod] = useState(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,17 +34,24 @@ export function UserProvider({ children }) {
 
     try {
       setLoading(true);
-      const response = await api.get('/api/me');
-      setUser(response);
-      
-      // Set first pod as current (or from localStorage)
-      if (response.pods?.length > 0) {
-        const savedPodId = localStorage.getItem('currentPodId');
-        const pod = response.pods.find(p => p.podId === savedPodId) || response.pods[0];
-        setCurrentPod(pod);
-      }
-      
       setError(null);
+      
+      const response = await api.get('/api/me');
+      
+      if (response.needsOnboarding) {
+        setNeedsOnboarding(true);
+        setUser(null);
+      } else {
+        setNeedsOnboarding(false);
+        setUser(response);
+        
+        // Set first pod as current (or from localStorage)
+        if (response.pods?.length > 0) {
+          const savedPodId = localStorage.getItem('currentPodId');
+          const pod = response.pods.find(p => p.podId === savedPodId) || response.pods[0];
+          setCurrentPod(pod);
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch user:', err);
       setError(err.message);
@@ -53,6 +61,12 @@ export function UserProvider({ children }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // Called after onboarding completes
+  const completeOnboarding = useCallback(() => {
+    setNeedsOnboarding(false);
     fetchUser();
   }, [fetchUser]);
 
@@ -84,9 +98,12 @@ export function UserProvider({ children }) {
     currentPod,
     loading,
     error,
+    needsOnboarding,
+    completeOnboarding,
     switchPod,
     hasPermission,
     refetch: fetchUser,
+    logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
     // Convenience booleans
     canModifyItems: hasPermission('MODIFY_ITEMS'),
     canShop: hasPermission('SHOP_ITEMS'),
