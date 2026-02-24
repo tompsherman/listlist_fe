@@ -1,0 +1,189 @@
+/**
+ * Pantry List Styles
+ */
+
+.pantry-list {
+  padding: 1rem;
+}
+
+.pantry-list.loading,
+.pantry-list.error {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+/* Add Item */
+.pantry-list .add-item {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.pantry-list .add-item input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.pantry-list .add-item input:focus {
+  outline: none;
+  border-color: #ffb74d;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  margin-top: 4px;
+  z-index: 10;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.pantry-list .search-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pantry-list .search-results li {
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+}
+
+.pantry-list .search-results li:last-child {
+  border-bottom: none;
+}
+
+.pantry-list .search-results .item-name {
+  font-weight: 500;
+}
+
+.location-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.location-btns button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  background: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.location-btns button:hover {
+  background: #444;
+}
+
+/* Location Tabs */
+.location-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.location-tabs button {
+  padding: 0.5rem 0.75rem;
+  background: #2a2a2a;
+  border: none;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.location-tabs button:hover {
+  background: #333;
+}
+
+.location-tabs button.active {
+  background: #ffb74d;
+  color: #000;
+}
+
+/* Items */
+.pantry-list .items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pantry-list .item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #333;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-info .name {
+  font-size: 1rem;
+}
+
+.location-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: #333;
+}
+
+.location-badge[data-location="fridge"] { background: #4fc3f7; color: #000; }
+.location-badge[data-location="freezer"] { background: #90caf9; color: #000; }
+.location-badge[data-location="pantry"] { background: #ffb74d; color: #000; }
+.location-badge[data-location="counter"] { background: #aed581; color: #000; }
+
+/* Quantity Controls */
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-controls button {
+  width: 32px;
+  height: 32px;
+  background: #333;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.qty-controls button:hover {
+  background: #444;
+}
+
+.qty-controls .qty {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.pantry-list .empty {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}

@@ -1,0 +1,206 @@
+/**
+ * Pantry List Component
+ * Shows inventory grouped by location (fridge, freezer, pantry, counter)
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { useUser } from '../context/UserContext';
+import { listsApi } from '../services/lists';
+import { itemsApi } from '../services/items';
+import './PantryList.css';
+
+const LOCATIONS = [
+  { id: 'fridge', label: '🧊 Fridge', color: '#4fc3f7' },
+  { id: 'freezer', label: '❄️ Freezer', color: '#90caf9' },
+  { id: 'pantry', label: '🏠 Pantry', color: '#ffb74d' },
+  { id: 'counter', label: '🍌 Counter', color: '#aed581' },
+];
+
+export default function PantryList() {
+  const { currentPod } = useUser();
+  const [list, setList] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeLocation, setActiveLocation] = useState('all');
+  
+  // Add item state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [addingTo, setAddingTo] = useState(null);
+
+  const fetchList = useCallback(async () => {
+    if (!currentPod) return;
+    
+    try {
+      setLoading(true);
+      const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'pantry' });
+      
+      if (lists.length > 0) {
+        const fullList = await listsApi.getById(lists[0]._id);
+        setList(fullList);
+        setItems(fullList.items || []);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch pantry:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPod]);
+
+  useEffect(() => {
+    fetchList();
+  }, [fetchList]);
+
+  const handleSearch = async (q) => {
+    setSearchQuery(q);
+    if (q.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    try {
+      const results = await itemsApi.search({ q, limit: 10 });
+      setSearchResults(results);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  const handleAddItem = async (catalogItem, location) => {
+    if (!list) return;
+    
+    try {
+      const newItem = await listsApi.addItem(list._id, {
+        itemId: catalogItem._id,
+        quantity: 1,
+        location: location,
+      });
+      setItems(prev => [newItem, ...prev]);
+      setSearchQuery('');
+      setSearchResults([]);
+      setAddingTo(null);
+    } catch (err) {
+      console.error('Failed to add item:', err);
+    }
+  };
+
+  const handleUpdateQuantity = async (listItem, delta) => {
+    const newQty = Math.max(0, listItem.quantity + delta);
+    if (newQty === 0) {
+      handleRemove(listItem);
+      return;
+    }
+    
+    try {
+      const updated = await listsApi.updateItem(list._id, listItem._id, {
+        quantity: newQty,
+      });
+      setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
+    } catch (err) {
+      console.error('Failed to update quantity:', err);
+    }
+  };
+
+  const handleRemove = async (listItem) => {
+    try {
+      await listsApi.removeItem(list._id, listItem._id);
+      setItems(prev => prev.filter(i => i._id !== listItem._id));
+    } catch (err) {
+      console.error('Failed to remove item:', err);
+    }
+  };
+
+  if (loading) return <div className="pantry-list loading">Loading...</div>;
+  if (error) return <div className="pantry-list error">{error}</div>;
+
+  const filteredItems = activeLocation === 'all' 
+    ? items 
+    : items.filter(i => i.location === activeLocation);
+
+  const groupedItems = LOCATIONS.reduce((acc, loc) => {
+    acc[loc.id] = items.filter(i => i.location === loc.id);
+    return acc;
+  }, {});
+
+  return (
+    <div className="pantry-list">
+      {/* Add Item */}
+      <div className="add-item">
+        <input
+          type="text"
+          placeholder="Add to pantry..."
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          onFocus={() => setAddingTo('pantry')}
+        />
+        {searchResults.length > 0 && (
+          <div className="search-dropdown">
+            <ul className="search-results">
+              {searchResults.map(item => (
+                <li key={item._id}>
+                  <span className="item-name">{item.name}</span>
+                  <div className="location-btns">
+                    {LOCATIONS.map(loc => (
+                      <button
+                        key={loc.id}
+                        onClick={() => handleAddItem(item, loc.id)}
+                        title={loc.label}
+                      >
+                        {loc.label.split(' ')[0]}
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Location Tabs */}
+      <div className="location-tabs">
+        <button
+          className={activeLocation === 'all' ? 'active' : ''}
+          onClick={() => setActiveLocation('all')}
+        >
+          All ({items.length})
+        </button>
+        {LOCATIONS.map(loc => (
+          <button
+            key={loc.id}
+            className={activeLocation === loc.id ? 'active' : ''}
+            onClick={() => setActiveLocation(loc.id)}
+          >
+            {loc.label.split(' ')[0]} {groupedItems[loc.id]?.length || 0}
+          </button>
+        ))}
+      </div>
+
+      {/* Items */}
+      {filteredItems.length === 0 ? (
+        <p className="empty">No items here yet.</p>
+      ) : (
+        <ul className="items">
+          {filteredItems.map(item => (
+            <li key={item._id} className="item">
+              <div className="item-info">
+                <span className="name">{item.itemId?.name || 'Unknown'}</span>
+                <span className="location-badge" data-location={item.location}>
+                  {LOCATIONS.find(l => l.id === item.location)?.label.split(' ')[0]}
+                </span>
+              </div>
+              <div className="qty-controls">
+                <button onClick={() => handleUpdateQuantity(item, -1)}>−</button>
+                <span className="qty">{item.quantity}</span>
+                <button onClick={() => handleUpdateQuantity(item, 1)}>+</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
