@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import GroceryList from '../components/GroceryList';
 import PantryList from '../components/PantryList';
+import MealsList from '../components/MealsList';
 import './Home.css';
 
 export default function Home({ tab = 'grocery' }) {
@@ -65,12 +66,7 @@ export default function Home({ tab = 'grocery' }) {
       <main className="content">
         {activeTab === 'grocery' && <GroceryList />}
         {activeTab === 'pantry' && <PantryList />}
-        {activeTab === 'meals' && (
-          <div className="tab-content">
-            <h2>Meals</h2>
-            <p className="placeholder">Meal planning coming soon...</p>
-          </div>
-        )}
+        {activeTab === 'meals' && <MealsList />}
       </main>
     </div>
   );

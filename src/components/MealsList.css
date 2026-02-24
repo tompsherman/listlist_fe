@@ -1,0 +1,147 @@
+/**
+ * Meals List Styles
+ */
+
+.meals-list {
+  padding: 1rem;
+}
+
+.meals-list.loading,
+.meals-list.error {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+/* Add Dish */
+.add-dish {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-dish input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.add-dish input:focus {
+  outline: none;
+  border-color: #e57373;
+}
+
+.add-dish button {
+  padding: 0.75rem 1.5rem;
+  background: #e57373;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-dish button:hover:not(:disabled) {
+  background: #ef5350;
+}
+
+.add-dish button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #888;
+}
+
+.section .hint {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Dish Grid */
+.dish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.dish-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #2a2a2a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.dish-card:hover {
+  border-color: #e57373;
+  background: #333;
+}
+
+.dish-card:active {
+  transform: scale(0.98);
+}
+
+.dish-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.dish-meta {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Manage List */
+.dish-manage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dish-manage-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.dish-manage-list .name {
+  font-size: 0.875rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  color: #f44336;
+}
+
+.meals-list .empty {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}
