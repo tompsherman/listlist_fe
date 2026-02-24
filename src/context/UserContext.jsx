@@ -1,159 +1,97 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import axios from "axios";
+/**
+ * User Context
+ * Manages user profile, current pod, and permissions
+ */
 
-const API_URL = "https://listlist-db.onrender.com/api";
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import api, { setTokenGetter } from '../services/api';
 
 const UserContext = createContext(null);
 
-export const UserProvider = ({ children }) => {
-  const { isAuthenticated, isLoading: authLoading, getAccessTokenSilently, user: auth0User } = useAuth0();
+export function UserProvider({ children }) {
+  const { getAccessTokenSilently, user: auth0User, isAuthenticated } = useAuth0();
   
   const [user, setUser] = useState(null);
   const [currentPod, setCurrentPod] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get access token for API calls
-  const getToken = useCallback(async () => {
-    try {
-      return await getAccessTokenSilently();
-    } catch (e) {
-      console.error("Error getting token:", e);
-      return null;
-    }
-  }, [getAccessTokenSilently]);
-
-  // Authenticated API call helper
-  const apiCall = useCallback(async (method, endpoint, data = null) => {
-    const token = await getToken();
-    if (!token) {
-      throw new Error("Not authenticated");
-    }
-
-    const config = {
-      method,
-      url: `${API_URL}${endpoint}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    if (data) {
-      config.data = data;
-    }
-
-    const response = await axios(config);
-    return response.data;
-  }, [getToken]);
-
-  // Fetch user profile from our backend
-  const fetchUserProfile = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const profile = await apiCall("GET", "/me");
-      setUser(profile);
-      
-      // Set current pod to first pod if not set
-      if (profile.pods?.length > 0 && !currentPod) {
-        setCurrentPod(profile.pods[0]);
-      }
-    } catch (e) {
-      console.error("Error fetching user profile:", e);
-      if (e.response?.data?.code === "USER_NOT_FOUND") {
-        setError("You need to be invited to a pod first.");
-      } else {
-        setError(e.response?.data?.message || "Error loading profile");
-      }
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [apiCall, currentPod]);
-
-  // Fetch profile when authenticated
+  // Set up token getter for API service
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      fetchUserProfile();
-    } else if (!authLoading) {
-      setIsLoading(false);
-      setUser(null);
+    if (isAuthenticated) {
+      setTokenGetter(getAccessTokenSilently);
     }
-  }, [isAuthenticated, authLoading, fetchUserProfile]);
+  }, [isAuthenticated, getAccessTokenSilently]);
 
-  // Switch current pod
-  const switchPod = (podId) => {
-    const pod = user?.pods?.find(p => p.pod_id.toString() === podId.toString());
+  // Fetch user profile when authenticated
+  const fetchUser = useCallback(async () => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.get('/api/me');
+      setUser(response);
+      
+      // Set first pod as current (or from localStorage)
+      if (response.pods?.length > 0) {
+        const savedPodId = localStorage.getItem('currentPodId');
+        const pod = response.pods.find(p => p.podId === savedPodId) || response.pods[0];
+        setCurrentPod(pod);
+      }
+      
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch user:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // Switch to different pod
+  const switchPod = useCallback((podId) => {
+    const pod = user?.pods?.find(p => p.podId === podId);
     if (pod) {
       setCurrentPod(pod);
-      localStorage.setItem("currentPodId", podId);
-    }
-  };
-
-  // Restore pod selection from localStorage
-  useEffect(() => {
-    if (user?.pods?.length > 0) {
-      const savedPodId = localStorage.getItem("currentPodId");
-      if (savedPodId) {
-        const savedPod = user.pods.find(p => p.pod_id.toString() === savedPodId);
-        if (savedPod) {
-          setCurrentPod(savedPod);
-          return;
-        }
-      }
-      // Default to first pod
-      setCurrentPod(user.pods[0]);
+      localStorage.setItem('currentPodId', podId);
     }
   }, [user]);
 
-  // Permission helpers
-  const hasPermission = (permission) => {
+  // Check if user has permission
+  const hasPermission = useCallback((permission) => {
     if (!currentPod) return false;
-    // Default to "unrestricted" if role is missing - new users should have full access
-    const role = currentPod.role || "unrestricted";
     
-    const permissions = {
-      MANAGE_MEMBERS: ["admin"],
-      MODIFY_ITEMS: ["admin", "unrestricted"],
-      MODIFY_LISTS: ["admin", "unrestricted"],
-      SHOP_ITEMS: ["admin", "unrestricted", "helper"],
-      COOK_DISHES: ["admin", "unrestricted", "helper"],
-      MOVE_ITEMS: ["admin", "unrestricted", "helper"],
-      VIEW: ["admin", "unrestricted", "helper", "restricted"],
+    const rolePermissions = {
+      admin: ['MANAGE_MEMBERS', 'MODIFY_ITEMS', 'MODIFY_LISTS', 'SHOP_ITEMS', 'COOK_DISHES', 'MOVE_ITEMS', 'VIEW'],
+      unrestricted: ['MODIFY_ITEMS', 'MODIFY_LISTS', 'SHOP_ITEMS', 'COOK_DISHES', 'MOVE_ITEMS', 'VIEW'],
+      helper: ['SHOP_ITEMS', 'COOK_DISHES', 'MOVE_ITEMS', 'VIEW'],
+      restricted: ['VIEW'],
     };
 
-    return permissions[permission]?.includes(role) || false;
-  };
-
-  const canModifyItems = () => hasPermission("MODIFY_ITEMS");
-  const canShop = () => hasPermission("SHOP_ITEMS");
-  const canCook = () => hasPermission("COOK_DISHES");
-  const canManageMembers = () => hasPermission("MANAGE_MEMBERS");
-  const isAdmin = () => currentPod?.role === "admin";
+    return rolePermissions[currentPod.role]?.includes(permission) || false;
+  }, [currentPod]);
 
   const value = {
     user,
     currentPod,
-    isLoading: isLoading || authLoading,
+    loading,
     error,
-    isAuthenticated,
-    auth0User,
-    
-    // Actions
     switchPod,
-    refreshProfile: fetchUserProfile,
-    apiCall,
-    getToken,
-    
-    // Permission helpers
     hasPermission,
-    canModifyItems,
-    canShop,
-    canCook,
-    canManageMembers,
-    isAdmin,
+    refetch: fetchUser,
+    // Convenience booleans
+    canModifyItems: hasPermission('MODIFY_ITEMS'),
+    canShop: hasPermission('SHOP_ITEMS'),
+    canCook: hasPermission('COOK_DISHES'),
+    canManageMembers: hasPermission('MANAGE_MEMBERS'),
   };
 
   return (
@@ -161,14 +99,12 @@ export const UserProvider = ({ children }) => {
       {children}
     </UserContext.Provider>
   );
-};
+}
 
-export const useUser = () => {
+export function useUser() {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
+    throw new Error('useUser must be used within UserProvider');
   }
   return context;
-};
-
-export default UserContext;
+}
