@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
+import { historyApi } from '../services/history';
 import { getCached, setCache } from '../utils/cache';
 import './PantryList.css';
 
@@ -29,6 +30,7 @@ export default function PantryList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [addingTo, setAddingTo] = useState(null);
+  const [expiring, setExpiring] = useState([]);
 
   const fetchList = useCallback(async () => {
     if (!currentPod) return;
@@ -62,6 +64,10 @@ export default function PantryList() {
 
   useEffect(() => {
     fetchList();
+    // Fetch expiring items
+    historyApi.getExpiring(7)
+      .then(setExpiring)
+      .catch(console.error);
   }, [fetchList]);
 
   const handleSearch = async (q) => {
@@ -150,8 +156,34 @@ export default function PantryList() {
     return acc;
   }, {});
 
+  const formatExpiry = (date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diffDays = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return 'Expired!';
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    return `${diffDays} days`;
+  };
+
   return (
     <div className="pantry-list">
+      {/* Expiring Soon Warning */}
+      {expiring.length > 0 && (
+        <div className="expiring-warning">
+          <span className="warning-icon">⚠️</span>
+          <span>{expiring.length} item{expiring.length > 1 ? 's' : ''} expiring soon:</span>
+          <div className="expiring-items">
+            {expiring.slice(0, 3).map(item => (
+              <span key={item._id} className="expiring-item">
+                {item.itemId?.name} ({formatExpiry(item.expiresAt)})
+              </span>
+            ))}
+            {expiring.length > 3 && <span className="more">+{expiring.length - 3} more</span>}
+          </div>
+        </div>
+      )}
+
       {/* Add Item */}
       <div className="add-item">
         <input
@@ -232,6 +264,11 @@ export default function PantryList() {
                 <span className="location-badge" data-location={item.location}>
                   {LOCATIONS.find(l => l.id === item.location)?.label.split(' ')[0]}
                 </span>
+                {item.expiresAt && (
+                  <span className={`expiry-badge ${new Date(item.expiresAt) < new Date() ? 'expired' : ''}`}>
+                    {formatExpiry(item.expiresAt)}
+                  </span>
+                )}
               </div>
               <div className="qty-controls">
                 <button onClick={() => handleUpdateQuantity(item, -1)}>−</button>

@@ -6,6 +6,40 @@
   padding: 1rem;
 }
 
+/* Expiring Warning */
+.expiring-warning {
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  color: #e65100;
+  font-size: 0.875rem;
+}
+
+.expiring-warning .warning-icon {
+  margin-right: 0.5rem;
+}
+
+.expiring-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.expiring-item {
+  background: #ffe0b2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.expiring-items .more {
+  color: #bf360c;
+  font-weight: 500;
+}
+
 .pantry-list.loading,
 .pantry-list.error {
   text-align: center;
@@ -161,6 +195,20 @@
 .location-badge[data-location="freezer"] { background: #90caf9; color: #000; }
 .location-badge[data-location="pantry"] { background: #ffb74d; color: #000; }
 .location-badge[data-location="counter"] { background: #aed581; color: #000; }
+
+.expiry-badge {
+  font-size: 0.7rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.expiry-badge.expired {
+  background: #ffebee;
+  color: #c62828;
+  font-weight: 600;
+}
 
 /* Quantity Controls */
 .qty-controls {
