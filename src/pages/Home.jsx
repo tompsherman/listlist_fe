@@ -7,11 +7,13 @@ import { useUser } from '../context/UserContext';
 import GroceryList from '../components/GroceryList';
 import PantryList from '../components/PantryList';
 import MealsList from '../components/MealsList';
+import PodSettings from '../components/PodSettings';
 import './Home.css';
 
 export default function Home({ tab = 'grocery' }) {
   const { user, currentPod, loading, error, logout } = useUser();
   const [activeTab, setActiveTab] = useState(tab);
+  const [showSettings, setShowSettings] = useState(false);
 
   if (loading) {
     return (
@@ -37,7 +39,9 @@ export default function Home({ tab = 'grocery' }) {
       <header className="home-header">
         <h1>🥕 ListList</h1>
         <div className="header-info">
-          <span className="pod-name">{currentPod?.podName}</span>
+          <button className="pod-btn" onClick={() => setShowSettings(true)}>
+            {currentPod?.podName} ⚙️
+          </button>
           <button className="logout-btn" onClick={logout}>Log out</button>
         </div>
       </header>
@@ -68,6 +72,8 @@ export default function Home({ tab = 'grocery' }) {
         {activeTab === 'pantry' && <PantryList />}
         {activeTab === 'meals' && <MealsList />}
       </main>
+
+      {showSettings && <PodSettings onClose={() => setShowSettings(false)} />}
     </div>
   );
 }

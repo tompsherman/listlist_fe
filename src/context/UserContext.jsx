@@ -6,6 +6,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import api, { setTokenGetter } from '../services/api';
+import { podsApi } from '../services/pods';
 
 const UserContext = createContext(null);
 
@@ -42,6 +43,18 @@ export function UserProvider({ children }) {
         setNeedsOnboarding(true);
         setUser(null);
       } else {
+        // Auto-join any pending pod invites
+        try {
+          const joinResult = await podsApi.join();
+          if (joinResult.joined?.length > 0) {
+            // Refetch user to get updated pods
+            const refreshed = await api.get('/api/me');
+            response = refreshed;
+          }
+        } catch (e) {
+          console.log('No pods to join:', e.message);
+        }
+
         setNeedsOnboarding(false);
         setUser(response);
         

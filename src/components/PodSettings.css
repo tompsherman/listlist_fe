@@ -1,0 +1,191 @@
+/**
+ * Pod Settings Styles
+ */
+
+.pod-settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.pod-settings {
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.pod-settings.loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+.pod-settings header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.pod-settings header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.pod-settings .message {
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.pod-settings .message.success {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.pod-settings .message.error {
+  background: #c62828;
+  color: #fff;
+}
+
+.pod-settings section {
+  padding: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.pod-settings section:last-child {
+  border-bottom: none;
+}
+
+.pod-settings h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pod-settings h4 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Members List */
+.members-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.members-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.member-info .name {
+  font-weight: 500;
+}
+
+.member-info .role {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
+.remove-btn {
+  background: none;
+  border: 1px solid #666;
+  color: #888;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  border-color: #f44336;
+  color: #f44336;
+}
+
+/* Invite Form */
+.invite-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.invite-form input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.invite-form input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.invite-form button {
+  padding: 0.5rem 1rem;
+  background: #4CAF50;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.invite-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pending-invites ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pending-invites li {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+.pod-settings .hint {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0;
+}
