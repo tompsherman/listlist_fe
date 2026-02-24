@@ -7,6 +7,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useAuth0 } from '@auth0/auth0-react';
 import api, { setTokenGetter } from '../services/api';
 import { podsApi } from '../services/pods';
+import { getCached, setCache, clearCache } from '../utils/cache';
 
 const UserContext = createContext(null);
 
@@ -33,11 +34,24 @@ export function UserProvider({ children }) {
       return;
     }
 
+    // Show cached data immediately
+    const cached = getCached('user');
+    if (cached && !cached.needsOnboarding) {
+      setUser(cached);
+      setNeedsOnboarding(false);
+      if (cached.pods?.length > 0) {
+        const savedPodId = localStorage.getItem('currentPodId');
+        const pod = cached.pods.find(p => p.podId === savedPodId) || cached.pods[0];
+        setCurrentPod(pod);
+      }
+      setLoading(false);
+    }
+
     try {
-      setLoading(true);
+      if (!cached) setLoading(true);
       setError(null);
       
-      const response = await api.get('/api/me');
+      let response = await api.get('/api/me');
       
       if (response.needsOnboarding) {
         setNeedsOnboarding(true);
@@ -57,6 +71,7 @@ export function UserProvider({ children }) {
 
         setNeedsOnboarding(false);
         setUser(response);
+        setCache('user', response, 10 * 60 * 1000); // 10 min
         
         // Set first pod as current (or from localStorage)
         if (response.pods?.length > 0) {
@@ -116,7 +131,10 @@ export function UserProvider({ children }) {
     switchPod,
     hasPermission,
     refetch: fetchUser,
-    logout: () => logout({ logoutParams: { returnTo: window.location.origin } }),
+    logout: () => {
+      clearCache('user');
+      logout({ logoutParams: { returnTo: window.location.origin } });
+    },
     // Convenience booleans
     canModifyItems: hasPermission('MODIFY_ITEMS'),
     canShop: hasPermission('SHOP_ITEMS'),

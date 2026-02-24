@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
+import { getCached, setCache } from '../utils/cache';
 import './PantryList.css';
 
 const LOCATIONS = [
@@ -32,19 +33,28 @@ export default function PantryList() {
   const fetchList = useCallback(async () => {
     if (!currentPod) return;
     
+    const cacheKey = `pantry_${currentPod.podId}`;
+    const cached = getCached(cacheKey);
+    if (cached) {
+      setList(cached);
+      setItems(cached.items || []);
+      setLoading(false);
+    }
+    
     try {
-      setLoading(true);
+      if (!cached) setLoading(true);
       const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'pantry' });
       
       if (lists.length > 0) {
         const fullList = await listsApi.getById(lists[0]._id);
         setList(fullList);
         setItems(fullList.items || []);
+        setCache(cacheKey, fullList, 5 * 60 * 1000);
       }
       setError(null);
     } catch (err) {
       console.error('Failed to fetch pantry:', err);
-      setError(err.message);
+      if (!cached) setError(err.message);
     } finally {
       setLoading(false);
     }
