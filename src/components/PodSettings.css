@@ -179,9 +179,46 @@
 }
 
 .pending-invites li {
-  padding: 0.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
   font-size: 0.875rem;
+  border-bottom: 1px solid #333;
+}
+
+.pending-invites li:last-child {
+  border-bottom: none;
+}
+
+.invite-email {
   color: #888;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.email-btn {
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.25rem;
+}
+
+.remove-invite-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.remove-invite-btn:hover {
+  color: #f44336;
 }
 
 .pod-settings .hint {

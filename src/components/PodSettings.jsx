@@ -48,6 +48,17 @@ export default function PodSettings({ onClose }) {
     }
   };
 
+  const handleRemoveInvite = async (email) => {
+    try {
+      await podsApi.removeInvite(currentPod.podId, email);
+      const updated = await podsApi.get(currentPod.podId);
+      setPod(updated);
+      setMessage({ type: 'success', text: `Removed invite for ${email}` });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    }
+  };
+
   const handleRemoveMember = async (member) => {
     if (!confirm(`Remove ${member.username} from ${pod.name}?`)) return;
 
@@ -121,7 +132,23 @@ export default function PodSettings({ onClose }) {
                 <h4>Pending Invites</h4>
                 <ul>
                   {pod.invites.map(inv => (
-                    <li key={inv.email}>{inv.email}</li>
+                    <li key={inv.email}>
+                      <span className="invite-email">{inv.email}</span>
+                      <div className="invite-actions">
+                        <a 
+                          href={`mailto:${inv.email}?subject=${encodeURIComponent(`Join ${pod.name} on ListList!`)}&body=${encodeURIComponent(`Hey! I'd like you to join my household on ListList.\n\nJust sign up at https://listless.vercel.app with this email address (${inv.email}) and you'll automatically join.\n\nSee you there!`)}`}
+                          className="email-btn"
+                        >
+                          📧
+                        </a>
+                        <button 
+                          className="remove-invite-btn"
+                          onClick={() => handleRemoveInvite(inv.email)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </li>
                   ))}
                 </ul>
               </div>
