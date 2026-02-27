@@ -93,11 +93,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #333;
+  border-left: 4px solid #ffb74d;
+  margin: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.15s;
 }
 
-.pantry-list .search-results li:last-child {
-  border-bottom: none;
+.pantry-list .search-results li:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .pantry-list .search-results .item-name {
@@ -105,7 +108,8 @@
 }
 
 .pantry-list .search-results .create-new {
-  border-top: 1px solid #444;
+  border-left-color: #4CAF50 !important;
+  background: rgba(76, 175, 80, 0.1);
 }
 
 .pantry-list .search-results .create-new .item-name {
@@ -405,4 +409,46 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* Drag and drop */
+.group-section .item[draggable="true"] {
+  cursor: grab;
+}
+
+.group-section .item[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.group-section .item.dragging {
+  opacity: 0.4;
+  background: #333;
+}
+
+.group-section.drop-target {
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 8px;
+}
+
+.group-section.drop-target .group-header {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+/* Drag handle hint */
+.group-section .item[draggable="true"]::before {
+  content: '⋮⋮';
+  position: absolute;
+  left: 8px;
+  color: #555;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.group-section .item[draggable="true"]:hover::before {
+  opacity: 1;
+}
+
+.group-section .item {
+  position: relative;
 }

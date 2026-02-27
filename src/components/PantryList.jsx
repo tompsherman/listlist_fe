@@ -43,6 +43,8 @@ export default function PantryList() {
   // UI state
   const [groupBy, setGroupBy] = useState('location'); // 'location' | 'category'
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
 
   const fetchList = useCallback(async () => {
     if (!currentPod) return;
@@ -217,6 +219,59 @@ export default function PantryList() {
     );
   };
 
+  // Drag and drop handlers
+  const handleDragStart = (e, item) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', item._id);
+    // Add dragging class after a tick
+    setTimeout(() => {
+      e.target.classList.add('dragging');
+    }, 0);
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.classList.remove('dragging');
+    setDraggedItem(null);
+    setDropTarget(null);
+  };
+
+  const handleDragOver = (e, locationId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dropTarget !== locationId) {
+      setDropTarget(locationId);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    // Only clear if leaving the group entirely
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDropTarget(null);
+    }
+  };
+
+  const handleDrop = async (e, targetLocation) => {
+    e.preventDefault();
+    setDropTarget(null);
+    
+    if (!draggedItem || draggedItem.location === targetLocation) {
+      setDraggedItem(null);
+      return;
+    }
+
+    try {
+      const updated = await listsApi.updateItem(list._id, draggedItem._id, {
+        location: targetLocation,
+      });
+      setItems(prev => prev.map(i => i._id === draggedItem._id ? updated : i));
+    } catch (err) {
+      console.error('Failed to move item:', err);
+    }
+    
+    setDraggedItem(null);
+  };
+
   if (loading) return <div className="pantry-list loading">Loading...</div>;
   if (error) return <div className="pantry-list error">{error}</div>;
 
@@ -361,8 +416,18 @@ export default function PantryList() {
         <p className="empty">No items here yet.</p>
       ) : (
         <div className="grouped-items">
-          {groups.map(group => (
-            <div key={group.id} className="group-section">
+          {groups.map(group => {
+            const isLocationGroup = groupBy === 'location';
+            const isDropTarget = isLocationGroup && dropTarget === group.id;
+            
+            return (
+            <div 
+              key={group.id} 
+              className={`group-section ${isDropTarget ? 'drop-target' : ''}`}
+              onDragOver={isLocationGroup ? (e) => handleDragOver(e, group.id) : undefined}
+              onDragLeave={isLocationGroup ? handleDragLeave : undefined}
+              onDrop={isLocationGroup ? (e) => handleDrop(e, group.id) : undefined}
+            >
               <button 
                 className="group-header"
                 onClick={() => toggleGroup(group.id)}
@@ -385,8 +450,11 @@ export default function PantryList() {
                     return (
                       <li 
                         key={item._id} 
-                        className={`item ${expColor ? `exp-${expColor}` : ''}`}
+                        className={`item ${expColor ? `exp-${expColor}` : ''} ${draggedItem?._id === item._id ? 'dragging' : ''}`}
                         style={{ borderLeftColor: getItemBorderColor(item) }}
+                        draggable={groupBy === 'location'}
+                        onDragStart={(e) => handleDragStart(e, item)}
+                        onDragEnd={handleDragEnd}
                       >
                         <div className="item-info">
                           <span className="name">{item.itemId?.name || 'Unknown'}</span>
@@ -435,7 +503,8 @@ export default function PantryList() {
                 </ul>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
