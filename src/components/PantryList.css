@@ -243,3 +243,166 @@
   color: #666;
   padding: 2rem;
 }
+
+/* Controls row */
+.controls-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Group by toggle */
+.group-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.group-toggle button {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.group-toggle button.active {
+  background: #333;
+  color: #fff;
+}
+
+/* Grouped items */
+.grouped-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.group-section {
+  margin-bottom: 0.25rem;
+}
+
+.group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: #1a1a1a;
+  border: none;
+  border-left: 4px solid #666;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.group-header:hover {
+  background: #222;
+}
+
+.group-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.group-count {
+  background: #333;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.collapse-icon {
+  font-size: 0.625rem;
+  color: #666;
+}
+
+/* Item with category border */
+.group-section .item {
+  border-left: 4px solid #666;
+  padding-left: 0.75rem;
+}
+
+/* Expiration border colors */
+.item.exp-green { border-left-color: #28a745 !important; }
+.item.exp-yellow { border-left-color: #ffc107 !important; }
+.item.exp-red { border-left-color: #dc3545 !important; }
+.item.exp-black { border-left-color: #212529 !important; }
+
+/* Expiry badge colors */
+.expiry-badge.green { background: #d4edda; color: #155724; }
+.expiry-badge.yellow { background: #fff3cd; color: #856404; }
+.expiry-badge.red { background: #f8d7da; color: #721c24; }
+.expiry-badge.black { background: #d6d8db; color: #1b1e21; font-weight: 600; }
+
+/* Uses badge */
+.uses-badge {
+  font-size: 0.7rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* Item actions */
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Eat/Cook buttons */
+.eat-cook-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.eat-btn, .cook-btn {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.eat-btn {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.eat-btn:hover {
+  background: #c8e6c9;
+}
+
+.cook-btn {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.cook-btn:hover {
+  background: #ffe0b2;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 480px) {
+  .pantry-list .item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .item-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
