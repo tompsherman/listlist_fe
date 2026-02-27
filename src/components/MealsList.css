@@ -17,7 +17,7 @@
 .add-dish {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .add-dish input {
@@ -54,54 +54,84 @@
   cursor: not-allowed;
 }
 
-/* Sections */
-.section {
-  margin-bottom: 2rem;
+/* Search bar */
+.search-bar {
+  position: relative;
+  margin-bottom: 1rem;
 }
 
-.section h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-  color: #888;
-}
-
-.section .hint {
-  margin: 0 0 1rem 0;
+.search-bar input {
+  width: 100%;
+  padding: 0.625rem 2rem 0.625rem 1rem;
   font-size: 0.875rem;
-  color: #666;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
 }
 
-/* Dish Grid */
-.dish-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
+.search-bar input:focus {
+  outline: none;
+  border-color: #666;
 }
 
-.dish-card {
+.clear-search {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.clear-search:hover {
+  color: #fff;
+}
+
+/* Dish list */
+.dish-list {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  background: #2a2a2a;
-  border: 2px solid #333;
+  gap: 0.5rem;
+}
+
+/* Dish card */
+.dish-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
   border-radius: 8px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s;
+  overflow: hidden;
 }
 
-.dish-card:hover {
+.dish-card.expanded {
   border-color: #e57373;
-  background: #333;
 }
 
-.dish-card:active {
-  transform: scale(0.98);
+.dish-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.dish-header:hover {
+  background: #222;
+}
+
+.dish-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .dish-name {
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  font-size: 1rem;
 }
 
 .dish-meta {
@@ -109,34 +139,171 @@
   color: #888;
 }
 
-/* Manage List */
-.dish-manage-list {
+/* Ingredient dots */
+.ingredient-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.ingredient-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.more-dots {
+  font-size: 0.625rem;
+  color: #666;
+}
+
+/* Dish actions */
+.dish-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dish-actions .cook-btn {
+  padding: 0.375rem 0.625rem;
+  background: #fff3e0;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.dish-actions .cook-btn:hover {
+  background: #ffe0b2;
+}
+
+.expand-icon {
+  font-size: 0.625rem;
+  color: #666;
+}
+
+/* Expanded view */
+.dish-expanded {
+  border-top: 1px solid #333;
+  padding: 1rem;
+  background: #222;
+}
+
+.ingredients-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+/* Ingredient search */
+.ingredient-search {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.ingredient-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.ingredient-search input:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.ingredient-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ingredient-results li {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-left: 3px solid #666;
+}
+
+.ingredient-results li:hover {
+  background: #333;
+}
+
+/* Ingredients list */
+.ingredients-list {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.dish-manage-list li {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #333;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.dish-manage-list .name {
+.ingredients-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  background: #1a1a1a;
+  border-left: 3px solid #666;
+  border-radius: 4px;
   font-size: 0.875rem;
 }
 
-.delete-btn {
+.ingredients-list .remove-ing {
   background: none;
   border: none;
   color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.ingredients-list .remove-ing:hover {
+  color: #f44336;
+}
+
+.no-ingredients {
+  color: #666;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Dish footer */
+.dish-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #333;
+}
+
+.dish-footer .delete-btn {
+  background: none;
+  border: 1px solid #666;
+  color: #888;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
   font-size: 0.75rem;
   cursor: pointer;
 }
 
-.delete-btn:hover {
+.dish-footer .delete-btn:hover {
+  border-color: #f44336;
   color: #f44336;
 }
 

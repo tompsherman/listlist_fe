@@ -1,11 +1,13 @@
 /**
  * Meals List Component
- * Quick meal logging + dish management
+ * Quick meal logging + dish management with ingredients
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import { dishesApi } from '../services/dishes';
+import { itemsApi } from '../services/items';
+import { getCategoryColor } from '../utils/categories';
 import './MealsList.css';
 
 export default function MealsList() {
@@ -15,6 +17,14 @@ export default function MealsList() {
   const [error, setError] = useState(null);
   const [newDishName, setNewDishName] = useState('');
   const [adding, setAdding] = useState(false);
+  
+  // Search/filter
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Expanded dish for editing
+  const [expandedDish, setExpandedDish] = useState(null);
+  const [ingredientSearch, setIngredientSearch] = useState('');
+  const [ingredientResults, setIngredientResults] = useState([]);
 
   const fetchDishes = useCallback(async () => {
     if (!currentPod) return;
@@ -55,7 +65,8 @@ export default function MealsList() {
     }
   };
 
-  const handleCook = async (dish) => {
+  const handleCook = async (dish, e) => {
+    e?.stopPropagation();
     try {
       const updated = await dishesApi.cook(dish._id);
       setDishes(prev => prev.map(d => d._id === dish._id ? updated : d));
@@ -64,14 +75,75 @@ export default function MealsList() {
     }
   };
 
-  const handleDelete = async (dish) => {
+  const handleDelete = async (dish, e) => {
+    e?.stopPropagation();
     if (!confirm(`Delete "${dish.name}"?`)) return;
     
     try {
       await dishesApi.delete(dish._id);
       setDishes(prev => prev.filter(d => d._id !== dish._id));
+      if (expandedDish?._id === dish._id) setExpandedDish(null);
     } catch (err) {
       console.error('Failed to delete dish:', err);
+    }
+  };
+
+  // Ingredient search
+  const handleIngredientSearch = async (q) => {
+    setIngredientSearch(q);
+    if (q.length < 2) {
+      setIngredientResults([]);
+      return;
+    }
+    
+    try {
+      const results = await itemsApi.search({ q, limit: 10 });
+      setIngredientResults(results);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  // Add ingredient to dish
+  const handleAddIngredient = async (item) => {
+    if (!expandedDish) return;
+    
+    const newIngredient = {
+      itemId: item._id,
+      name: item.name,
+      category: item.category,
+      quantity: 1,
+    };
+    
+    const updatedIngredients = [...(expandedDish.ingredients || []), newIngredient];
+    
+    try {
+      const updated = await dishesApi.update(expandedDish._id, {
+        ingredients: updatedIngredients,
+      });
+      setDishes(prev => prev.map(d => d._id === updated._id ? updated : d));
+      setExpandedDish(updated);
+      setIngredientSearch('');
+      setIngredientResults([]);
+    } catch (err) {
+      console.error('Failed to add ingredient:', err);
+    }
+  };
+
+  // Remove ingredient from dish
+  const handleRemoveIngredient = async (index) => {
+    if (!expandedDish) return;
+    
+    const updatedIngredients = expandedDish.ingredients.filter((_, i) => i !== index);
+    
+    try {
+      const updated = await dishesApi.update(expandedDish._id, {
+        ingredients: updatedIngredients,
+      });
+      setDishes(prev => prev.map(d => d._id === updated._id ? updated : d));
+      setExpandedDish(updated);
+    } catch (err) {
+      console.error('Failed to remove ingredient:', err);
     }
   };
 
@@ -86,6 +158,12 @@ export default function MealsList() {
     if (diffDays < 7) return `${diffDays} days ago`;
     return d.toLocaleDateString();
   };
+
+  // Filter dishes by search
+  const filteredDishes = dishes.filter(d => 
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.ingredients?.some(i => i.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   if (loading) return <div className="meals-list loading">Loading...</div>;
   if (error) return <div className="meals-list error">{error}</div>;
@@ -106,46 +184,137 @@ export default function MealsList() {
         </button>
       </form>
 
-      {/* Quick Cook */}
-      <div className="section">
-        <h3>Quick Cook</h3>
-        <p className="hint">Tap a dish to log that you made it</p>
-        
-        {dishes.length === 0 ? (
-          <p className="empty">No dishes yet. Add some above!</p>
-        ) : (
-          <div className="dish-grid">
-            {dishes.map(dish => (
-              <button
-                key={dish._id}
-                className="dish-card"
-                onClick={() => handleCook(dish)}
-              >
-                <span className="dish-name">{dish.name}</span>
-                <span className="dish-meta">
-                  {dish.timesMade > 0 && `Made ${dish.timesMade}× • `}
-                  {formatDate(dish.lastMade)}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Search */}
+      {dishes.length > 3 && (
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="🔍 Search dishes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="clear-search" onClick={() => setSearchQuery('')}>×</button>
+          )}
+        </div>
+      )}
 
-      {/* Manage Dishes */}
-      {dishes.length > 0 && (
-        <div className="section">
-          <h3>Manage Dishes</h3>
-          <ul className="dish-manage-list">
-            {dishes.map(dish => (
-              <li key={dish._id}>
-                <span className="name">{dish.name}</span>
-                <button className="delete-btn" onClick={() => handleDelete(dish)}>
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* Dishes */}
+      {filteredDishes.length === 0 ? (
+        <p className="empty">
+          {dishes.length === 0 ? 'No dishes yet. Add some above!' : 'No dishes match your search.'}
+        </p>
+      ) : (
+        <div className="dish-list">
+          {filteredDishes.map(dish => (
+            <div 
+              key={dish._id} 
+              className={`dish-card ${expandedDish?._id === dish._id ? 'expanded' : ''}`}
+            >
+              <div 
+                className="dish-header"
+                onClick={() => setExpandedDish(expandedDish?._id === dish._id ? null : dish)}
+              >
+                <div className="dish-info">
+                  <span className="dish-name">{dish.name}</span>
+                  <span className="dish-meta">
+                    {dish.timesMade > 0 && `${dish.timesMade}× • `}
+                    {formatDate(dish.lastMade)}
+                  </span>
+                  {dish.ingredients?.length > 0 && (
+                    <div className="ingredient-dots">
+                      {dish.ingredients.slice(0, 5).map((ing, i) => (
+                        <span 
+                          key={i} 
+                          className="dot"
+                          style={{ backgroundColor: getCategoryColor(ing.category) }}
+                          title={ing.name}
+                        />
+                      ))}
+                      {dish.ingredients.length > 5 && (
+                        <span className="more-dots">+{dish.ingredients.length - 5}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="dish-actions">
+                  <button 
+                    className="cook-btn"
+                    onClick={(e) => handleCook(dish, e)}
+                    title="Log cook"
+                  >
+                    🍳
+                  </button>
+                  <span className="expand-icon">
+                    {expandedDish?._id === dish._id ? '▼' : '▶'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Expanded view - ingredients */}
+              {expandedDish?._id === dish._id && (
+                <div className="dish-expanded">
+                  <div className="ingredients-section">
+                    <h4>Ingredients</h4>
+                    
+                    {/* Add ingredient search */}
+                    <div className="ingredient-search">
+                      <input
+                        type="text"
+                        placeholder="Add ingredient..."
+                        value={ingredientSearch}
+                        onChange={(e) => handleIngredientSearch(e.target.value)}
+                      />
+                      {ingredientResults.length > 0 && (
+                        <ul className="ingredient-results">
+                          {ingredientResults.map(item => (
+                            <li 
+                              key={item._id}
+                              onClick={() => handleAddIngredient(item)}
+                              style={{ borderLeftColor: getCategoryColor(item.category) }}
+                            >
+                              {item.name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    {/* Ingredient list */}
+                    {dish.ingredients?.length > 0 ? (
+                      <ul className="ingredients-list">
+                        {dish.ingredients.map((ing, i) => (
+                          <li 
+                            key={i}
+                            style={{ borderLeftColor: getCategoryColor(ing.category) }}
+                          >
+                            <span className="ing-name">{ing.name}</span>
+                            <button 
+                              className="remove-ing"
+                              onClick={() => handleRemoveIngredient(i)}
+                            >
+                              ×
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="no-ingredients">No ingredients added yet</p>
+                    )}
+                  </div>
+
+                  <div className="dish-footer">
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => handleDelete(dish, e)}
+                    >
+                      🗑️ Delete Dish
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
