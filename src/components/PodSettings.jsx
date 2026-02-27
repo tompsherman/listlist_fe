@@ -9,7 +9,7 @@ import { podsApi } from '../services/pods';
 import './PodSettings.css';
 
 export default function PodSettings({ onClose }) {
-  const { currentPod, user, refetch } = useUser();
+  const { currentPod, user, switchPod, refetch } = useUser();
   const [pod, setPod] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -160,8 +160,27 @@ export default function PodSettings({ onClose }) {
         {user?.pods?.length > 1 && (
           <section>
             <h3>Switch Pod</h3>
-            <p className="hint">You're in {user.pods.length} pods</p>
-            {/* TODO: Pod switcher UI */}
+            <ul className="pod-list">
+              {user.pods.map(p => (
+                <li 
+                  key={p.podId} 
+                  className={p.podId === currentPod?.podId ? 'active' : ''}
+                >
+                  <button 
+                    className="pod-switch-btn"
+                    onClick={() => {
+                      switchPod(p.podId);
+                      onClose();
+                    }}
+                    disabled={p.podId === currentPod?.podId}
+                  >
+                    <span className="pod-name">{p.podName}</span>
+                    <span className="pod-role">{p.role}</span>
+                    {p.podId === currentPod?.podId && <span className="current-badge">✓</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </div>

@@ -226,3 +226,57 @@
   color: #666;
   margin: 0;
 }
+
+/* Pod Switcher */
+.pod-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pod-list li.active .pod-switch-btn {
+  background: #2a2a2a;
+  border-color: #4CAF50;
+}
+
+.pod-switch-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pod-switch-btn:hover:not(:disabled) {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.pod-switch-btn:disabled {
+  cursor: default;
+}
+
+.pod-switch-btn .pod-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.pod-switch-btn .pod-role {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
+.pod-switch-btn .current-badge {
+  color: #4CAF50;
+  font-size: 1rem;
+}
