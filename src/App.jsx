@@ -15,24 +15,26 @@ import NotFound from './pages/NotFound';
 function AppContent() {
   const { user, loading, error, needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
 
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  // DISABLED: Loading gate removed - show app immediately, let data load in background
+  // if (loading) {
+  //   return (
+  //     <div className="loading-screen">
+  //       <div className="loading-spinner" />
+  //       <p>Loading...</p>
+  //     </div>
+  //   );
+  // }
 
-  if (error) {
-    return (
-      <div className="error-screen">
-        <h2>Something went wrong</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
-      </div>
-    );
-  }
+  // DISABLED: Error screen - errors will be handled by individual components
+  // if (error) {
+  //   return (
+  //     <div className="error-screen">
+  //       <h2>Something went wrong</h2>
+  //       <p>{error}</p>
+  //       <button onClick={() => window.location.reload()}>Retry</button>
+  //     </div>
+  //   );
+  // }
 
   if (needsOnboarding) {
     return <Onboarding 
