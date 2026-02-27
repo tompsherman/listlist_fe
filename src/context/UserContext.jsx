@@ -1,15 +1,24 @@
 /**
  * User Context
  * Manages user profile, onboarding state, current pod, and permissions
+ * 
+ * Cold Start Handling:
+ * - Shows cached data immediately while server wakes
+ * - Retries with exponential backoff on NETWORK_ERROR
+ * - Only shows error if no cache AND all retries fail
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import api, { setTokenGetter } from '../services/api';
 import { podsApi } from '../services/pods';
 import { getCached, setCache, clearCache } from '../utils/cache';
 
 const UserContext = createContext(null);
+
+// Retry config for cold start
+const RETRY_DELAYS = [2000, 4000, 8000]; // 2s, 4s, 8s
+const MAX_RETRIES = 3;
 
 export function UserProvider({ children }) {
   const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
@@ -19,6 +28,10 @@ export function UserProvider({ children }) {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [serverWaking, setServerWaking] = useState(false);
+  
+  const retryCount = useRef(0);
+  const retryTimeout = useRef(null);
 
   // Set up token getter for API service
   useEffect(() => {
@@ -27,14 +40,17 @@ export function UserProvider({ children }) {
     }
   }, [isAuthenticated, getAccessTokenSilently]);
 
-  // Fetch user profile when authenticated
-  const fetchUser = useCallback(async () => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
+  // Cleanup retry timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (retryTimeout.current) {
+        clearTimeout(retryTimeout.current);
+      }
+    };
+  }, []);
 
-    // Show cached data immediately
+  // Load cached data on mount (before fetch)
+  useEffect(() => {
     const cached = getCached('user');
     if (cached && !cached.needsOnboarding) {
       setUser(cached);
@@ -44,14 +60,35 @@ export function UserProvider({ children }) {
         const pod = cached.pods.find(p => p.podId === savedPodId) || cached.pods[0];
         setCurrentPod(pod);
       }
+      // Don't set loading=false yet, let fetch complete
+    }
+  }, []);
+
+  // Fetch user profile when authenticated
+  const fetchUser = useCallback(async (isRetry = false) => {
+    if (!isAuthenticated) {
       setLoading(false);
+      return;
+    }
+
+    const cached = getCached('user');
+    
+    // Only show loading spinner if no cached data
+    if (!cached && !isRetry) {
+      setLoading(true);
+    }
+    
+    if (!isRetry) {
+      setError(null);
+      retryCount.current = 0;
     }
 
     try {
-      if (!cached) setLoading(true);
-      setError(null);
-      
       let response = await api.get('/api/me');
+      
+      // Success! Clear retry state
+      setServerWaking(false);
+      retryCount.current = 0;
       
       if (response.needsOnboarding) {
         setNeedsOnboarding(true);
@@ -80,9 +117,39 @@ export function UserProvider({ children }) {
           setCurrentPod(pod);
         }
       }
+      setError(null);
     } catch (err) {
       console.error('Failed to fetch user:', err);
-      setError(err.message);
+      
+      // Handle cold start (NETWORK_ERROR or timeout)
+      const isNetworkError = err.code === 'NETWORK_ERROR' || err.status === 0;
+      
+      if (isNetworkError && retryCount.current < MAX_RETRIES) {
+        // Server might be waking up - retry with backoff
+        setServerWaking(true);
+        const delay = RETRY_DELAYS[retryCount.current] || 8000;
+        retryCount.current++;
+        
+        console.log(`Server waking, retry ${retryCount.current}/${MAX_RETRIES} in ${delay}ms`);
+        
+        retryTimeout.current = setTimeout(() => {
+          fetchUser(true);
+        }, delay);
+        
+        // Don't set error if we have cached data
+        if (!cached) {
+          setError('Server is waking up... please wait');
+        }
+        return;
+      }
+      
+      // All retries failed
+      setServerWaking(false);
+      
+      // Only set error if no cached data
+      if (!cached) {
+        setError(err.message || 'Unable to connect to server');
+      }
     } finally {
       setLoading(false);
     }
@@ -126,6 +193,7 @@ export function UserProvider({ children }) {
     currentPod,
     loading,
     error,
+    serverWaking,
     needsOnboarding,
     completeOnboarding,
     switchPod,
@@ -140,6 +208,8 @@ export function UserProvider({ children }) {
     canShop: hasPermission('SHOP_ITEMS'),
     canCook: hasPermission('COOK_DISHES'),
     canManageMembers: hasPermission('MANAGE_MEMBERS'),
+    // Cache state
+    hasCachedData: !!getCached('user'),
   };
 
   return (

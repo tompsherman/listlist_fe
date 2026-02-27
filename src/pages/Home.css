@@ -15,6 +15,32 @@
   text-align: center;
 }
 
+/* Server waking banner - subtle reconnecting indicator */
+.server-waking-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-warning, #ffc107);
+  color: #000;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .home-header {
   display: flex;
   justify-content: space-between;
