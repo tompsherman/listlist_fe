@@ -52,6 +52,7 @@ export function UserProvider({ children }) {
   }, []);
 
   // Load cached data on mount (before fetch)
+  // If we have valid cached data, show it immediately (no loading screen)
   useEffect(() => {
     const cached = getCached('user');
     if (cached && !cached.needsOnboarding) {
@@ -62,7 +63,7 @@ export function UserProvider({ children }) {
         const pod = cached.pods.find(p => p.podId === savedPodId) || cached.pods[0];
         setCurrentPod(pod);
       }
-      // Don't set loading=false yet, let fetch complete
+      setLoading(false); // Show cached data immediately, fetch updates silently
     }
   }, []);
 
