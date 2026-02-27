@@ -13,7 +13,7 @@ import Onboarding from './pages/Onboarding';
 import NotFound from './pages/NotFound';
 
 function AppContent() {
-  const { user, loading, error, needsOnboarding, completeOnboarding } = useUser();
+  const { user, loading, error, needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
 
   if (loading) {
     return (
@@ -35,7 +35,11 @@ function AppContent() {
   }
 
   if (needsOnboarding) {
-    return <Onboarding onComplete={completeOnboarding} />;
+    return <Onboarding 
+      onComplete={completeOnboarding} 
+      hasPendingInvites={hasPendingInvites}
+      invitedPods={invitedPods}
+    />;
   }
 
   return (

@@ -1,13 +1,14 @@
 /**
  * Onboarding Page
  * New user setup: username, pod name, invite emails
+ * OR simplified flow for invited users (just username)
  */
 
 import { useState } from 'react';
 import api from '../services/api';
 import './Onboarding.css';
 
-export default function Onboarding({ onComplete }) {
+export default function Onboarding({ onComplete, hasPendingInvites = false, invitedPods = [] }) {
   const [username, setUsername] = useState('');
   const [podName, setPodName] = useState('');
   const [invite1, setInvite1] = useState('');
@@ -22,7 +23,9 @@ export default function Onboarding({ onComplete }) {
       setError('Please enter your name');
       return;
     }
-    if (!podName.trim()) {
+    
+    // Invited users don't need pod name
+    if (!hasPendingInvites && !podName.trim()) {
       setError('Please name your pod');
       return;
     }
@@ -31,13 +34,21 @@ export default function Onboarding({ onComplete }) {
     setError(null);
 
     try {
-      const inviteEmails = [invite1, invite2].filter(e => e.trim());
-      
-      await api.post('/api/signup', {
-        username: username.trim(),
-        podName: podName.trim(),
-        inviteEmails,
-      });
+      if (hasPendingInvites) {
+        // Invited user - just create account and join pods
+        await api.post('/api/signup/accept', {
+          username: username.trim(),
+        });
+      } else {
+        // New user - create account with new pod
+        const inviteEmails = [invite1, invite2].filter(e => e.trim());
+        
+        await api.post('/api/signup', {
+          username: username.trim(),
+          podName: podName.trim(),
+          inviteEmails,
+        });
+      }
 
       onComplete();
     } catch (err) {
@@ -48,10 +59,48 @@ export default function Onboarding({ onComplete }) {
     }
   };
 
+  // Simplified flow for invited users
+  if (hasPendingInvites) {
+    const podNames = invitedPods.map(p => p.name).join(', ');
+    
+    return (
+      <div className="onboarding">
+        <div className="onboarding-card">
+          <h1>You're Invited! 🫛</h1>
+          <p className="subtitle">
+            Join <strong>{podNames}</strong>
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label htmlFor="username">Your Name *</label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g., Tom"
+                autoFocus
+                disabled={loading}
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? 'Joining...' : '🫛 Join Pod'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Full onboarding for new users
   return (
     <div className="onboarding">
       <div className="onboarding-card">
-        <h1>Welcome to ListList! 🥕</h1>
+        <h1>Welcome to ListList! 🫛</h1>
         <p className="subtitle">Let's set up your kitchen</p>
 
         <form onSubmit={handleSubmit}>

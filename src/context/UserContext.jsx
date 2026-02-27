@@ -26,6 +26,8 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [currentPod, setCurrentPod] = useState(null);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [hasPendingInvites, setHasPendingInvites] = useState(false);
+  const [invitedPods, setInvitedPods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [serverWaking, setServerWaking] = useState(false);
@@ -92,6 +94,8 @@ export function UserProvider({ children }) {
       
       if (response.needsOnboarding) {
         setNeedsOnboarding(true);
+        setHasPendingInvites(response.hasPendingInvites || false);
+        setInvitedPods(response.invitedPods || []);
         setUser(null);
       } else {
         // Auto-join any pending pod invites
@@ -195,6 +199,8 @@ export function UserProvider({ children }) {
     error,
     serverWaking,
     needsOnboarding,
+    hasPendingInvites,
+    invitedPods,
     completeOnboarding,
     switchPod,
     hasPermission,
