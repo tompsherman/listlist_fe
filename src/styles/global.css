@@ -154,3 +154,71 @@ html {
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* ============================================
+   Category Colors (v1 palette)
+   ============================================ */
+
+/* Background colors for cards/badges */
+.category-vegetable { background-color: #228B22; color: #fff; }
+.category-herbs { background-color: #8B7355; color: #fff; }
+.category-fruit { background-color: #9ACD32; color: #000; }
+.category-grains { background-color: #DAA520; color: #000; }
+.category-meat { background-color: #F08080; color: #000; }
+.category-dairy { background-color: #FFFAF0; color: #000; }
+.category-leftovers { background-color: #9370DB; color: #fff; }
+.category-household { background-color: #ADD8E6; color: #000; }
+.category-drinks { background-color: #BDB76B; color: #000; }
+.category-snack { background-color: #FF6347; color: #fff; }
+.category-other { background-color: #888; color: #fff; }
+
+/* Border colors for list items */
+.border-vegetable { border-left-color: #228B22 !important; }
+.border-herbs { border-left-color: #8B7355 !important; }
+.border-fruit { border-left-color: #9ACD32 !important; }
+.border-grains { border-left-color: #DAA520 !important; }
+.border-meat { border-left-color: #F08080 !important; }
+.border-dairy { border-left-color: #FFFAF0 !important; }
+.border-leftovers { border-left-color: #9370DB !important; }
+.border-household { border-left-color: #ADD8E6 !important; }
+.border-drinks { border-left-color: #BDB76B !important; }
+.border-snack { border-left-color: #FF6347 !important; }
+.border-other { border-left-color: #888 !important; }
+
+/* Light backgrounds for card styling */
+.bg-light-vegetable { background-color: rgba(34, 139, 34, 0.15); }
+.bg-light-herbs { background-color: rgba(139, 115, 85, 0.15); }
+.bg-light-fruit { background-color: rgba(154, 205, 50, 0.15); }
+.bg-light-grains { background-color: rgba(218, 165, 32, 0.15); }
+.bg-light-meat { background-color: rgba(240, 128, 128, 0.15); }
+.bg-light-dairy { background-color: rgba(255, 250, 240, 0.3); }
+.bg-light-leftovers { background-color: rgba(147, 112, 219, 0.15); }
+.bg-light-household { background-color: rgba(173, 216, 230, 0.15); }
+.bg-light-drinks { background-color: rgba(189, 183, 107, 0.15); }
+.bg-light-snack { background-color: rgba(255, 99, 71, 0.15); }
+
+/* Expiration status colors */
+.exp-fresh, .exp-green { border-color: #28a745 !important; }
+.exp-warning, .exp-yellow { border-color: #ffc107 !important; }
+.exp-urgent, .exp-red { border-color: #dc3545 !important; }
+.exp-expired, .exp-black { border-color: #212529 !important; }
+
+/* Reconnecting banner */
+.reconnecting-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff3cd;
+  color: #856404;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  z-index: 1000;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
