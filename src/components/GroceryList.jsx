@@ -14,7 +14,7 @@ import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
 import { getCached, setCache } from '../utils/cache';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
-import { CollapsibleCard, Button, SearchBar, Badge } from './ui';
+import { CollapsibleCard, Button, Badge } from './ui';
 import './GroceryList.css';
 
 export default function GroceryList() {
@@ -279,10 +279,12 @@ export default function GroceryList() {
       {/* Add Item Search (only in add mode) */}
       {mode === 'add' && (
         <div className="add-item">
-          <SearchBar
+          <input
+            type="text"
             value={searchQuery}
-            onChange={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search items..."
+            className="search-input"
           />
           {(searchResults.length > 0 || searchQuery.length >= 2) && (
             <ul className="search-results">
