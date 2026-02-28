@@ -1,6 +1,7 @@
 /**
  * Dev Route - Component Showcase
  * Internal Storybook alternative
+ * Updated: 2026-02-27
  */
 
 import { useState, useEffect, useRef } from 'react';
