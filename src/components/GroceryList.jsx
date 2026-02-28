@@ -1,7 +1,11 @@
 /**
- * Grocery List Component
- * Shows items with checkboxes, add new items
- * Grouped by category with v1 color system
+ * Grocery List Component - V1 Logic Restored
+ * 
+ * Two modes:
+ * - Add Mode: Search and add items, view as collapsed cards
+ * - Shop Mode: Range sliders to mark quantities acquired
+ * 
+ * Done Shopping: Splits acquired → pantry, remainder → grocery
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +14,7 @@ import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
 import { getCached, setCache } from '../utils/cache';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
+import { CollapsibleCard, Button, SearchBar, Badge } from './ui';
 import './GroceryList.css';
 
 export default function GroceryList() {
@@ -19,14 +24,16 @@ export default function GroceryList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  // Mode state
+  const [mode, setMode] = useState('view'); // 'view', 'add', 'shop'
+  
   // Add item state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   
-  // UI state
-  const [shoppingMode, setShoppingMode] = useState(false);
-  const [collapsedCategories, setCollapsedCategories] = useState({});
+  // Shopping cart state (tracks slider values)
+  const [cart, setCart] = useState({});
 
   // Fetch grocery list
   const fetchList = useCallback(async () => {
@@ -62,6 +69,20 @@ export default function GroceryList() {
   useEffect(() => {
     fetchList();
   }, [fetchList]);
+
+  // Initialize cart when entering shop mode
+  useEffect(() => {
+    if (mode === 'shop') {
+      const initialCart = {};
+      items.forEach(item => {
+        initialCart[item._id] = {
+          acquired: 0,
+          needed: item.quantity || 1,
+        };
+      });
+      setCart(initialCart);
+    }
+  }, [mode, items]);
 
   // Search catalog
   const handleSearch = async (q) => {
@@ -114,15 +135,16 @@ export default function GroceryList() {
     }
   };
 
-  // Toggle checked
-  const handleToggle = async (listItem) => {
+  // Update quantity in add mode
+  const handleQuantityChange = async (listItem, delta) => {
+    const newQty = Math.max(1, (listItem.quantity || 1) + delta);
     try {
       const updated = await listsApi.updateItem(list._id, listItem._id, {
-        checked: !listItem.checked,
+        quantity: newQty,
       });
       setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
     } catch (err) {
-      console.error('Failed to toggle item:', err);
+      console.error('Failed to update quantity:', err);
     }
   };
 
@@ -136,25 +158,73 @@ export default function GroceryList() {
     }
   };
 
-  // Update quantity
-  const handleQuantityChange = async (listItem, delta) => {
-    const newQty = Math.max(1, (listItem.quantity || 1) + delta);
-    try {
-      const updated = await listsApi.updateItem(list._id, listItem._id, {
-        quantity: newQty,
-      });
-      setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
-    } catch (err) {
-      console.error('Failed to update quantity:', err);
-    }
+  // Update slider in shop mode
+  const handleSliderChange = (itemId, value) => {
+    setCart(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        acquired: parseInt(value, 10),
+      },
+    }));
   };
 
-  // Toggle category collapse
-  const toggleCategory = (category) => {
-    setCollapsedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+  // Done Shopping - split items between pantry and grocery
+  const handleDoneShopping = async () => {
+    if (!list) return;
+
+    try {
+      // Separate fully acquired, partially acquired, and not acquired
+      const toMove = []; // Items to move to pantry
+      const toKeep = []; // Items to keep on grocery (with reduced qty)
+      
+      items.forEach(item => {
+        const cartItem = cart[item._id];
+        if (!cartItem) return;
+        
+        const acquired = cartItem.acquired;
+        const needed = cartItem.needed;
+        
+        if (acquired > 0) {
+          // Move acquired amount to pantry
+          toMove.push({
+            itemId: item.itemId?._id || item.itemId,
+            quantity: acquired,
+            name: item.itemId?.name || 'Unknown',
+          });
+        }
+        
+        if (acquired < needed) {
+          // Keep remainder on grocery
+          toKeep.push({
+            ...item,
+            newQuantity: needed - acquired,
+          });
+        }
+      });
+
+      // Use checkout endpoint if available, or manual update
+      if (toMove.length > 0) {
+        await listsApi.checkout(list._id);
+      }
+
+      // Update remaining items
+      for (const item of toKeep) {
+        if (item.newQuantity > 0) {
+          await listsApi.updateItem(list._id, item._id, {
+            quantity: item.newQuantity,
+            checked: false,
+          });
+        }
+      }
+
+      // Refresh list
+      await fetchList();
+      setMode('view');
+      
+    } catch (err) {
+      console.error('Done shopping failed:', err);
+    }
   };
 
   // Group items by category
@@ -165,27 +235,12 @@ export default function GroceryList() {
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     });
-    // Sort categories in standard order
     return CATEGORIES.filter(c => groups[c]).map(c => ({
       category: c,
       items: groups[c],
     })).concat(
       groups.other ? [{ category: 'other', items: groups.other }] : []
     );
-  };
-
-  // Move checked items to pantry
-  const handleCheckout = async () => {
-    if (!list || checked.length === 0) return;
-    
-    try {
-      const result = await listsApi.checkout(list._id);
-      // Remove checked items from local state
-      setItems(prev => prev.filter(i => !i.checked));
-      alert(result.message || `Moved ${checked.length} items to pantry!`);
-    } catch (err) {
-      console.error('Checkout failed:', err);
-    }
   };
 
   if (loading) {
@@ -196,35 +251,44 @@ export default function GroceryList() {
     return <div className="grocery-list error">{error}</div>;
   }
 
-  const unchecked = items.filter(i => !i.checked);
-  const checked = items.filter(i => i.checked);
-  const groupedUnchecked = groupByCategory(unchecked);
+  const grouped = groupByCategory(items);
 
   return (
     <div className="grocery-list">
-      {/* Header with mode toggle */}
+      {/* Mode Toggle Buttons */}
       <div className="list-header">
-        <button 
-          className={`mode-toggle ${shoppingMode ? 'shopping' : ''}`}
-          onClick={() => setShoppingMode(!shoppingMode)}
+        <Button 
+          variant={mode === 'add' ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => setMode(mode === 'add' ? 'view' : 'add')}
         >
-          {shoppingMode ? '🛒 Shopping' : '📝 Edit'}
-        </button>
-        {checked.length > 0 && (
-          <button className="checkout-btn" onClick={handleCheckout}>
-            ✓ Add {checked.length} to Pantry
-          </button>
+          {mode === 'add' ? '✕ Close' : '+ Add Item'}
+        </Button>
+        <Button 
+          variant={mode === 'shop' ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => setMode(mode === 'shop' ? 'view' : 'shop')}
+        >
+          {mode === 'shop' ? '✕ Cancel' : '🛒 Go Shop'}
+        </Button>
+        {mode === 'shop' && (
+          <Button 
+            variant="primary"
+            size="sm"
+            onClick={handleDoneShopping}
+          >
+            ✓ Done Shopping
+          </Button>
         )}
       </div>
 
-      {/* Add Item (hide in shopping mode) */}
-      {!shoppingMode && (
+      {/* Add Item Search (only in add mode) */}
+      {mode === 'add' && (
         <div className="add-item">
-          <input
-            type="text"
-            placeholder="Add item..."
+          <SearchBar
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={handleSearch}
+            placeholder="Search items..."
           />
           {(searchResults.length > 0 || searchQuery.length >= 2) && (
             <ul className="search-results">
@@ -235,7 +299,7 @@ export default function GroceryList() {
                   style={{ borderLeftColor: getCategoryColor(item.category) }}
                 >
                   {item.name}
-                  <span className="category">{item.category}</span>
+                  <Badge size="sm">{item.category}</Badge>
                 </li>
               ))}
               {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && (
@@ -248,103 +312,85 @@ export default function GroceryList() {
         </div>
       )}
 
-      {/* Items grouped by category */}
-      {unchecked.length === 0 && checked.length === 0 ? (
+      {/* Items */}
+      {items.length === 0 ? (
         <p className="empty">Your grocery list is empty. Add some items!</p>
-      ) : (
-        <>
-          {groupedUnchecked.map(({ category, items: catItems }) => (
+      ) : mode === 'shop' ? (
+        /* SHOP MODE - Range Sliders */
+        <div className="shop-mode">
+          {grouped.map(({ category, items: catItems }) => (
             <div key={category} className="category-section">
-              <button 
-                className="category-header"
-                onClick={() => toggleCategory(category)}
-                style={{ borderLeftColor: getCategoryColor(category) }}
-              >
-                <span className="category-name">{category}</span>
-                <span className="category-count">{catItems.length}</span>
-                <span className="collapse-icon">
-                  {collapsedCategories[category] ? '▶' : '▼'}
-                </span>
-              </button>
-              
-              {!collapsedCategories[category] && (
-                <ul className="items">
-                  {catItems.map(item => (
-                    <li 
+              <h3 style={{ borderLeftColor: getCategoryColor(category) }}>
+                {category}
+              </h3>
+              <div className="shop-items">
+                {catItems.map(item => {
+                  const cartItem = cart[item._id] || { acquired: 0, needed: item.quantity || 1 };
+                  const isFulfilled = cartItem.acquired >= cartItem.needed;
+                  
+                  return (
+                    <div 
                       key={item._id} 
-                      className="item"
-                      style={{ borderLeftColor: getCategoryColor(item.itemId?.category) }}
+                      className={`shop-item ${isFulfilled ? 'fulfilled' : ''}`}
                     >
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={false}
-                          onChange={() => handleToggle(item)}
-                        />
-                        <span className="name">{item.itemId?.name || 'Unknown'}</span>
-                      </label>
-                      <div className="item-controls">
-                        {!shoppingMode && (
-                          <div className="qty-controls">
-                            <button onClick={() => handleQuantityChange(item, -1)}>−</button>
-                            <span className="qty">{item.quantity || 1}</span>
-                            <button onClick={() => handleQuantityChange(item, 1)}>+</button>
-                          </div>
-                        )}
-                        {shoppingMode && item.quantity > 1 && (
-                          <span className="qty-badge">×{item.quantity}</span>
-                        )}
-                        {!shoppingMode && (
-                          <button className="remove" onClick={() => handleRemove(item)}>×</button>
-                        )}
+                      <div className="item-info">
+                        <span className={isFulfilled ? 'strikethrough' : ''}>
+                          {item.itemId?.name || 'Unknown'}
+                        </span>
+                        <span className="qty-display">
+                          {cartItem.acquired} / {cartItem.needed}
+                        </span>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                      <input
+                        type="range"
+                        min="0"
+                        max={cartItem.needed}
+                        value={cartItem.acquired}
+                        onChange={(e) => handleSliderChange(item._id, e.target.value)}
+                        className="qty-slider"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
-
-          {/* Checked Items */}
-          {checked.length > 0 && (
-            <div className="category-section checked-section">
-              <button 
-                className="category-header checked"
-                onClick={() => toggleCategory('_checked')}
-              >
-                <span className="category-name">✓ In Cart</span>
-                <span className="category-count">{checked.length}</span>
-                <span className="collapse-icon">
-                  {collapsedCategories['_checked'] ? '▶' : '▼'}
-                </span>
-              </button>
-              
-              {!collapsedCategories['_checked'] && (
-                <ul className="items checked">
-                  {checked.map(item => (
-                    <li 
-                      key={item._id} 
-                      className="item"
-                      style={{ borderLeftColor: getCategoryColor(item.itemId?.category) }}
-                    >
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={true}
-                          onChange={() => handleToggle(item)}
-                        />
-                        <span className="name">{item.itemId?.name || 'Unknown'}</span>
-                      </label>
-                      {!shoppingMode && (
-                        <button className="remove" onClick={() => handleRemove(item)}>×</button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+        </div>
+      ) : (
+        /* VIEW/ADD MODE - Collapsed Cards */
+        <div className="view-mode">
+          {grouped.map(({ category, items: catItems }) => (
+            <div key={category} className="category-section">
+              <h3 style={{ borderLeftColor: getCategoryColor(category) }}>
+                {category} <Badge size="sm">{catItems.length}</Badge>
+              </h3>
+              <div className="item-cards">
+                {catItems.map(item => (
+                  <CollapsibleCard
+                    key={item._id}
+                    title={
+                      <div className="card-title">
+                        <span>{item.itemId?.name || 'Unknown'}</span>
+                        <Badge size="sm">×{item.quantity || 1}</Badge>
+                      </div>
+                    }
+                  >
+                    <div className="card-details">
+                      <div className="qty-controls">
+                        <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, -1)}>−</Button>
+                        <span className="qty">{item.quantity || 1}</span>
+                        <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, 1)}>+</Button>
+                      </div>
+                      <Button size="sm" variant="destructive" onClick={() => handleRemove(item)}>
+                        Remove
+                      </Button>
+                    </div>
+                  </CollapsibleCard>
+                ))}
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </div>
   );
