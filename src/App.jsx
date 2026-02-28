@@ -18,7 +18,7 @@ import NotFound from './pages/NotFound';
 
 export default function App() {
   const { isLoading: authLoading, isAuthenticated } = useAuth0();
-  const { user, loading, needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
+  const { needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
 
   // Brief Auth0 check - only to prevent Login flash while reading localStorage.
   // With cacheLocation="localstorage", this resolves in <100ms for returning users.
@@ -30,17 +30,15 @@ export default function App() {
     return <Login />;
   }
 
-  // Only show loading if we're authenticated but have NO cached user data yet.
-  // This is a brief gate for first-time users or cleared cache.
-  // Returning users with cached data skip this entirely.
-  if (loading && !user) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  // COMMENTED OUT: Let alpha users tell us if onboarding flash is a problem
+  // if (loading && !user) {
+  //   return (
+  //     <div className="loading-screen">
+  //       <div className="loading-spinner" />
+  //       <p>Loading...</p>
+  //     </div>
+  //   );
+  // }
 
   // Onboarding check (user is authenticated but needs setup)
   if (needsOnboarding) {
