@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import { dishesApi } from '../services/dishes';
 import { itemsApi } from '../services/items';
-import { getCategoryColor } from '../utils/categories';
+import { getCategoryColor, isEdible } from '../utils/categories';
 import './MealsList.css';
 
 export default function MealsList() {
@@ -88,7 +88,7 @@ export default function MealsList() {
     }
   };
 
-  // Ingredient search
+  // Ingredient search - filters out household (non-edible) items
   const handleIngredientSearch = async (q) => {
     setIngredientSearch(q);
     if (q.length < 2) {
@@ -98,7 +98,8 @@ export default function MealsList() {
     
     try {
       const results = await itemsApi.search({ q, limit: 10 });
-      setIngredientResults(results);
+      // Filter to only edible items (exclude household)
+      setIngredientResults(results.filter(isEdible));
     } catch (err) {
       console.error('Search failed:', err);
     }

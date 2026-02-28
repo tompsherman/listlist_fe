@@ -38,6 +38,17 @@ export default function DonutChart({
   showLabels = false,
   className = '',
 }) {
+  // Guard against undefined/empty data
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className={`chart-container ${className}`} style={{ height }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-secondary)' }}>
+          No data
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`chart-container ${className}`} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">

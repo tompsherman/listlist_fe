@@ -27,6 +27,17 @@ export default function BarChart({
   layout = 'horizontal',
   className = '',
 }) {
+  // Guard against undefined/empty data
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className={`chart-container ${className}`} style={{ height }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-secondary)' }}>
+          No data
+        </div>
+      </div>
+    );
+  }
+
   const isVertical = layout === 'vertical';
 
   return (
