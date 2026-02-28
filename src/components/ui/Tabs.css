@@ -1,0 +1,68 @@
+/**
+ * Tabs Styles
+ */
+
+.tabs {
+  width: 100%;
+}
+
+.tabs-list {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-4);
+}
+
+.tabs-tab {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.tabs-tab:hover:not(:disabled) {
+  color: var(--color-text);
+}
+
+.tabs-tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.tabs-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tabs-tab-active {
+  color: var(--color-primary);
+}
+
+.tabs-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+.tabs-panel {
+  animation: tabs-panel-fade-in 0.15s ease-out;
+}
+
+@keyframes tabs-panel-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

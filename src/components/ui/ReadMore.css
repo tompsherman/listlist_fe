@@ -1,0 +1,36 @@
+/**
+ * ReadMore Styles
+ */
+
+.read-more {
+  /* Container */
+}
+
+.read-more-content {
+  /* Full content */
+}
+
+.read-more-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--read-more-lines, 3);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.read-more-toggle {
+  display: inline;
+  padding: 0;
+  margin-top: var(--space-1);
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font-size: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.read-more-toggle:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}

@@ -1,0 +1,112 @@
+/**
+ * Toggle Styles
+ */
+
+.toggle-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.toggle-wrapper.toggle-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Sizes */
+.toggle-sm {
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-md {
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-lg {
+  width: 56px;
+  height: 30px;
+}
+
+.toggle-thumb {
+  position: absolute;
+  left: 2px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.toggle-sm .toggle-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.toggle-md .toggle-thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.toggle-lg .toggle-thumb {
+  width: 26px;
+  height: 26px;
+}
+
+/* Checked state */
+.toggle-input:checked + .toggle {
+  background-color: var(--color-primary);
+}
+
+.toggle-input:checked + .toggle-sm .toggle-thumb {
+  transform: translateX(16px);
+}
+
+.toggle-input:checked + .toggle-md .toggle-thumb {
+  transform: translateX(20px);
+}
+
+.toggle-input:checked + .toggle-lg .toggle-thumb {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle-thumb {
+    transition: none;
+  }
+}

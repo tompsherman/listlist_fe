@@ -1,0 +1,55 @@
+/**
+ * Timer Styles
+ */
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.timer-display {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  transition: color var(--transition-fast);
+}
+
+.timer-controls {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Sizes */
+.timer-sm .timer-display {
+  font-size: var(--text-2xl);
+}
+
+.timer-md .timer-display {
+  font-size: var(--text-4xl);
+}
+
+.timer-lg .timer-display {
+  font-size: var(--text-6xl);
+}
+
+/* Warning state (< 10 seconds) */
+.timer-warning .timer-display {
+  color: var(--color-warning);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Complete state */
+.timer-complete .timer-display {
+  color: var(--color-error);
+}

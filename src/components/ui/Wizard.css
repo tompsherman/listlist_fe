@@ -1,0 +1,106 @@
+/**
+ * Wizard Styles
+ */
+
+.wizard {
+  width: 100%;
+}
+
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Progress */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wizard-progress-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Header */
+.wizard-header {
+  text-align: center;
+}
+
+.wizard-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.wizard-description {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+}
+
+/* Content */
+.wizard-content {
+  min-height: 150px;
+}
+
+/* Navigation */
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Step Indicators */
+.wizard-indicators {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.wizard-indicator {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wizard-indicator:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.wizard-indicator:not(:disabled):hover {
+  border-color: var(--color-primary);
+}
+
+.wizard-indicator-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+}
+
+.wizard-indicator-complete {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: white;
+}
+
+.wizard-indicator-complete:not(:disabled):hover {
+  border-color: var(--color-success);
+  opacity: 0.9;
+}

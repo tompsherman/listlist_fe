@@ -1,0 +1,82 @@
+/**
+ * Badge Styles
+ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+/* Sizes */
+.badge-sm {
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  height: 20px;
+}
+
+.badge-md {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  height: 24px;
+}
+
+.badge-lg {
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+  height: 28px;
+}
+
+/* Variants */
+.badge-default {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.badge-primary {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background-color: #cffafe;
+  color: #0e7490;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .badge-success {
+  background-color: #166534;
+  color: #dcfce7;
+}
+
+[data-theme="dark"] .badge-warning {
+  background-color: #92400e;
+  color: #fef3c7;
+}
+
+[data-theme="dark"] .badge-error {
+  background-color: #991b1b;
+  color: #fee2e2;
+}
+
+[data-theme="dark"] .badge-info {
+  background-color: #0e7490;
+  color: #cffafe;
+}

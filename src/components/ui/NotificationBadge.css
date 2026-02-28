@@ -1,0 +1,56 @@
+/**
+ * NotificationBadge Styles
+ */
+
+.notification-badge-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+/* Dot variant */
+.notification-badge-dot {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  top: -2px;
+  right: -2px;
+}
+
+/* Colors */
+.notification-badge-error {
+  background: var(--color-error);
+}
+
+.notification-badge-warning {
+  background: var(--color-warning);
+  color: #000;
+}
+
+.notification-badge-success {
+  background: var(--color-success);
+}
+
+.notification-badge-primary {
+  background: var(--color-primary);
+}
+
+.notification-badge-info {
+  background: var(--color-info);
+}

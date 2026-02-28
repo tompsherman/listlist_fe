@@ -1,0 +1,13 @@
+/**
+ * RelativeTime Styles
+ */
+
+.relative-time {
+  /* Inherit text styles by default */
+  cursor: default;
+}
+
+.relative-time[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--color-text-secondary);
+}

@@ -1,0 +1,53 @@
+/**
+ * CopyButton Styles
+ */
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.copy-button:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.copy-button-copied {
+  color: var(--color-success);
+}
+
+.copy-button-copied:hover {
+  color: var(--color-success);
+}
+
+.copy-button-icon {
+  flex-shrink: 0;
+}
+
+/* Sizes */
+.copy-button-sm .copy-button-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.copy-button-md .copy-button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.copy-button-lg .copy-button-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.copy-button-label {
+  font-size: var(--text-sm);
+}

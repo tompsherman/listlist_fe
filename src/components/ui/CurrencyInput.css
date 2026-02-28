@@ -1,0 +1,46 @@
+/**
+ * CurrencyInput Styles
+ */
+
+.currency-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.currency-input:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.currency-input-symbol {
+  padding: var(--space-2) var(--space-3);
+  padding-right: 0;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  user-select: none;
+}
+
+.currency-input-field {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.currency-input-field::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.currency-input-field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

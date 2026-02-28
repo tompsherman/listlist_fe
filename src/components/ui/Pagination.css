@@ -1,0 +1,81 @@
+/**
+ * Pagination Styles
+ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination-info strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* Jump to page */
+.pagination-jump {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border);
+}
+
+.pagination-jump-input {
+  width: 60px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.pagination-jump-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.pagination-jump-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hide number input spinners */
+.pagination-jump-input::-webkit-outer-spin-button,
+.pagination-jump-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pagination-jump-input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Sizes */
+.pagination-sm {
+  gap: var(--space-2);
+}
+
+.pagination-sm .pagination-info {
+  font-size: var(--text-xs);
+}
+
+.pagination-lg {
+  gap: var(--space-4);
+}
+
+.pagination-lg .pagination-info {
+  font-size: var(--text-base);
+}

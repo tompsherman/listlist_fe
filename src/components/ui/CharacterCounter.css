@@ -1,0 +1,62 @@
+/**
+ * CharacterCounter Styles
+ */
+
+.character-counter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.character-counter-textarea {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+}
+
+.character-counter-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.character-counter-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.character-counter-display {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--transition-fast);
+}
+
+.character-counter-normal {
+  color: var(--color-text-secondary);
+}
+
+.character-counter-warning .character-counter-remaining {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.character-counter-error .character-counter-remaining {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.character-counter-max {
+  color: var(--color-text-secondary);
+}

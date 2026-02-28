@@ -1,0 +1,53 @@
+/**
+ * Kbd Styles
+ * Styled to look like physical keyboard keys
+ */
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  padding: 0.15em 0.4em;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    var(--color-bg-secondary) 100%
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow:
+    0 2px 0 var(--color-border),
+    inset 0 -1px 0 var(--color-border);
+}
+
+/* Sizes */
+.kbd-sm {
+  font-size: var(--text-xs);
+  padding: 0.1em 0.3em;
+}
+
+.kbd-md {
+  font-size: var(--text-sm);
+}
+
+.kbd-lg {
+  font-size: var(--text-base);
+  padding: 0.2em 0.5em;
+}
+
+/* Key group */
+.kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+.kbd-separator {
+  color: var(--color-text-secondary);
+  font-size: 0.8em;
+}

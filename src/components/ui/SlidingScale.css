@@ -1,0 +1,148 @@
+/**
+ * SlidingScale Styles
+ * Range input with colored track based on value
+ */
+
+.sliding-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.sliding-scale-track {
+  position: relative;
+  width: 100%;
+}
+
+/* Reset range input */
+.sliding-scale-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sliding-scale-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Track */
+.sliding-scale-input::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  background-image: linear-gradient(
+    to right,
+    var(--scale-color) 0%,
+    var(--scale-color) var(--fill-percentage),
+    var(--color-bg-secondary) var(--fill-percentage),
+    var(--color-bg-secondary) 100%
+  );
+}
+
+.sliding-scale-input::-moz-range-track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+}
+
+.sliding-scale-input::-moz-range-progress {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--scale-color);
+}
+
+/* Thumb */
+.sliding-scale-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--scale-color);
+  border: 2px solid var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.sliding-scale-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--scale-color);
+  border: 2px solid var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.sliding-scale-input:hover::-webkit-slider-thumb {
+  transform: scale(1.1);
+}
+
+.sliding-scale-input:hover::-moz-range-thumb {
+  transform: scale(1.1);
+}
+
+.sliding-scale-input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Color variants */
+.sliding-scale-red {
+  --scale-color: var(--color-error);
+}
+
+.sliding-scale-yellow {
+  --scale-color: var(--color-warning);
+}
+
+.sliding-scale-green {
+  --scale-color: var(--color-success);
+}
+
+/* Sizes */
+.sliding-scale-sm .sliding-scale-input::-webkit-slider-runnable-track {
+  height: 4px;
+}
+
+.sliding-scale-sm .sliding-scale-input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+}
+
+.sliding-scale-lg .sliding-scale-input::-webkit-slider-runnable-track {
+  height: 12px;
+}
+
+.sliding-scale-lg .sliding-scale-input::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  margin-top: -7px;
+}
+
+/* Info display */
+.sliding-scale-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sliding-scale-value {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--scale-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliding-scale-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

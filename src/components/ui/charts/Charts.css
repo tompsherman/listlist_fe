@@ -1,0 +1,35 @@
+/**
+ * Chart Styles
+ */
+
+.chart-container {
+  width: 100%;
+}
+
+/* Override recharts styles to use CSS variables */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--color-border);
+}
+
+.recharts-legend-item-text {
+  color: var(--color-text) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.recharts-default-tooltip {
+  background: var(--color-bg) !important;
+  border-color: var(--color-border) !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--color-text) !important;
+  font-weight: 600;
+}
+
+.recharts-tooltip-item {
+  color: var(--color-text-secondary) !important;
+}

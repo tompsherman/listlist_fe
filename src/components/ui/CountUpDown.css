@@ -1,0 +1,115 @@
+/**
+ * CountUpDown Styles
+ */
+
+.count-up-down {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Sizes */
+.count-up-down-sm {
+  height: 32px;
+}
+
+.count-up-down-sm .count-btn {
+  width: 32px;
+  font-size: var(--text-sm);
+}
+
+.count-up-down-sm .count-input {
+  width: 48px;
+  font-size: var(--text-sm);
+}
+
+.count-up-down-md {
+  height: 40px;
+}
+
+.count-up-down-md .count-btn {
+  width: 40px;
+  font-size: var(--text-base);
+}
+
+.count-up-down-md .count-input {
+  width: 56px;
+  font-size: var(--text-base);
+}
+
+.count-up-down-lg {
+  height: 48px;
+}
+
+.count-up-down-lg .count-btn {
+  width: 48px;
+  font-size: var(--text-lg);
+}
+
+.count-up-down-lg .count-input {
+  width: 64px;
+  font-size: var(--text-lg);
+}
+
+.count-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+  background-color: var(--color-bg-secondary);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.count-btn:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+}
+
+.count-btn:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.count-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.count-input {
+  height: 100%;
+  padding: 0;
+  font-weight: var(--font-medium);
+  text-align: center;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.count-input:focus {
+  outline: none;
+  background-color: var(--color-bg-secondary);
+}
+
+.count-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Remove spinner on number inputs */
+.count-input::-webkit-outer-spin-button,
+.count-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.count-input[type=number] {
+  -moz-appearance: textfield;
+}
