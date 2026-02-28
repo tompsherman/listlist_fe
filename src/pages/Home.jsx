@@ -16,30 +16,12 @@ import PodSettings from '../components/PodSettings';
 import './Home.css';
 
 export default function Home({ tab = 'grocery' }) {
-  const { user, currentPod, loading, error, serverWaking, hasCachedData, logout, refetch } = useUser();
+  const { currentPod, serverWaking } = useUser();
   const [activeTab, setActiveTab] = useState(tab);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Only show loading spinner if no cached data
-  if (loading && !hasCachedData) {
-    return (
-      <div className="home loading">
-        <div className="loading-spinner" />
-        <p>{serverWaking ? 'Server is waking up...' : 'Loading your lists...'}</p>
-      </div>
-    );
-  }
-
-  // Only show error screen if no cached data AND error exists
-  if (error && !hasCachedData && !user) {
-    return (
-      <div className="home error">
-        <h2>Something went wrong</h2>
-        <p>{error}</p>
-        <button onClick={refetch}>Retry</button>
-      </div>
-    );
-  }
+  // V1 approach: No page-level loading gate.
+  // App shell renders immediately. List components handle their own loading.
 
   return (
     <div className="home">
