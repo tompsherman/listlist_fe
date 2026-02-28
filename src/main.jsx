@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
+import { UserProvider } from './context/UserContext';
 import App from './App';
 import './styles/global.css';
 
@@ -18,6 +19,8 @@ const onRedirectCallback = (appState) => {
   );
 };
 
+// V1 Architecture: UserProvider wraps App (not inside it)
+// This lets UserContext initialize early and show cached data immediately
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -29,7 +32,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         cacheLocation="localstorage"
         onRedirectCallback={onRedirectCallback}
       >
-        <App />
+        <UserProvider>
+          <App />
+        </UserProvider>
       </Auth0Provider>
     </BrowserRouter>
   </React.StrictMode>

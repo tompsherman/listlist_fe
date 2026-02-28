@@ -1,10 +1,14 @@
 /**
  * ListList - Main App
+ * 
+ * V1 Architecture: No global loading gate. App shell renders immediately.
+ * UserProvider is in main.jsx and starts fetching early.
+ * Individual components handle their own loading states.
  */
 
 import { Routes, Route } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { UserProvider, useUser } from './context/UserContext';
+import { useUser } from './context/UserContext';
 
 // Pages
 import Home from './pages/Home';
@@ -12,30 +16,33 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import NotFound from './pages/NotFound';
 
-function AppContent() {
-  const { user, loading, error, needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
+export default function App() {
+  const { isLoading: authLoading, isAuthenticated } = useAuth0();
+  const { user, loading, needsOnboarding, hasPendingInvites, invitedPods, completeOnboarding } = useUser();
 
-  // DISABLED: Loading gate removed - show app immediately, let data load in background
-  // if (loading) {
-  //   return (
-  //     <div className="loading-screen">
-  //       <div className="loading-spinner" />
-  //       <p>Loading...</p>
-  //     </div>
-  //   );
-  // }
+  // Brief Auth0 check - only to prevent Login flash while reading localStorage.
+  // With cacheLocation="localstorage", this resolves in <100ms for returning users.
+  if (authLoading) {
+    return null; // Blank screen briefly, no spinner
+  }
 
-  // DISABLED: Error screen - errors will be handled by individual components
-  // if (error) {
-  //   return (
-  //     <div className="error-screen">
-  //       <h2>Something went wrong</h2>
-  //       <p>{error}</p>
-  //       <button onClick={() => window.location.reload()}>Retry</button>
-  //     </div>
-  //   );
-  // }
+  if (!isAuthenticated) {
+    return <Login />;
+  }
 
+  // Only show loading if we're authenticated but have NO cached user data yet.
+  // This is a brief gate for first-time users or cleared cache.
+  // Returning users with cached data skip this entirely.
+  if (loading && !user) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Onboarding check (user is authenticated but needs setup)
   if (needsOnboarding) {
     return <Onboarding 
       onComplete={completeOnboarding} 
@@ -44,6 +51,7 @@ function AppContent() {
     />;
   }
 
+  // App shell renders immediately - components fetch their own data
   return (
     <div className="app">
       <Routes>
@@ -54,28 +62,5 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
-  );
-}
-
-export default function App() {
-  const { isLoading, isAuthenticated } = useAuth0();
-
-  if (isLoading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
-  return (
-    <UserProvider>
-      <AppContent />
-    </UserProvider>
   );
 }
