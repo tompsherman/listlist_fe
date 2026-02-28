@@ -174,48 +174,42 @@ export default function GroceryList() {
     if (!list) return;
 
     try {
-      // Separate fully acquired, partially acquired, and not acquired
-      const toMove = []; // Items to move to pantry
-      const toKeep = []; // Items to keep on grocery (with reduced qty)
+      const itemsToReAdd = []; // Items with remaining qty to add back after checkout
       
-      items.forEach(item => {
+      // Step 1: Mark items as checked with acquired qty
+      for (const item of items) {
         const cartItem = cart[item._id];
-        if (!cartItem) return;
+        if (!cartItem) continue;
         
         const acquired = cartItem.acquired;
         const needed = cartItem.needed;
         
         if (acquired > 0) {
-          // Move acquired amount to pantry
-          toMove.push({
-            itemId: item.itemId?._id || item.itemId,
+          // Track if we need to re-add remainder
+          if (acquired < needed) {
+            itemsToReAdd.push({
+              itemId: item.itemId?._id || item.itemId,
+              quantity: needed - acquired,
+            });
+          }
+          
+          // Update item: set qty to acquired amount and mark checked
+          await listsApi.updateItem(list._id, item._id, {
             quantity: acquired,
-            name: item.itemId?.name || 'Unknown',
+            checked: true,
           });
         }
-        
-        if (acquired < needed) {
-          // Keep remainder on grocery
-          toKeep.push({
-            ...item,
-            newQuantity: needed - acquired,
-          });
-        }
-      });
-
-      // Use checkout endpoint if available, or manual update
-      if (toMove.length > 0) {
-        await listsApi.checkout(list._id);
       }
 
-      // Update remaining items
-      for (const item of toKeep) {
-        if (item.newQuantity > 0) {
-          await listsApi.updateItem(list._id, item._id, {
-            quantity: item.newQuantity,
-            checked: false,
-          });
-        }
+      // Step 2: Checkout - moves all checked items to pantry
+      await listsApi.checkout(list._id);
+
+      // Step 3: Re-add remaining quantities back to grocery
+      for (const item of itemsToReAdd) {
+        await listsApi.addItem(list._id, {
+          itemId: item.itemId,
+          quantity: item.quantity,
+        });
       }
 
       // Refresh list
