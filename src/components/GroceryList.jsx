@@ -118,10 +118,31 @@ export default function GroceryList() {
     }
   };
 
-  // Add item to list
+  // Add item to list (with duplicate detection)
   const handleAddItem = async (catalogItem) => {
     if (!list) return;
     
+    // Check if item already exists on the list
+    const existingItem = items.find(i => 
+      (i.itemId?._id || i.itemId) === catalogItem._id
+    );
+    
+    if (existingItem) {
+      // Increment quantity of existing item
+      try {
+        const updated = await listsApi.updateItem(list._id, existingItem._id, {
+          quantity: (existingItem.quantity || 1) + 1,
+        });
+        setItems(prev => prev.map(i => i._id === existingItem._id ? updated : i));
+        setSearchQuery('');
+        setSearchResults([]);
+      } catch (err) {
+        console.error('Failed to update quantity:', err);
+      }
+      return;
+    }
+    
+    // Add new item
     try {
       const newItem = await listsApi.addItem(list._id, {
         itemId: catalogItem._id,
@@ -288,16 +309,25 @@ export default function GroceryList() {
           />
           {(searchResults.length > 0 || searchQuery.length >= 2) && (
             <ul className="search-results">
-              {searchResults.map(item => (
-                <li 
-                  key={item._id} 
-                  onClick={() => handleAddItem(item)}
-                  style={{ borderLeftColor: getCategoryColor(item.category) }}
-                >
-                  {item.name}
-                  <Badge size="sm">{item.category}</Badge>
-                </li>
-              ))}
+              {searchResults.map(item => {
+                const existingItem = items.find(i => (i.itemId?._id || i.itemId) === item._id);
+                const isOnList = !!existingItem;
+                return (
+                  <li 
+                    key={item._id} 
+                    onClick={() => handleAddItem(item)}
+                    style={{ borderLeftColor: getCategoryColor(item.category) }}
+                    className={isOnList ? 'on-list' : ''}
+                  >
+                    {item.name}
+                    {isOnList ? (
+                      <Badge size="sm" variant="success">+1 (have {existingItem.quantity})</Badge>
+                    ) : (
+                      <Badge size="sm">{item.category}</Badge>
+                    )}
+                  </li>
+                );
+              })}
               {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && (
                 <li className="create-new" onClick={() => handleCreateAndAdd(searchQuery)}>
                   + Create "{searchQuery}"

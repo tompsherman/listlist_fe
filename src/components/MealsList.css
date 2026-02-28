@@ -6,6 +6,30 @@
   padding: 1rem;
 }
 
+/* Gap #6: Cook Now button */
+.cook-now-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  border: none;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.cook-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.cook-now-btn:active {
+  transform: translateY(0);
+}
+
 .meals-list.loading,
 .meals-list.error {
   text-align: center;

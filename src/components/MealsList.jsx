@@ -8,6 +8,7 @@ import { useUser } from '../context/UserContext';
 import { dishesApi } from '../services/dishes';
 import { itemsApi } from '../services/items';
 import { getCategoryColor, isEdible } from '../utils/categories';
+import CookDishModal from './CookDishModal';
 import './MealsList.css';
 
 export default function MealsList() {
@@ -25,6 +26,9 @@ export default function MealsList() {
   const [expandedDish, setExpandedDish] = useState(null);
   const [ingredientSearch, setIngredientSearch] = useState('');
   const [ingredientResults, setIngredientResults] = useState([]);
+  
+  // Gap #6: Cook modal
+  const [showCookModal, setShowCookModal] = useState(false);
 
   const fetchDishes = useCallback(async () => {
     if (!currentPod) return;
@@ -171,6 +175,11 @@ export default function MealsList() {
 
   return (
     <div className="meals-list">
+      {/* Gap #6: Cook Button */}
+      <button className="cook-now-btn" onClick={() => setShowCookModal(true)}>
+        🍳 Cook Something
+      </button>
+      
       {/* Add Dish */}
       <form className="add-dish" onSubmit={handleAddDish}>
         <input
@@ -318,6 +327,15 @@ export default function MealsList() {
           ))}
         </div>
       )}
+      
+      {/* Gap #6: Cook Modal */}
+      <CookDishModal 
+        isOpen={showCookModal}
+        onClose={() => setShowCookModal(false)}
+        onCookComplete={() => {
+          fetchDishes(); // Refresh dishes list
+        }}
+      />
     </div>
   );
 }

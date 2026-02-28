@@ -1,0 +1,299 @@
+/**
+ * CookDishModal Styles
+ */
+
+.cook-dish-modal {
+  max-width: 500px;
+}
+
+.cook-dish-modal .step {
+  min-height: 300px;
+}
+
+.cook-dish-modal h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+/* Step 1: Dish selection */
+.dish-search {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.dish-search:focus {
+  outline: none;
+  border-color: #ffb74d;
+}
+
+.dish-suggestions {
+  margin-top: 1rem;
+}
+
+.dish-suggestions .hint {
+  color: #888;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.dish-suggestions .no-results {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+}
+
+.dish-suggestions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dish-suggestions li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: #2a2a2a;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.dish-suggestions li:hover {
+  background: #333;
+}
+
+.dish-suggestions .dish-name {
+  font-weight: 500;
+}
+
+/* Step 2: Ingredients */
+.ingredient-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.ingredient-search input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  border: 2px solid #333;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.ingredient-search input:focus {
+  outline: none;
+  border-color: #4fc3f7;
+}
+
+.pantry-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+
+.pantry-results li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-left: 4px solid #666;
+  margin: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.pantry-results li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pantry-results .item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.pantry-results .uses {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.ingredients-list {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 0.5rem;
+  min-height: 150px;
+}
+
+.ingredients-list .empty {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}
+
+.ingredients-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ingredients-list .ingredient {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid #666;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  background: #252525;
+}
+
+.ingredients-list .ingredient.missing {
+  opacity: 0.7;
+  border-left-color: #ffc107;
+}
+
+.ingredients-list .ingredient.adhoc {
+  border-left-color: #9c27b0;
+}
+
+.ingredients-list .ing-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.ingredients-list .ing-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ingredients-list .ing-controls button {
+  width: 28px;
+  height: 28px;
+  background: #333;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ingredients-list .ing-controls button:hover:not(:disabled) {
+  background: #444;
+}
+
+.ingredients-list .ing-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ingredients-list .ing-controls button.remove {
+  background: #dc3545;
+  margin-left: 0.5rem;
+}
+
+.ingredients-list .ing-controls button.remove:hover {
+  background: #c82333;
+}
+
+.ingredients-list .ing-controls .amount {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Step 3: Details */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.form-row label {
+  width: 100px;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+.form-row select {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.form-row select:focus {
+  outline: none;
+  border-color: #4fc3f7;
+}
+
+.servings-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.servings-input button {
+  width: 32px;
+  height: 32px;
+  background: #333;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.servings-input button:hover {
+  background: #444;
+}
+
+.servings-input span {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.cook-summary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+}
+
+.cook-summary p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #ccc;
+}
+
+.cook-summary p strong {
+  color: #fff;
+}

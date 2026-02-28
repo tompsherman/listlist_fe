@@ -14,7 +14,9 @@ import {
   CATEGORIES, 
   getCategoryColor, 
   getExpirationColor,
+  getOpenTagColor,
   EXPIRATION_BORDER_COLORS,
+  OPEN_TAG_COLORS,
   isEdible 
 } from '../utils/categories';
 import './PantryList.css';
@@ -43,6 +45,7 @@ export default function PantryList() {
   // UI state
   const [groupBy, setGroupBy] = useState('location'); // 'location' | 'category'
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [collapsedNameGroups, setCollapsedNameGroups] = useState({}); // Gap #3: name groups
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
 
@@ -191,6 +194,63 @@ export default function PantryList() {
       ...prev,
       [groupId]: !prev[groupId],
     }));
+  };
+
+  // Gap #3: Toggle name group collapse
+  const toggleNameGroup = (nameKey) => {
+    setCollapsedNameGroups(prev => ({
+      ...prev,
+      [nameKey]: !prev[nameKey],
+    }));
+  };
+
+  // Gap #5: Mark item as opened
+  const handleMarkOpen = async (listItem) => {
+    try {
+      const updated = await listsApi.updateItem(list._id, listItem._id, {
+        openedAt: new Date().toISOString(),
+      });
+      setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
+    } catch (err) {
+      console.error('Failed to mark item as open:', err);
+    }
+  };
+
+  // Gap #3: Group items by name within a group
+  const groupItemsByName = (itemList) => {
+    const nameGroups = {};
+    itemList.forEach(item => {
+      const name = (item.itemId?.name || 'Unknown').toLowerCase();
+      if (!nameGroups[name]) {
+        nameGroups[name] = {
+          name: item.itemId?.name || 'Unknown',
+          items: [],
+        };
+      }
+      nameGroups[name].items.push(item);
+    });
+
+    // Sort each name group: OPEN items first, then by expiresAt/purchasedAt
+    Object.values(nameGroups).forEach(group => {
+      group.items.sort((a, b) => {
+        // Open items come first
+        const aOpen = !!a.openedAt;
+        const bOpen = !!b.openedAt;
+        if (aOpen && !bOpen) return -1;
+        if (!aOpen && bOpen) return 1;
+        
+        // Then sort by expiresAt (soonest first)
+        if (a.expiresAt && b.expiresAt) {
+          return new Date(a.expiresAt) - new Date(b.expiresAt);
+        }
+        if (a.expiresAt) return -1;
+        if (b.expiresAt) return 1;
+        
+        return 0;
+      });
+    });
+
+    return Object.values(nameGroups);
   };
 
   // Get border color for item based on expiration
@@ -441,66 +501,123 @@ export default function PantryList() {
               </button>
               
               {!collapsedGroups[group.id] && (
-                <ul className="items">
-                  {group.items.map(item => {
-                    const expColor = getExpirationColor(item.expiresAt);
-                    const usesRemaining = item.usesRemaining ?? item.quantity ?? 1;
-                    const itemIsEdible = isEdible(item.itemId);
+                <div className="name-groups">
+                  {groupItemsByName(group.items).map(nameGroup => {
+                    const nameKey = `${group.id}-${nameGroup.name.toLowerCase()}`;
+                    const isNameCollapsed = collapsedNameGroups[nameKey];
+                    const hasMultiple = nameGroup.items.length > 1;
                     
                     return (
-                      <li 
-                        key={item._id} 
-                        className={`item ${expColor ? `exp-${expColor}` : ''} ${draggedItem?._id === item._id ? 'dragging' : ''}`}
-                        style={{ borderLeftColor: getItemBorderColor(item) }}
-                        draggable={groupBy === 'location'}
-                        onDragStart={(e) => handleDragStart(e, item)}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <div className="item-info">
-                          <span className="name">{item.itemId?.name || 'Unknown'}</span>
-                          {groupBy === 'category' && (
-                            <span className="location-badge" data-location={item.location}>
-                              {LOCATIONS.find(l => l.id === item.location)?.label.split(' ')[0]}
+                      <div key={nameKey} className="name-group">
+                        {/* Gap #3: Collapsible name header when multiple items */}
+                        {hasMultiple && (
+                          <button 
+                            className="name-group-header"
+                            onClick={() => toggleNameGroup(nameKey)}
+                          >
+                            <span className="name-group-name">{nameGroup.name}</span>
+                            <span className="name-group-count">{nameGroup.items.length} items</span>
+                            <span className="collapse-icon">
+                              {isNameCollapsed ? '▶' : '▼'}
                             </span>
-                          )}
-                          {item.expiresAt && (
-                            <span className={`expiry-badge ${expColor || ''}`}>
-                              {formatExpiry(item.expiresAt)}
-                            </span>
-                          )}
-                          {usesRemaining > 1 && (
-                            <span className="uses-badge">{usesRemaining} uses</span>
-                          )}
-                        </div>
-                        <div className="item-actions">
-                          {itemIsEdible && (
-                            <div className="eat-cook-btns">
-                              <button 
-                                className="eat-btn" 
-                                onClick={() => handleEatOne(item)}
-                                title="Eat one"
-                              >
-                                🍴 Eat 1
-                              </button>
-                              <button 
-                                className="cook-btn" 
-                                onClick={() => handleCookIt(item)}
-                                title="Use in cooking"
-                              >
-                                🍳 Cook
-                              </button>
-                            </div>
-                          )}
-                          <div className="qty-controls">
-                            <button onClick={() => handleUpdateQuantity(item, -1)}>−</button>
-                            <span className="qty">{item.quantity}</span>
-                            <button onClick={() => handleUpdateQuantity(item, 1)}>+</button>
-                          </div>
-                        </div>
-                      </li>
+                          </button>
+                        )}
+                        
+                        {/* Items (collapsed if multiple and collapsed state) */}
+                        {(!hasMultiple || !isNameCollapsed) && (
+                          <ul className={`items ${hasMultiple ? 'indented' : ''}`}>
+                            {nameGroup.items.map(item => {
+                              const expColor = getExpirationColor(item.expiresAt);
+                              const openColor = getOpenTagColor(item.openedAt, item.itemId?.timeToExpire);
+                              const usesRemaining = item.usesRemaining ?? item.quantity ?? 1;
+                              const itemIsEdible = isEdible(item.itemId);
+                              const isOpen = !!item.openedAt;
+                              
+                              return (
+                                <li 
+                                  key={item._id} 
+                                  className={`item ${expColor ? `exp-${expColor}` : ''} ${draggedItem?._id === item._id ? 'dragging' : ''}`}
+                                  style={{ borderLeftColor: getItemBorderColor(item) }}
+                                  draggable={groupBy === 'location'}
+                                  onDragStart={(e) => handleDragStart(e, item)}
+                                  onDragEnd={handleDragEnd}
+                                >
+                                  <div className="item-info">
+                                    {/* Only show name if not in a multi-item name group */}
+                                    {!hasMultiple && (
+                                      <span className="name">{item.itemId?.name || 'Unknown'}</span>
+                                    )}
+                                    {/* Gap #5: Open tag with color */}
+                                    {isOpen && (
+                                      <span 
+                                        className={`open-tag open-${openColor || 'green'}`}
+                                        style={openColor ? {
+                                          borderColor: OPEN_TAG_COLORS[openColor]?.border,
+                                          backgroundColor: OPEN_TAG_COLORS[openColor]?.background,
+                                          color: OPEN_TAG_COLORS[openColor]?.text,
+                                        } : undefined}
+                                      >
+                                        OPEN
+                                      </span>
+                                    )}
+                                    {groupBy === 'category' && (
+                                      <span className="location-badge" data-location={item.location}>
+                                        {LOCATIONS.find(l => l.id === item.location)?.label.split(' ')[0]}
+                                      </span>
+                                    )}
+                                    {item.expiresAt && (
+                                      <span className={`expiry-badge ${expColor || ''}`}>
+                                        {formatExpiry(item.expiresAt)}
+                                      </span>
+                                    )}
+                                    {usesRemaining > 1 && (
+                                      <span className="uses-badge">{usesRemaining} uses</span>
+                                    )}
+                                  </div>
+                                  <div className="item-actions">
+                                    {/* Gap #5: Mark as Open button */}
+                                    {!isOpen && (
+                                      <button 
+                                        className="open-btn"
+                                        onClick={() => handleMarkOpen(item)}
+                                        title="Mark as opened"
+                                      >
+                                        📦 Open
+                                      </button>
+                                    )}
+                                    {itemIsEdible && (
+                                      <div className="eat-cook-btns">
+                                        <button 
+                                          className="eat-btn" 
+                                          onClick={() => handleEatOne(item)}
+                                          title="Eat one"
+                                        >
+                                          🍴 Eat 1
+                                        </button>
+                                        <button 
+                                          className="cook-btn" 
+                                          onClick={() => handleCookIt(item)}
+                                          title="Use in cooking"
+                                        >
+                                          🍳 Cook
+                                        </button>
+                                      </div>
+                                    )}
+                                    <div className="qty-controls">
+                                      <button onClick={() => handleUpdateQuantity(item, -1)}>−</button>
+                                      <span className="qty">{item.quantity}</span>
+                                      <button onClick={() => handleUpdateQuantity(item, 1)}>+</button>
+                                    </div>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
                     );
                   })}
-                </ul>
+                </div>
               )}
             </div>
           );
