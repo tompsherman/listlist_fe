@@ -20,6 +20,7 @@ import Onboarding from './pages/Onboarding';
 import NotFound from './pages/NotFound';
 import Dev from './pages/Dev';
 import Data from './pages/Data';
+import DataEntry from './pages/DataEntry';
 
 export default function App() {
   const { isLoading: authLoading, isAuthenticated } = useAuth0();
@@ -40,6 +41,15 @@ export default function App() {
     return (
       <ToastProvider>
         <Data />
+      </ToastProvider>
+    );
+  }
+
+  // /data/entry route accessible without auth (data entry admin)
+  if (location.pathname === '/data/entry') {
+    return (
+      <ToastProvider>
+        <DataEntry />
       </ToastProvider>
     );
   }
