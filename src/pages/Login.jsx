@@ -11,7 +11,7 @@ export default function Login() {
   return (
     <div className="login">
       <div className="login-card">
-        <h1>🥕 ListList</h1>
+        <h1>🫛 ListList</h1>
         <p>Track your groceries, manage your pantry, plan your meals.</p>
         <button className="login-button" onClick={() => loginWithRedirect()}>
           Log In / Sign Up

@@ -19,6 +19,7 @@ import {
   OPEN_TAG_COLORS,
   isEdible 
 } from '../utils/categories';
+import CookDishModal from './CookDishModal';
 import './PantryList.css';
 
 const LOCATIONS = [
@@ -181,11 +182,36 @@ export default function PantryList() {
     }
   };
 
-  // Use item in cooking (flags it for meal)
-  const handleCookIt = async (listItem) => {
-    // For now, same as eat - decrements uses
-    // TODO: integrate with meals when that's built out
-    handleEatOne(listItem);
+  // Use item in cooking - opens cook modal
+  const [cookModalItem, setCookModalItem] = useState(null);
+  
+  const handleCookIt = (listItem) => {
+    setCookModalItem(listItem);
+  };
+
+  // Use (for non-edible items like household)
+  const handleUseOne = async (listItem) => {
+    const currentUses = listItem.usesRemaining ?? listItem.quantity ?? 1;
+    const newUses = currentUses - 1;
+    
+    if (newUses <= 0) {
+      handleRemove(listItem);
+    } else {
+      try {
+        const updated = await listsApi.updateItem(list._id, listItem._id, {
+          usesRemaining: newUses,
+        });
+        setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
+      } catch (err) {
+        console.error('Failed to use item:', err);
+      }
+    }
+  };
+
+  // Throw out item
+  const handleThrowOut = async (listItem) => {
+    if (!confirm(`Throw out ${listItem.itemId?.name || 'this item'}?`)) return;
+    handleRemove(listItem);
   };
 
   // Toggle group collapse
@@ -585,6 +611,7 @@ export default function PantryList() {
                                         📦 Open
                                       </button>
                                     )}
+                                    {/* Edible items: Eat and Cook buttons */}
                                     {itemIsEdible && (
                                       <div className="eat-cook-btns">
                                         <button 
@@ -592,7 +619,7 @@ export default function PantryList() {
                                           onClick={() => handleEatOne(item)}
                                           title="Eat one"
                                         >
-                                          🍴 Eat 1
+                                          🍴 Eat
                                         </button>
                                         <button 
                                           className="cook-btn" 
@@ -603,11 +630,26 @@ export default function PantryList() {
                                         </button>
                                       </div>
                                     )}
-                                    <div className="qty-controls">
-                                      <button onClick={() => handleUpdateQuantity(item, -1)}>−</button>
-                                      <span className="qty">{item.quantity}</span>
-                                      <button onClick={() => handleUpdateQuantity(item, 1)}>+</button>
-                                    </div>
+                                    {/* Non-edible items: Use button */}
+                                    {!itemIsEdible && (
+                                      <button 
+                                        className="use-btn" 
+                                        onClick={() => handleUseOne(item)}
+                                        title="Use one"
+                                      >
+                                        ✓ Use
+                                      </button>
+                                    )}
+                                    {/* Throw out button for all items */}
+                                    <button 
+                                      className="throw-btn" 
+                                      onClick={() => handleThrowOut(item)}
+                                      title="Throw out"
+                                    >
+                                      🗑️
+                                    </button>
+                                    {/* Show quantity badge (no manual controls) */}
+                                    <span className="qty-badge">×{item.quantity}</span>
                                   </div>
                                 </li>
                               );
@@ -624,6 +666,17 @@ export default function PantryList() {
           })}
         </div>
       )}
+
+      {/* Cook Modal - opens when Cook button clicked */}
+      <CookDishModal 
+        isOpen={!!cookModalItem}
+        onClose={() => setCookModalItem(null)}
+        preselectedItem={cookModalItem}
+        onCookComplete={() => {
+          setCookModalItem(null);
+          fetchList(); // Refresh pantry
+        }}
+      />
     </div>
   );
 }

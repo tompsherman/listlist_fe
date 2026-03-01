@@ -20,7 +20,7 @@ import {
 import { Modal, ModalFooter, Button, Badge } from './ui';
 import './CookDishModal.css';
 
-export default function CookDishModal({ isOpen, onClose, onCookComplete }) {
+export default function CookDishModal({ isOpen, onClose, onCookComplete, preselectedItem }) {
   const { currentPod } = useUser();
   
   // Dish selection
@@ -48,6 +48,25 @@ export default function CookDishModal({ isOpen, onClose, onCookComplete }) {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Select dish, 2: Ingredients, 3: Details
   
+  // Pre-populate ingredient from preselectedItem
+  useEffect(() => {
+    if (isOpen && preselectedItem) {
+      const usesRemaining = preselectedItem.usesRemaining ?? preselectedItem.quantity ?? 1;
+      setIngredients([{
+        listItemId: preselectedItem._id,
+        itemId: preselectedItem.itemId?._id || preselectedItem.itemId,
+        name: preselectedItem.itemId?.name,
+        category: preselectedItem.itemId?.category,
+        amountUsed: 1,
+        maxAmount: usesRemaining,
+        inPantry: true,
+        isOpen: !!preselectedItem.openedAt,
+      }]);
+      // Skip to step 2 (ingredients) since we already have one
+      setStep(1);
+    }
+  }, [isOpen, preselectedItem]);
+
   // Fetch dishes and pantry on open
   useEffect(() => {
     if (isOpen && currentPod) {
