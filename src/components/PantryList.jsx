@@ -9,7 +9,7 @@ import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
 import { historyApi } from '../services/history';
-import { getCached, setCache } from '../utils/cache';
+import { useCachedData } from '../hooks';
 import { 
   CATEGORIES, 
   getCategoryColor, 
@@ -22,6 +22,7 @@ import {
 import CookDishModal from './CookDishModal';
 import QuickAddForm from './QuickAddForm';
 import ItemEditModal from './ItemEditModal';
+import LoadingCountdown from './LoadingCountdown';
 import './PantryList.css';
 
 const LOCATIONS = [
@@ -33,11 +34,38 @@ const LOCATIONS = [
 
 export default function PantryList() {
   const { currentPod } = useUser();
-  const [list, setList] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeLocation, setActiveLocation] = useState('all');
+  
+  // Fetch pantry list with cold-start handling
+  const {
+    data: list,
+    loading,
+    error,
+    countdown,
+    isStale,
+    applyChange,
+    refetch: fetchList,
+    setData: setList,
+  } = useCachedData({
+    key: currentPod ? `pantry_${currentPod.podId}` : null,
+    fetchFn: async () => {
+      const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'pantry' });
+      if (lists.length > 0) {
+        return await listsApi.getById(lists[0]._id);
+      }
+      return null;
+    },
+    enabled: !!currentPod,
+    coldStartMs: 30000,
+  });
+
+  // Derive items from list
+  const items = list?.items || [];
+  const setItems = (newItems) => {
+    if (list) {
+      setList({ ...list, items: typeof newItems === 'function' ? newItems(items) : newItems });
+    }
+  };
   
   // Add item state
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,43 +86,14 @@ export default function PantryList() {
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
 
-  const fetchList = useCallback(async () => {
-    if (!currentPod) return;
-    
-    const cacheKey = `pantry_${currentPod.podId}`;
-    const cached = getCached(cacheKey);
-    if (cached) {
-      setList(cached);
-      setItems(cached.items || []);
-      setLoading(false);
-    }
-    
-    try {
-      if (!cached) setLoading(true);
-      const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'pantry' });
-      
-      if (lists.length > 0) {
-        const fullList = await listsApi.getById(lists[0]._id);
-        setList(fullList);
-        setItems(fullList.items || []);
-        setCache(cacheKey, fullList, 5 * 60 * 1000);
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch pantry:', err);
-      if (!cached) setError(err.message);
-    } finally {
-      setLoading(false);
+  // Fetch expiring items separately
+  useEffect(() => {
+    if (currentPod) {
+      historyApi.getExpiring(7)
+        .then(setExpiring)
+        .catch(console.error);
     }
   }, [currentPod]);
-
-  useEffect(() => {
-    fetchList();
-    // Fetch expiring items
-    historyApi.getExpiring(7)
-      .then(setExpiring)
-      .catch(console.error);
-  }, [fetchList]);
 
   const handleSearch = async (q) => {
     setSearchQuery(q);
@@ -397,7 +396,10 @@ export default function PantryList() {
     setDraggedItem(null);
   };
 
-  if (loading) return <div className="pantry-list loading">Loading...</div>;
+  // Show countdown when loading with no data (cold start)
+  if (loading && !list) {
+    return <LoadingCountdown countdown={countdown} />;
+  }
   if (error) return <div className="pantry-list error">{error}</div>;
 
   const filteredItems = activeLocation === 'all' 

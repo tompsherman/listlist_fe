@@ -29,6 +29,7 @@ export { default as useWindowSize } from './useWindowSize';
 
 // State management
 export { default as useUndoRedo } from './useUndoRedo';
+export { default as useCachedData } from './useCachedData';
 
 // Milestone 12: Patterns & Architecture
 export { default as useOptimistic } from './useOptimistic';
