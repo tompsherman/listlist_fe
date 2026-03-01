@@ -4,10 +4,21 @@
  * Protected by DATA_SECRET env var
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import mermaid from 'mermaid';
 import SEO from '../components/SEO';
 import CollapsibleCard from '../components/ui/CollapsibleCard';
 import api from '../services/api';
+
+// Initialize mermaid
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'neutral',
+  er: {
+    useMaxWidth: true,
+    layoutDirection: 'TB',
+  },
+});
 
 const DATA_SECRET = import.meta.env.VITE_DATA_SECRET || '';
 const STORAGE_KEY = 'data_explorer_unlocked';
@@ -157,7 +168,14 @@ export default function Data() {
         {loading && <p>Loading models...</p>}
         {error && <p style={{ color: 'var(--color-error)' }}>{error}</p>}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        {/* ERD Diagram */}
+        {models.length > 0 && (
+          <CollapsibleCard title="📊 Entity Relationship Diagram" icon="" defaultOpen={true}>
+            <MermaidERD models={models} />
+          </CollapsibleCard>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginTop: 'var(--space-4)' }}>
           {models.map((model) => (
             <CollapsibleCard key={model.name} title={`${model.name} (${model.documentCount})`} icon="📋">
               {/* Schema Fields */}
@@ -224,8 +242,89 @@ export default function Data() {
           padding: var(--space-3) var(--space-4);
           font-size: var(--text-sm);
         }
+        .mermaid-container {
+          overflow-x: auto;
+          padding: var(--space-4);
+          background-color: var(--color-surface);
+          border-radius: var(--radius-md);
+        }
+        .mermaid-container svg {
+          max-width: 100%;
+          height: auto;
+        }
       `}</style>
     </>
+  );
+}
+
+/**
+ * MermaidERD Component
+ * Renders an ER diagram using Mermaid.js
+ */
+function MermaidERD({ models }) {
+  const containerRef = useRef(null);
+  const [rendered, setRendered] = useState(false);
+
+  // Generate Mermaid ERD syntax from models
+  const generateERD = useCallback(() => {
+    let erd = 'erDiagram\n';
+
+    // Add each model as an entity with its fields
+    for (const model of models) {
+      erd += `  ${model.name} {\n`;
+      for (const field of model.fields) {
+        // Skip _id and timestamps for cleaner diagram
+        if (['_id', 'createdAt', 'updatedAt', 'id'].includes(field.name)) continue;
+        
+        const type = field.ref ? 'ObjectId' : field.type;
+        const required = field.required ? 'PK' : '';
+        erd += `    ${type} ${field.name.replace(/\./g, '_')} ${required}\n`;
+      }
+      erd += '  }\n';
+    }
+
+    // Add relationships
+    for (const model of models) {
+      if (!model.relationships) continue;
+      for (const rel of model.relationships) {
+        // Check if referenced model exists in our models list
+        const refExists = models.some(m => m.name === rel.ref);
+        if (!refExists) continue;
+        
+        if (rel.type === 'many') {
+          erd += `  ${model.name} }o--|| ${rel.ref} : "${rel.field}"\n`;
+        } else {
+          erd += `  ${model.name} ||--|| ${rel.ref} : "${rel.field}"\n`;
+        }
+      }
+    }
+
+    return erd;
+  }, [models]);
+
+  useEffect(() => {
+    const renderDiagram = async () => {
+      if (!containerRef.current || models.length === 0) return;
+
+      try {
+        const erd = generateERD();
+        const id = `mermaid-${Date.now()}`;
+        const { svg } = await mermaid.render(id, erd);
+        containerRef.current.innerHTML = svg;
+        setRendered(true);
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+        containerRef.current.innerHTML = `<pre style="color: var(--color-error)">ERD render error: ${err.message}\n\nGenerated syntax:\n${generateERD()}</pre>`;
+      }
+    };
+
+    renderDiagram();
+  }, [models, generateERD]);
+
+  return (
+    <div className="mermaid-container" ref={containerRef}>
+      {!rendered && <p>Generating diagram...</p>}
+    </div>
   );
 }
 
