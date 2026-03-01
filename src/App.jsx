@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import NotFound from './pages/NotFound';
 import Dev from './pages/Dev';
+import Data from './pages/Data';
 
 export default function App() {
   const { isLoading: authLoading, isAuthenticated } = useAuth0();
@@ -30,6 +31,15 @@ export default function App() {
     return (
       <ToastProvider>
         <Dev />
+      </ToastProvider>
+    );
+  }
+
+  // /data route accessible without auth (schema explorer)
+  if (location.pathname === '/data') {
+    return (
+      <ToastProvider>
+        <Data />
       </ToastProvider>
     );
   }
