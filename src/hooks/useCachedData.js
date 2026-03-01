@@ -78,7 +78,7 @@ export function useCachedData({
   key,
   fetchFn,
   coldStartMs = DEFAULT_COLD_START_MS,
-  ttl = 5 * 60 * 1000, // 5 min cache TTL
+  ttl = 24 * 60 * 60 * 1000, // 24 hour cache TTL - survives cold starts
   enabled = true,
   mergeStrategy = 'replace', // 'replace' | 'merge'
   getId = (item) => item._id || item.id,
