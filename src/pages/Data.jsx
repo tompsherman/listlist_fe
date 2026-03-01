@@ -4,7 +4,7 @@
  * Protected by DATA_SECRET env var
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import mermaid from 'mermaid';
 import SEO from '../components/SEO';
 import CollapsibleCard from '../components/ui/CollapsibleCard';
@@ -260,10 +260,11 @@ export default function Data() {
 /**
  * MermaidERD Component
  * Renders an ER diagram using Mermaid.js
+ * Uses dangerouslySetInnerHTML to keep React in control of DOM
  */
 function MermaidERD({ models }) {
-  const containerRef = useRef(null);
-  const [rendered, setRendered] = useState(false);
+  const [svgContent, setSvgContent] = useState(null);
+  const [error, setError] = useState(null);
 
   // Generate Mermaid ERD syntax from models
   const generateERD = useCallback(() => {
@@ -304,27 +305,45 @@ function MermaidERD({ models }) {
 
   useEffect(() => {
     const renderDiagram = async () => {
-      if (!containerRef.current || models.length === 0) return;
+      if (models.length === 0) return;
 
       try {
         const erd = generateERD();
         const id = `mermaid-${Date.now()}`;
         const { svg } = await mermaid.render(id, erd);
-        containerRef.current.innerHTML = svg;
-        setRendered(true);
+        setSvgContent(svg);
+        setError(null);
       } catch (err) {
         console.error('Mermaid render error:', err);
-        containerRef.current.innerHTML = `<pre style="color: var(--color-error)">ERD render error: ${err.message}\n\nGenerated syntax:\n${generateERD()}</pre>`;
+        setError(`ERD render error: ${err.message}\n\nGenerated syntax:\n${generateERD()}`);
+        setSvgContent(null);
       }
     };
 
     renderDiagram();
   }, [models, generateERD]);
 
+  if (error) {
+    return (
+      <div className="mermaid-container">
+        <pre style={{ color: 'var(--color-error)' }}>{error}</pre>
+      </div>
+    );
+  }
+
+  if (!svgContent) {
+    return (
+      <div className="mermaid-container">
+        <p>Generating diagram...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="mermaid-container" ref={containerRef}>
-      {!rendered && <p>Generating diagram...</p>}
-    </div>
+    <div 
+      className="mermaid-container" 
+      dangerouslySetInnerHTML={{ __html: svgContent }}
+    />
   );
 }
 
