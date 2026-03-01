@@ -8,23 +8,50 @@
  * Done Shopping: Splits acquired → pantry, remainder → grocery
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
-import { getCached, setCache } from '../utils/cache';
+import { useCachedData } from '../hooks';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
 import { CollapsibleCard, Button, Badge } from './ui';
 import QuickAddForm from './QuickAddForm';
 import ItemEditModal from './ItemEditModal';
+import LoadingCountdown from './LoadingCountdown';
 import './GroceryList.css';
 
 export default function GroceryList() {
   const { currentPod } = useUser();
-  const [list, setList] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // Fetch grocery list with cold-start handling
+  const {
+    data: list,
+    loading,
+    error,
+    countdown,
+    isStale,
+    refetch: fetchList,
+    setData: setList,
+  } = useCachedData({
+    key: currentPod ? `grocery_${currentPod.podId}` : null,
+    fetchFn: async () => {
+      const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'grocery' });
+      if (lists.length > 0) {
+        return await listsApi.getById(lists[0]._id);
+      }
+      return null;
+    },
+    enabled: !!currentPod,
+    coldStartMs: 30000,
+  });
+
+  // Derive items from list
+  const items = list?.items || [];
+  const setItems = (newItems) => {
+    if (list) {
+      setList({ ...list, items: typeof newItems === 'function' ? newItems(items) : newItems });
+    }
+  };
   
   // Mode state
   const [mode, setMode] = useState('view'); // 'view', 'add', 'shop'
@@ -41,41 +68,6 @@ export default function GroceryList() {
   
   // Shopping cart state (tracks slider values)
   const [cart, setCart] = useState({});
-
-  // Fetch grocery list
-  const fetchList = useCallback(async () => {
-    if (!currentPod) return;
-    
-    const cacheKey = `grocery_${currentPod.podId}`;
-    const cached = getCached(cacheKey);
-    if (cached) {
-      setList(cached);
-      setItems(cached.items || []);
-      setLoading(false);
-    }
-    
-    try {
-      if (!cached) setLoading(true);
-      const lists = await listsApi.getAll({ podId: currentPod.podId, type: 'grocery' });
-      
-      if (lists.length > 0) {
-        const fullList = await listsApi.getById(lists[0]._id);
-        setList(fullList);
-        setItems(fullList.items || []);
-        setCache(cacheKey, fullList, 5 * 60 * 1000);
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch list:', err);
-      if (!cached) setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPod]);
-
-  useEffect(() => {
-    fetchList();
-  }, [fetchList]);
 
   // Initialize cart when entering shop mode
   useEffect(() => {
@@ -294,8 +286,9 @@ export default function GroceryList() {
     );
   };
 
-  if (loading) {
-    return <div className="grocery-list loading">Loading...</div>;
+  // Show countdown when loading with no data (cold start)
+  if (loading && !list) {
+    return <LoadingCountdown countdown={countdown} />;
   }
 
   if (error) {

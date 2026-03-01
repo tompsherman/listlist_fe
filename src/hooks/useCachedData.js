@@ -20,6 +20,23 @@ import { getCached, setCache } from '../utils/cache';
 const DEFAULT_COLD_START_MS = 30000; // 30 seconds for Render cold start
 const COUNTDOWN_INTERVAL_MS = 1000;
 
+// Global sync status for ConnectionStatus indicator
+const syncRegistry = new Set();
+const syncListeners = new Set();
+
+export function getSyncingCount() {
+  return syncRegistry.size;
+}
+
+export function onSyncChange(callback) {
+  syncListeners.add(callback);
+  return () => syncListeners.delete(callback);
+}
+
+function notifySyncChange() {
+  syncListeners.forEach(cb => cb(syncRegistry.size));
+}
+
 export function useCachedData({
   key,
   fetchFn,
@@ -117,6 +134,10 @@ export function useCachedData({
 
     setError(null);
     
+    // Register as syncing
+    syncRegistry.add(key);
+    notifySyncChange();
+    
     // Check cache first
     const cached = getCached(key);
     if (cached) {
@@ -150,6 +171,9 @@ export function useCachedData({
     } finally {
       setLoading(false);
       stopCountdown();
+      // Unregister syncing
+      syncRegistry.delete(key);
+      notifySyncChange();
     }
   }, [key, fetchFn, enabled, ttl, startCountdown, stopCountdown, applyPendingChanges, data]);
 

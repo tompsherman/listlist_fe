@@ -13,6 +13,7 @@ import GroceryList from '../components/GroceryList';
 import PantryList from '../components/PantryList';
 import MealsList from '../components/MealsList';
 import PodSettings from '../components/PodSettings';
+import ConnectionStatus from '../components/ConnectionStatus';
 import './Home.css';
 
 export default function Home({ tab = 'grocery' }) {
@@ -36,6 +37,7 @@ export default function Home({ tab = 'grocery' }) {
       <header className="home-header">
         <h1>🫛 ListList</h1>
         <div className="header-info">
+          <ConnectionStatus />
           <button className="pod-btn" onClick={() => setShowSettings(true)}>
             {currentPod?.podName} ⚙️
           </button>

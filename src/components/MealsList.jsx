@@ -3,19 +3,37 @@
  * Quick meal logging + dish management with ingredients
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { dishesApi } from '../services/dishes';
 import { itemsApi } from '../services/items';
+import { useCachedData } from '../hooks';
 import { getCategoryColor, isEdible } from '../utils/categories';
 import CookDishModal from './CookDishModal';
+import LoadingCountdown from './LoadingCountdown';
 import './MealsList.css';
 
 export default function MealsList() {
   const { currentPod } = useUser();
-  const [dishes, setDishes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
+  // Fetch dishes with cold-start handling
+  const {
+    data: dishes,
+    loading,
+    error,
+    countdown,
+    isStale,
+    refetch: fetchDishes,
+    setData: setDishes,
+  } = useCachedData({
+    key: currentPod ? `dishes_${currentPod.podId}` : null,
+    fetchFn: async () => {
+      return await dishesApi.getAll(currentPod.podId);
+    },
+    enabled: !!currentPod,
+    coldStartMs: 30000,
+  });
+
   const [newDishName, setNewDishName] = useState('');
   const [adding, setAdding] = useState(false);
   
@@ -29,26 +47,6 @@ export default function MealsList() {
   
   // Gap #6: Cook modal
   const [showCookModal, setShowCookModal] = useState(false);
-
-  const fetchDishes = useCallback(async () => {
-    if (!currentPod) return;
-    
-    try {
-      setLoading(true);
-      const data = await dishesApi.getAll(currentPod.podId);
-      setDishes(data);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch dishes:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPod]);
-
-  useEffect(() => {
-    fetchDishes();
-  }, [fetchDishes]);
 
   const handleAddDish = async (e) => {
     e.preventDefault();
@@ -164,13 +162,17 @@ export default function MealsList() {
     return d.toLocaleDateString();
   };
 
-  // Filter dishes by search
-  const filteredDishes = dishes.filter(d => 
+  // Show countdown when loading with no data (cold start)
+  if (loading && !dishes) {
+    return <LoadingCountdown countdown={countdown} />;
+  }
+
+  // Filter dishes by search (dishes is guaranteed to be array at this point)
+  const dishesArray = dishes || [];
+  const filteredDishes = dishesArray.filter(d => 
     d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.ingredients?.some(i => i.name?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  if (loading) return <div className="meals-list loading">Loading...</div>;
   if (error) return <div className="meals-list error">{error}</div>;
 
   return (
@@ -195,7 +197,7 @@ export default function MealsList() {
       </form>
 
       {/* Search */}
-      {dishes.length > 3 && (
+      {dishesArray.length > 3 && (
         <div className="search-bar">
           <input
             type="text"
@@ -212,7 +214,7 @@ export default function MealsList() {
       {/* Dishes */}
       {filteredDishes.length === 0 ? (
         <p className="empty">
-          {dishes.length === 0 ? 'No dishes yet. Add some above!' : 'No dishes match your search.'}
+          {dishesArray.length === 0 ? 'No dishes yet. Add some above!' : 'No dishes match your search.'}
         </p>
       ) : (
         <div className="dish-list">
