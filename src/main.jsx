@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { UserProvider } from './context/UserContext';
 import App from './App';
@@ -23,19 +24,21 @@ const onRedirectCallback = (appState) => {
 // This lets UserContext initialize early and show cached data immediately
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Auth0Provider
-        domain={domain}
-        clientId={clientId}
-        redirectUri={window.location.origin}
-        audience={audience}
-        cacheLocation="localstorage"
-        onRedirectCallback={onRedirectCallback}
-      >
-        <UserProvider>
-          <App />
-        </UserProvider>
-      </Auth0Provider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <Auth0Provider
+          domain={domain}
+          clientId={clientId}
+          redirectUri={window.location.origin}
+          audience={audience}
+          cacheLocation="localstorage"
+          onRedirectCallback={onRedirectCallback}
+        >
+          <UserProvider>
+            <App />
+          </UserProvider>
+        </Auth0Provider>
+      </BrowserRouter>
+    </HelmetProvider>
   </React.StrictMode>
 );
