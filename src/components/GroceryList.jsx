@@ -15,6 +15,8 @@ import { itemsApi } from '../services/items';
 import { getCached, setCache } from '../utils/cache';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
 import { CollapsibleCard, Button, Badge } from './ui';
+import QuickAddForm from './QuickAddForm';
+import ItemEditModal from './ItemEditModal';
 import './GroceryList.css';
 
 export default function GroceryList() {
@@ -31,6 +33,11 @@ export default function GroceryList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [quickAddName, setQuickAddName] = useState('');
+  
+  // Edit modal state
+  const [editingItem, setEditingItem] = useState(null);
   
   // Shopping cart state (tracks slider values)
   const [cart, setCart] = useState({});
@@ -103,19 +110,48 @@ export default function GroceryList() {
     }
   };
 
-  // Create custom item and add to list
-  const handleCreateAndAdd = async (name) => {
+  // Show quick add form for new item
+  const handleShowQuickAdd = (name) => {
+    setQuickAddName(name.trim());
+    setShowQuickAdd(true);
+    setSearchResults([]);
+  };
+
+  // Create custom item and add to list (from QuickAddForm)
+  const handleCreateAndAdd = async ({ name, category, cost, quantity }) => {
     if (!list || !currentPod) return;
     
     try {
       const newItem = await itemsApi.create({
         name: name.trim(),
+        category,
+        cost: cost || null,
         podId: currentPod.podId,
       });
-      await handleAddItem(newItem);
+      
+      // Add to list with specified quantity
+      const listItem = await listsApi.addItem(list._id, {
+        itemId: newItem._id,
+        quantity: quantity || 1,
+      });
+      
+      setItems(prev => [listItem, ...prev]);
+      setSearchQuery('');
+      setShowQuickAdd(false);
+      setQuickAddName('');
     } catch (err) {
       console.error('Failed to create item:', err);
     }
+  };
+
+  // Handle item saved from edit modal
+  const handleItemSaved = (savedItem) => {
+    // Update items in list if the item was already there
+    setItems(prev => prev.map(i => 
+      (i.itemId?._id || i.itemId) === savedItem._id 
+        ? { ...i, itemId: savedItem }
+        : i
+    ));
   };
 
   // Add item to list (with duplicate detection)
@@ -328,12 +364,24 @@ export default function GroceryList() {
                   </li>
                 );
               })}
-              {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && (
-                <li className="create-new" onClick={() => handleCreateAndAdd(searchQuery)}>
+              {searchQuery.length >= 2 && !searchResults.some(r => r.name.toLowerCase() === searchQuery.toLowerCase()) && !showQuickAdd && (
+                <li className="create-new" onClick={() => handleShowQuickAdd(searchQuery)}>
                   + Create "{searchQuery}"
                 </li>
               )}
             </ul>
+          )}
+          
+          {/* Quick Add Form */}
+          {showQuickAdd && (
+            <QuickAddForm
+              itemName={quickAddName}
+              onSubmit={handleCreateAndAdd}
+              onCancel={() => {
+                setShowQuickAdd(false);
+                setQuickAddName('');
+              }}
+            />
           )}
         </div>
       )}
@@ -407,9 +455,14 @@ export default function GroceryList() {
                         <span className="qty">{item.quantity || 1}</span>
                         <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, 1)}>+</Button>
                       </div>
-                      <Button size="sm" variant="destructive" onClick={() => handleRemove(item)}>
-                        Remove
-                      </Button>
+                      <div className="card-actions">
+                        <Button size="sm" variant="secondary" onClick={() => setEditingItem(item.itemId)}>
+                          ✏️ Edit
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleRemove(item)}>
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   </CollapsibleCard>
                 ))}
@@ -418,6 +471,14 @@ export default function GroceryList() {
           ))}
         </div>
       )}
+
+      {/* Item Edit Modal */}
+      <ItemEditModal
+        isOpen={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        item={editingItem}
+        onSave={handleItemSaved}
+      />
     </div>
   );
 }

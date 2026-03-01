@@ -20,6 +20,8 @@ import {
   isEdible 
 } from '../utils/categories';
 import CookDishModal from './CookDishModal';
+import QuickAddForm from './QuickAddForm';
+import ItemEditModal from './ItemEditModal';
 import './PantryList.css';
 
 const LOCATIONS = [
@@ -42,6 +44,12 @@ export default function PantryList() {
   const [searchResults, setSearchResults] = useState([]);
   const [addingTo, setAddingTo] = useState(null);
   const [expiring, setExpiring] = useState([]);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [quickAddName, setQuickAddName] = useState('');
+  const [quickAddLocation, setQuickAddLocation] = useState('pantry');
+  
+  // Edit modal state
+  const [editingItem, setEditingItem] = useState(null);
   
   // UI state
   const [groupBy, setGroupBy] = useState('location'); // 'location' | 'category'
@@ -103,19 +111,50 @@ export default function PantryList() {
     }
   };
 
-  const handleCreateAndAdd = async (name, location) => {
+  // Show quick add form
+  const handleShowQuickAdd = (name, location) => {
+    setQuickAddName(name.trim());
+    setQuickAddLocation(location);
+    setShowQuickAdd(true);
+    setSearchResults([]);
+  };
+
+  // Create and add from quick form
+  const handleCreateAndAdd = async ({ name, category, cost, quantity }) => {
     if (!list || !currentPod) return;
     
     try {
       const newItem = await itemsApi.create({
         name: name.trim(),
+        category,
+        cost: cost || null,
         podId: currentPod.podId,
-        defaultLocation: location,
+        defaultLocation: quickAddLocation,
       });
-      await handleAddItem(newItem, location);
+      
+      // Add to list
+      const listItem = await listsApi.addItem(list._id, {
+        itemId: newItem._id,
+        quantity: quantity || 1,
+        location: quickAddLocation,
+      });
+      
+      setItems(prev => [listItem, ...prev]);
+      setSearchQuery('');
+      setShowQuickAdd(false);
+      setQuickAddName('');
     } catch (err) {
       console.error('Failed to create item:', err);
     }
+  };
+
+  // Handle item saved from edit modal
+  const handleItemSaved = (savedItem) => {
+    setItems(prev => prev.map(i => 
+      (i.itemId?._id || i.itemId) === savedItem._id 
+        ? { ...i, itemId: savedItem }
+        : i
+    ));
   };
 
   const handleAddItem = async (catalogItem, location) => {
@@ -417,7 +456,7 @@ export default function PantryList() {
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => setAddingTo('pantry')}
         />
-        {(searchResults.length > 0 || searchQuery.length >= 2) && (
+        {(searchResults.length > 0 || searchQuery.length >= 2) && !showQuickAdd && (
           <div className="search-dropdown">
             <ul className="search-results">
               {searchResults.map(item => (
@@ -443,7 +482,7 @@ export default function PantryList() {
                     {LOCATIONS.map(loc => (
                       <button
                         key={loc.id}
-                        onClick={() => handleCreateAndAdd(searchQuery, loc.id)}
+                        onClick={() => handleShowQuickAdd(searchQuery, loc.id)}
                         title={loc.label}
                       >
                         {loc.label.split(' ')[0]}
@@ -454,6 +493,18 @@ export default function PantryList() {
               )}
             </ul>
           </div>
+        )}
+        
+        {/* Quick Add Form */}
+        {showQuickAdd && (
+          <QuickAddForm
+            itemName={quickAddName}
+            onSubmit={handleCreateAndAdd}
+            onCancel={() => {
+              setShowQuickAdd(false);
+              setQuickAddName('');
+            }}
+          />
         )}
       </div>
 
@@ -640,6 +691,14 @@ export default function PantryList() {
                                         ✓ Use
                                       </button>
                                     )}
+                                    {/* Edit button */}
+                                    <button 
+                                      className="edit-btn" 
+                                      onClick={() => setEditingItem(item.itemId)}
+                                      title="Edit item"
+                                    >
+                                      ✏️
+                                    </button>
                                     {/* Throw out button for all items */}
                                     <button 
                                       className="throw-btn" 
@@ -676,6 +735,14 @@ export default function PantryList() {
           setCookModalItem(null);
           fetchList(); // Refresh pantry
         }}
+      />
+      
+      {/* Item Edit Modal */}
+      <ItemEditModal
+        isOpen={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        item={editingItem}
+        onSave={handleItemSaved}
       />
     </div>
   );

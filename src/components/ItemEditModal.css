@@ -1,0 +1,80 @@
+/**
+ * ItemEditModal Styles
+ */
+
+.item-edit-modal .modal-content {
+  max-width: 500px;
+}
+
+.item-edit-modal .error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.item-edit-modal .form-section {
+  margin-bottom: 1.5rem;
+}
+
+.item-edit-modal .form-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.item-edit-modal .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.item-edit-modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.item-edit-modal label.full-width {
+  grid-column: 1 / -1;
+}
+
+.item-edit-modal label.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.item-edit-modal label.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.item-edit-modal input[type="text"],
+.item-edit-modal input[type="number"],
+.item-edit-modal select {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: #222;
+  color: #fff;
+}
+
+.item-edit-modal input:focus,
+.item-edit-modal select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.item-edit-modal input::placeholder {
+  color: #666;
+}

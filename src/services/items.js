@@ -10,4 +10,7 @@ export const itemsApi = {
   
   // Create custom item
   create: (data) => api.post('/api/items', data),
+  
+  // Update item (pod-created items only)
+  update: (id, data) => api.patch(`/api/items/${id}/user`, data),
 };
