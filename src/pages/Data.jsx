@@ -163,10 +163,32 @@ export default function Data() {
           <p style={{ color: 'var(--color-text-secondary)', marginTop: 'var(--space-2)' }}>
             Browse database schemas and live data
           </p>
+          {/* DB Status Indicator */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--space-2)', 
+            marginTop: 'var(--space-4)',
+            padding: 'var(--space-3)',
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+          }}>
+            <span style={{ 
+              fontSize: '12px',
+              filter: loading ? 'none' : 'none',
+              animation: loading ? 'pulse 1s infinite' : 'none',
+            }}>
+              {loading ? '🟡' : error ? '🔴' : models.length > 0 ? '🟢' : '⚪'}
+            </span>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+              {loading ? 'Connecting to database...' : 
+               error ? `Database error: ${error}` : 
+               models.length > 0 ? `Connected — ${models.length} models loaded` : 
+               'Not connected'}
+            </span>
+          </div>
         </div>
-
-        {loading && <p>Loading models...</p>}
-        {error && <p style={{ color: 'var(--color-error)' }}>{error}</p>}
 
         {/* ERD Diagram */}
         {models.length > 0 && (

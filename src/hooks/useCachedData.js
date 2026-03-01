@@ -24,6 +24,14 @@ const COUNTDOWN_INTERVAL_MS = 1000;
 const syncRegistry = new Set();
 const syncListeners = new Set();
 
+// Global error status for ConnectionStatus indicator
+const errorRegistry = new Set();
+const errorListeners = new Set();
+
+// Global initialization status - true until first successful fetch
+let isInitializing = true;
+const initListeners = new Set();
+
 export function getSyncingCount() {
   return syncRegistry.size;
 }
@@ -35,6 +43,35 @@ export function onSyncChange(callback) {
 
 function notifySyncChange() {
   syncListeners.forEach(cb => cb(syncRegistry.size));
+}
+
+export function getErrorCount() {
+  return errorRegistry.size;
+}
+
+export function onErrorChange(callback) {
+  errorListeners.add(callback);
+  return () => errorListeners.delete(callback);
+}
+
+function notifyErrorChange() {
+  errorListeners.forEach(cb => cb(errorRegistry.size));
+}
+
+export function getIsInitializing() {
+  return isInitializing;
+}
+
+export function onInitChange(callback) {
+  initListeners.add(callback);
+  return () => initListeners.delete(callback);
+}
+
+function markInitialized() {
+  if (isInitializing) {
+    isInitializing = false;
+    initListeners.forEach(cb => cb(false));
+  }
 }
 
 export function useCachedData({
@@ -161,6 +198,13 @@ export function useCachedData({
       setCache(key, mergedData, ttl);
       setIsStale(false);
       setError(null);
+      
+      // Clear error state on success
+      errorRegistry.delete(key);
+      notifyErrorChange();
+      
+      // Mark app as initialized (first successful fetch)
+      markInitialized();
     } catch (err) {
       console.error('useCachedData fetch error:', err);
       setError(err.message || 'Failed to load data');
@@ -168,6 +212,10 @@ export function useCachedData({
       if (!data) {
         setData(null);
       }
+      
+      // Register error state
+      errorRegistry.add(key);
+      notifyErrorChange();
     } finally {
       setLoading(false);
       stopCountdown();

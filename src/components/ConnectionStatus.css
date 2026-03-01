@@ -27,6 +27,11 @@
   animation: pulse-dot 1.4s ease-in-out infinite;
 }
 
+/* Error state - static red dots */
+.connection-status--error .connection-status__dot {
+  background-color: #ef4444;
+}
+
 .connection-status--syncing .connection-status__dot:nth-child(1) {
   animation-delay: 0s;
 }
