@@ -577,18 +577,28 @@ function BulkImportForm({ onImport, onCancel }) {
     setImporting(true);
     
     let successCount = 0;
+    let failedItems = [];
+    
     for (const item of preview) {
       try {
         await api.post('/api/items/admin', item, {
           headers: { 'x-data-secret': DATA_SECRET },
         });
         successCount++;
+        // Small delay to avoid rate limiting (100ms between requests)
+        if (preview.length > 10) {
+          await new Promise(r => setTimeout(r, 100));
+        }
       } catch (err) {
         console.error(`Failed to import ${item.name}:`, err);
+        failedItems.push({ name: item.name, error: err.message || 'Unknown error' });
       }
     }
     
     setImporting(false);
+    if (failedItems.length > 0) {
+      console.warn('Failed items:', failedItems);
+    }
     onImport(successCount);
   };
 
