@@ -9,7 +9,7 @@ import { podsApi } from '../services/pods';
 import './PodSettings.css';
 
 export default function PodSettings({ onClose }) {
-  const { currentPod, user, switchPod, refetch } = useUser();
+  const { currentPod, user, switchPod, refetch, logout } = useUser();
   const [pod, setPod] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -183,6 +183,13 @@ export default function PodSettings({ onClose }) {
             </ul>
           </section>
         )}
+
+        {/* Logout */}
+        <section className="logout-section">
+          <button className="logout-btn" onClick={logout}>
+            Log Out
+          </button>
+        </section>
       </div>
     </div>
   );

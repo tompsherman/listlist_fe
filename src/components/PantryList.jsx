@@ -119,6 +119,7 @@ export default function PantryList() {
   };
 
   // Create and add from quick form
+  // Creates INDIVIDUAL entries for each unit (not 1 item with quantity=N)
   const handleCreateAndAdd = async ({ name, category, cost, quantity }) => {
     if (!list || !currentPod) return;
     
@@ -131,14 +132,20 @@ export default function PantryList() {
         defaultLocation: quickAddLocation,
       });
       
-      // Add to list
-      const listItem = await listsApi.addItem(list._id, {
-        itemId: newItem._id,
-        quantity: quantity || 1,
-        location: quickAddLocation,
-      });
+      // Create individual entries for each unit
+      const qty = quantity || 1;
+      const newListItems = [];
       
-      setItems(prev => [listItem, ...prev]);
+      for (let i = 0; i < qty; i++) {
+        const listItem = await listsApi.addItem(list._id, {
+          itemId: newItem._id,
+          quantity: 1,
+          location: quickAddLocation,
+        });
+        newListItems.push(listItem);
+      }
+      
+      setItems(prev => [...newListItems, ...prev]);
       setSearchQuery('');
       setShowQuickAdd(false);
       setQuickAddName('');

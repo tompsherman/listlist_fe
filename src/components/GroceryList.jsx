@@ -305,6 +305,8 @@ export default function GroceryList() {
           variant={mode === 'add' ? 'primary' : 'secondary'}
           size="sm"
           onClick={() => setMode(mode === 'add' ? 'view' : 'add')}
+          disabled={mode === 'shop'}
+          title={mode === 'shop' ? 'Finish shopping first' : undefined}
         >
           {mode === 'add' ? '✕ Close' : '+ Add Item'}
         </Button>
@@ -315,16 +317,18 @@ export default function GroceryList() {
         >
           {mode === 'shop' ? '✕ Cancel' : '🛒 Go Shop'}
         </Button>
-        {mode === 'shop' && (
-          <Button 
-            variant="primary"
-            size="sm"
-            onClick={handleDoneShopping}
-          >
-            ✓ Done Shopping
-          </Button>
-        )}
       </div>
+
+      {/* Estimated Cost - shown at top in shop mode and view mode */}
+      {items.length > 0 && (
+        <div className="estimated-cost">
+          💰 Estimated: ${items.reduce((sum, item) => {
+            const price = item.itemId?.cost || 0;
+            const qty = item.quantity || 1;
+            return sum + (price * qty);
+          }, 0).toFixed(2)}
+        </div>
+      )}
 
       {/* Add Item Search (only in add mode) */}
       {mode === 'add' && (
@@ -422,6 +426,16 @@ export default function GroceryList() {
               </div>
             </div>
           ))}
+          
+          {/* Done Shopping - at bottom, orange */}
+          <Button 
+            variant="warning"
+            size="lg"
+            onClick={handleDoneShopping}
+            className="done-shopping-btn"
+          >
+            ✓ Done Shopping
+          </Button>
         </div>
       ) : (
         /* VIEW/ADD MODE - Collapsed Cards */

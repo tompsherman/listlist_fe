@@ -280,3 +280,27 @@
   color: #4CAF50;
   font-size: 1rem;
 }
+
+/* Logout */
+.logout-section {
+  padding: 1rem;
+  border-top: 1px solid #333;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid #c62828;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #c62828;
+  color: #fff;
+}
