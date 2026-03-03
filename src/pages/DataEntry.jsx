@@ -14,8 +14,12 @@ const STORAGE_KEY = 'data_entry_unlocked';
 // Item enums - extensible via localStorage
 const DEFAULT_CATEGORIES = ['vegetable', 'herbs', 'fruit', 'grains', 'meat', 'dairy', 'leftovers', 'household', 'snack', 'drinks', 'other'];
 const DEFAULT_UNITS = ['each', 'lb', 'oz', 'bunch', 'bag', 'box', 'can', 'jar', 'bottle', 'gallon', 'dozen'];
-const DEFAULT_LOCATIONS = ['fridge', 'freezer', 'pantry', 'counter'];
+const DEFAULT_LOCATIONS = ['fridge', 'freezer', 'pantry', 'counter', 'closet'];
 const TIME_TO_EXPIRE = ['three_days', 'six_days', 'nine_days', 'eighteen_days', 'thirty-six_days', 'seventy-three_days', 'three-hundred-sixty-five_days', 'never'];
+
+// Full schema enums (from Item model)
+const PURCHASE_UNITS = ['each', 'lb', 'oz', 'bunch', 'bag', 'box', 'can', 'jar', 'bottle', 'gallon', 'dozen', 'carton', 'pack'];
+const USE_UNITS = ['each', 'cup', 'tbsp', 'tsp', 'slice', 'serving', 'oz', 'lb', 'piece', 'self'];
 
 // Load custom options from localStorage
 const getCustomOptions = (key, defaults) => {
@@ -278,9 +282,11 @@ function ItemsManager() {
             <tr style={{ borderBottom: '2px solid #333', textAlign: 'left' }}>
               <th style={thStyle}>Name</th>
               <th style={thStyle}>Category</th>
-              <th style={thStyle}>Unit</th>
               <th style={thStyle}>Location</th>
-              <th style={thStyle}>Shelf Life</th>
+              <th style={thStyle}>Purchase</th>
+              <th style={thStyle}>Use</th>
+              <th style={thStyle}>Uses</th>
+              <th style={thStyle}>Cost</th>
               <th style={thStyle}>Actions</th>
             </tr>
           </thead>
@@ -289,11 +295,13 @@ function ItemsManager() {
               <tr key={item._id || item.id} style={{ borderBottom: '1px solid #eee' }}>
                 <td style={tdStyle}>{item.name}</td>
                 <td style={tdStyle}>{item.category}</td>
-                <td style={tdStyle}>{item.defaultUnit}</td>
                 <td style={tdStyle}>{item.defaultLocation}</td>
-                <td style={tdStyle}>{item.shelfLifeDays || '—'}</td>
+                <td style={tdStyle}>{item.purchaseUnit || '—'}</td>
+                <td style={tdStyle}>{item.useUnit || '—'}</td>
+                <td style={tdStyle}>{item.usePerUnit || 1}</td>
+                <td style={tdStyle}>{item.cost ? `$${item.cost}` : '—'}</td>
                 <td style={tdStyle}>
-                  <button onClick={() => { setEditingItem(item); setShowForm(true); }} style={smallBtnStyle}>Edit</button>
+                  <button onClick={() => { setEditingItem(item); setShowForm(true); }} style={smallBtnStyle}>Full Edit</button>
                   <button onClick={() => handleDelete(item._id || item.id)} style={{ ...smallBtnStyle, backgroundColor: '#e53e3e' }}>Delete</button>
                 </td>
               </tr>
@@ -307,17 +315,24 @@ function ItemsManager() {
 }
 
 /**
- * Item Form Component
+ * Full Item Edit Component
+ * Complete CRUD for the full Item object
  */
 function ItemForm({ item, onSave, onCancel }) {
   const [form, setForm] = useState({
     name: item?.name || '',
     category: item?.category || 'other',
-    defaultUnit: item?.defaultUnit || 'each',
+    purchaseUnit: item?.purchaseUnit || 'each',
+    useUnit: item?.useUnit || 'each',
+    usePerUnit: item?.usePerUnit || 1,
     defaultLocation: item?.defaultLocation || 'pantry',
     shelfLifeDays: item?.shelfLifeDays || '',
-    usePerUnit: item?.usePerUnit || 1,
     timeToExpire: item?.timeToExpire || 'nine_days',
+    cost: item?.cost || '',
+    perishable: item?.perishable !== false,
+    brandMatters: item?.brandMatters || false,
+    brand: item?.brand || '',
+    imageUrl: item?.imageUrl || '',
     isGlobal: item?.isGlobal !== false,
   });
   const [saving, setSaving] = useState(false);
@@ -326,7 +341,13 @@ function ItemForm({ item, onSave, onCancel }) {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { ...form, shelfLifeDays: form.shelfLifeDays ? parseInt(form.shelfLifeDays) : null };
+      const payload = { 
+        ...form, 
+        shelfLifeDays: form.shelfLifeDays ? parseInt(form.shelfLifeDays) : null,
+        cost: form.cost ? parseFloat(form.cost) : null,
+        brand: form.brand || null,
+        imageUrl: form.imageUrl || null,
+      };
       if (item) {
         await api.patch(`/api/items/${item._id || item.id}`, payload, {
           headers: { 'x-data-secret': DATA_SECRET },
@@ -346,8 +367,11 @@ function ItemForm({ item, onSave, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ backgroundColor: '#f5f5f5', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-      <h3>{item ? 'Edit Item' : 'Add Item'}</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+      <h3>🔧 {item ? 'Full Item Edit' : 'Add New Item'}</h3>
+      
+      {/* Basic Info */}
+      <h4 style={{ margin: '1rem 0 0.5rem', color: '#666', fontSize: '0.875rem' }}>BASIC INFO</h4>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         <label>
           Name *
           <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required style={inputStyle} />
@@ -359,38 +383,85 @@ function ItemForm({ item, onSave, onCancel }) {
           </select>
         </label>
         <label>
-          Default Unit
-          <select value={form.defaultUnit} onChange={(e) => setForm({ ...form, defaultUnit: e.target.value })} style={inputStyle}>
-            {getUnits().map((u) => <option key={u} value={u}>{u}</option>)}
-          </select>
-        </label>
-        <label>
           Default Location
           <select value={form.defaultLocation} onChange={(e) => setForm({ ...form, defaultLocation: e.target.value })} style={inputStyle}>
             {getLocations().map((l) => <option key={l} value={l}>{l}</option>)}
           </select>
         </label>
+      </div>
+      
+      {/* Units & Quantity */}
+      <h4 style={{ margin: '1.5rem 0 0.5rem', color: '#666', fontSize: '0.875rem' }}>UNITS & QUANTITY</h4>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         <label>
-          Shelf Life (days)
-          <input type="number" value={form.shelfLifeDays} onChange={(e) => setForm({ ...form, shelfLifeDays: e.target.value })} style={inputStyle} />
+          Purchase Unit
+          <select value={form.purchaseUnit} onChange={(e) => setForm({ ...form, purchaseUnit: e.target.value })} style={inputStyle}>
+            {PURCHASE_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </label>
+        <label>
+          Use Unit
+          <select value={form.useUnit} onChange={(e) => setForm({ ...form, useUnit: e.target.value })} style={inputStyle}>
+            {USE_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
         </label>
         <label>
           Uses Per Unit
-          <input type="number" value={form.usePerUnit} onChange={(e) => setForm({ ...form, usePerUnit: parseInt(e.target.value) || 1 })} style={inputStyle} />
+          <input type="number" value={form.usePerUnit} onChange={(e) => setForm({ ...form, usePerUnit: parseInt(e.target.value) || 1 })} min="1" style={inputStyle} />
         </label>
         <label>
-          Time to Expire
+          Cost ($)
+          <input type="number" step="0.01" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} placeholder="0.00" style={inputStyle} />
+        </label>
+      </div>
+      
+      {/* Expiration */}
+      <h4 style={{ margin: '1.5rem 0 0.5rem', color: '#666', fontSize: '0.875rem' }}>EXPIRATION</h4>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+        <label>
+          Shelf Life (days)
+          <input type="number" value={form.shelfLifeDays} onChange={(e) => setForm({ ...form, shelfLifeDays: e.target.value })} placeholder="e.g., 7" style={inputStyle} />
+        </label>
+        <label>
+          Time to Expire (color)
           <select value={form.timeToExpire} onChange={(e) => setForm({ ...form, timeToExpire: e.target.value })} style={inputStyle}>
             {TIME_TO_EXPIRE.map((t) => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
           </select>
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <input type="checkbox" checked={form.isGlobal} onChange={(e) => setForm({ ...form, isGlobal: e.target.checked })} />
-          Global Item
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '1.5rem' }}>
+          <input type="checkbox" checked={form.perishable} onChange={(e) => setForm({ ...form, perishable: e.target.checked })} />
+          Perishable
         </label>
       </div>
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-        <button type="submit" disabled={saving} style={btnStyle}>{saving ? 'Saving...' : 'Save'}</button>
+      
+      {/* Branding */}
+      <h4 style={{ margin: '1.5rem 0 0.5rem', color: '#666', fontSize: '0.875rem' }}>BRANDING (optional)</h4>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingTop: '0.25rem' }}>
+          <input type="checkbox" checked={form.brandMatters} onChange={(e) => setForm({ ...form, brandMatters: e.target.checked })} />
+          Brand Matters
+        </label>
+        <label>
+          Brand
+          <input type="text" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="e.g., Kirkland" style={inputStyle} />
+        </label>
+        <label>
+          Image URL
+          <input type="text" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." style={inputStyle} />
+        </label>
+      </div>
+      
+      {/* Flags */}
+      <h4 style={{ margin: '1.5rem 0 0.5rem', color: '#666', fontSize: '0.875rem' }}>FLAGS</h4>
+      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input type="checkbox" checked={form.isGlobal} onChange={(e) => setForm({ ...form, isGlobal: e.target.checked })} />
+          Global Item (shared across pods)
+        </label>
+      </div>
+      
+      <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+        <button type="submit" disabled={saving} style={btnStyle}>{saving ? 'Saving...' : 'Save Item'}</button>
         <button type="button" onClick={onCancel} style={{ ...btnStyle, backgroundColor: '#666' }}>Cancel</button>
       </div>
     </form>
@@ -400,6 +471,7 @@ function ItemForm({ item, onSave, onCancel }) {
 /**
  * Bulk Import Form Component
  * Paste CSV/TSV data to import multiple items at once
+ * Full schema: name, category, location, uses, expires, purchaseUnit, useUnit, cost, shelfLife, perishable
  */
 function BulkImportForm({ onImport, onCancel }) {
   const [bulkData, setBulkData] = useState('');
@@ -416,24 +488,47 @@ function BulkImportForm({ onImport, onCancel }) {
     // Parse header
     const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
     
-    // Map common header names
+    // Map common header names to schema fields
     const headerMap = {
+      // Name
       'name': 'name',
       'item': 'name',
       'item name': 'name',
+      // Category
       'category': 'category',
       'type': 'category',
-      'unit': 'defaultUnit',
-      'default unit': 'defaultUnit',
+      // Location
       'location': 'defaultLocation',
       'default location': 'defaultLocation',
       'storage': 'defaultLocation',
-      'shelf life': 'shelfLifeDays',
-      'shelf life days': 'shelfLifeDays',
-      'days': 'shelfLifeDays',
+      // Purchase unit
+      'purchaseunit': 'purchaseUnit',
+      'purchase unit': 'purchaseUnit',
+      'buy unit': 'purchaseUnit',
+      'unit': 'purchaseUnit',
+      // Use unit
+      'useunit': 'useUnit',
+      'use unit': 'useUnit',
+      // Uses per unit
       'uses': 'usePerUnit',
       'uses per unit': 'usePerUnit',
+      'usesperunit': 'usePerUnit',
       'portions': 'usePerUnit',
+      // Shelf life
+      'shelflife': 'shelfLifeDays',
+      'shelf life': 'shelfLifeDays',
+      'shelflifedays': 'shelfLifeDays',
+      'days': 'shelfLifeDays',
+      // Time to expire (color coding)
+      'expires': 'timeToExpire',
+      'timetoexpire': 'timeToExpire',
+      'time to expire': 'timeToExpire',
+      'expiration': 'timeToExpire',
+      // Cost
+      'cost': 'cost',
+      'price': 'cost',
+      // Perishable
+      'perishable': 'perishable',
     };
     
     const mappedHeaders = headers.map(h => headerMap[h] || h);
@@ -450,12 +545,21 @@ function BulkImportForm({ onImport, onCancel }) {
         }
       });
       if (item.name) {
-        // Apply defaults
+        // Apply defaults and type conversions
         item.category = item.category || 'other';
-        item.defaultUnit = item.defaultUnit || 'each';
+        item.purchaseUnit = item.purchaseUnit || 'each';
+        item.useUnit = item.useUnit || 'each';
         item.defaultLocation = item.defaultLocation || 'pantry';
         item.usePerUnit = parseInt(item.usePerUnit) || 1;
-        item.shelfLifeDays = parseInt(item.shelfLifeDays) || null;
+        item.shelfLifeDays = item.shelfLifeDays ? parseInt(item.shelfLifeDays) : null;
+        item.cost = item.cost ? parseFloat(item.cost) : null;
+        item.timeToExpire = item.timeToExpire || 'nine_days';
+        // Handle perishable as boolean
+        if (item.perishable !== undefined) {
+          item.perishable = ['true', 'yes', '1', 'y'].includes(String(item.perishable).toLowerCase());
+        } else {
+          item.perishable = true;
+        }
         item.isGlobal = true;
         items.push(item);
       }
@@ -491,22 +595,24 @@ function BulkImportForm({ onImport, onCancel }) {
   return (
     <div style={{ backgroundColor: '#f0fff4', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', border: '2px solid #38a169' }}>
       <h3>📋 Bulk Import Items</h3>
-      <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
-        Paste CSV or tab-separated data. First row should be headers.<br/>
-        Supported columns: name, category, unit, location, shelf life, uses
+      <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
+        Paste CSV or tab-separated data. First row should be headers.
+      </p>
+      <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '1rem' }}>
+        <strong>Supported columns:</strong> name, category, location, uses, purchaseUnit, useUnit, cost, shelfLife, expires, perishable
       </p>
       <textarea
         value={bulkData}
         onChange={(e) => setBulkData(e.target.value)}
-        placeholder="name&#9;category&#9;location&#9;uses
-Milk&#9;dairy&#9;fridge&#9;8
-Chicken Breast&#9;meat&#9;freezer&#9;4
-Rice&#9;grains&#9;pantry&#9;20"
+        placeholder="name&#9;category&#9;location&#9;purchaseUnit&#9;useUnit&#9;uses&#9;cost&#9;shelfLife&#9;perishable
+Milk&#9;dairy&#9;fridge&#9;gallon&#9;cup&#9;16&#9;4.99&#9;7&#9;true
+Chicken Breast&#9;meat&#9;freezer&#9;lb&#9;serving&#9;4&#9;8.99&#9;180&#9;true
+Rice&#9;grains&#9;pantry&#9;bag&#9;cup&#9;20&#9;3.49&#9;365&#9;false"
         rows={8}
         style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'pre' }}
       />
       
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <button type="button" onClick={handlePreview} style={btnStyle}>Preview ({parseData(bulkData).length} items)</button>
         <button type="button" onClick={handleImport} disabled={preview.length === 0 || importing} style={{ ...btnStyle, backgroundColor: '#38a169' }}>
           {importing ? 'Importing...' : `Import ${preview.length} Items`}
@@ -515,14 +621,18 @@ Rice&#9;grains&#9;pantry&#9;20"
       </div>
       
       {preview.length > 0 && (
-        <div style={{ marginTop: '1rem', maxHeight: '200px', overflow: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+        <div style={{ marginTop: '1rem', maxHeight: '250px', overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
             <thead>
               <tr style={{ backgroundColor: '#e2e8f0' }}>
                 <th style={thStyle}>Name</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
+                <th style={thStyle}>Purchase</th>
+                <th style={thStyle}>Use</th>
                 <th style={thStyle}>Uses</th>
+                <th style={thStyle}>Cost</th>
+                <th style={thStyle}>Days</th>
               </tr>
             </thead>
             <tbody>
@@ -531,11 +641,15 @@ Rice&#9;grains&#9;pantry&#9;20"
                   <td style={tdStyle}>{item.name}</td>
                   <td style={tdStyle}>{item.category}</td>
                   <td style={tdStyle}>{item.defaultLocation}</td>
+                  <td style={tdStyle}>{item.purchaseUnit}</td>
+                  <td style={tdStyle}>{item.useUnit}</td>
                   <td style={tdStyle}>{item.usePerUnit}</td>
+                  <td style={tdStyle}>{item.cost ? `$${item.cost}` : '—'}</td>
+                  <td style={tdStyle}>{item.shelfLifeDays || '—'}</td>
                 </tr>
               ))}
               {preview.length > 10 && (
-                <tr><td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#666' }}>... and {preview.length - 10} more</td></tr>
+                <tr><td colSpan={8} style={{ ...tdStyle, textAlign: 'center', color: '#666' }}>... and {preview.length - 10} more</td></tr>
               )}
             </tbody>
           </table>

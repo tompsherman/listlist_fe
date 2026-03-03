@@ -1,5 +1,6 @@
 /**
  * Pod Settings Styles
+ * Light-mode first with CSS variables
  */
 
 .pod-settings-overlay {
@@ -14,7 +15,7 @@
 }
 
 .pod-settings {
-  background: #1a1a1a;
+  background: var(--color-surface);
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
@@ -32,7 +33,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .pod-settings header h2 {
@@ -44,12 +45,12 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #888;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
 .close-btn:hover {
-  color: #fff;
+  color: var(--color-text);
 }
 
 .pod-settings .message {
@@ -71,7 +72,7 @@
 
 .pod-settings section {
   padding: 1rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .pod-settings section:last-child {
@@ -81,7 +82,7 @@
 .pod-settings h3 {
   margin: 0 0 0.75rem 0;
   font-size: 0.875rem;
-  color: #888;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -89,7 +90,7 @@
 .pod-settings h4 {
   margin: 1rem 0 0.5rem 0;
   font-size: 0.75rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Members List */
@@ -117,14 +118,14 @@
 
 .member-info .role {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-secondary);
   text-transform: capitalize;
 }
 
 .remove-btn {
   background: none;
-  border: 1px solid #666;
-  color: #888;
+  border: 1px solid var(--color-text-secondary);
+  color: var(--color-text-secondary);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -145,10 +146,10 @@
 .invite-form input {
   flex: 1;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
   font-size: 0.875rem;
 }
 
@@ -184,7 +185,7 @@
   align-items: center;
   padding: 0.5rem 0;
   font-size: 0.875rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .pending-invites li:last-child {
@@ -192,7 +193,7 @@
 }
 
 .invite-email {
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .invite-actions {
@@ -210,7 +211,7 @@
 .remove-invite-btn {
   background: none;
   border: none;
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -223,7 +224,7 @@
 
 .pod-settings .hint {
   font-size: 0.75rem;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -238,7 +239,7 @@
 }
 
 .pod-list li.active .pod-switch-btn {
-  background: #2a2a2a;
+  background: var(--color-bg-secondary);
   border-color: #4CAF50;
 }
 
@@ -248,17 +249,17 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: #222;
-  border: 1px solid #333;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #fff;
+  color: var(--color-text);
   cursor: pointer;
   text-align: left;
 }
 
 .pod-switch-btn:hover:not(:disabled) {
-  background: #2a2a2a;
-  border-color: #444;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
 
 .pod-switch-btn:disabled {
@@ -272,7 +273,7 @@
 
 .pod-switch-btn .pod-role {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-secondary);
   text-transform: capitalize;
 }
 
@@ -284,7 +285,7 @@
 /* Logout */
 .logout-section {
   padding: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border);
 }
 
 .logout-btn {

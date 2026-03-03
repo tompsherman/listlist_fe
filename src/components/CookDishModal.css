@@ -1,5 +1,6 @@
 /**
  * CookDishModal Styles
+ * Light-mode first with CSS variables
  */
 
 .cook-dish-modal {
@@ -13,7 +14,7 @@
 .cook-dish-modal h3 {
   margin: 0 0 1rem;
   font-size: 1.25rem;
-  color: #fff;
+  color: var(--color-text);
 }
 
 /* Step 1: Dish selection */
@@ -21,10 +22,10 @@
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 2px solid #333;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .dish-search:focus {
@@ -37,13 +38,13 @@
 }
 
 .dish-suggestions .hint {
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }
 
 .dish-suggestions .no-results {
-  color: #666;
+  color: var(--color-text-secondary);
   text-align: center;
   padding: 2rem;
 }
@@ -59,7 +60,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem;
-  background: #2a2a2a;
+  background: var(--color-bg-secondary);
   border-radius: 6px;
   margin-bottom: 0.5rem;
   cursor: pointer;
@@ -67,7 +68,7 @@
 }
 
 .dish-suggestions li:hover {
-  background: #333;
+  background: var(--color-border);
 }
 
 .dish-suggestions .dish-name {
@@ -84,10 +85,10 @@
   width: 100%;
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
-  border: 2px solid #333;
+  border: 2px solid var(--color-border);
   border-radius: 6px;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .ingredient-search input:focus {
@@ -100,8 +101,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   margin-top: 4px;
   max-height: 200px;
@@ -117,7 +118,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 0.75rem;
-  border-left: 4px solid #666;
+  border-left: 4px solid var(--color-text-secondary);
   margin: 0.25rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
@@ -125,7 +126,7 @@
 }
 
 .pantry-results li:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-border);
 }
 
 .pantry-results .item-name {
@@ -135,11 +136,11 @@
 
 .pantry-results .uses {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .ingredients-list {
-  background: #1a1a1a;
+  background: var(--color-bg);
   border-radius: 8px;
   padding: 0.5rem;
   min-height: 150px;
@@ -147,7 +148,7 @@
 
 .ingredients-list .empty {
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
   padding: 2rem;
 }
 
@@ -162,10 +163,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
-  border-left: 4px solid #666;
+  border-left: 4px solid var(--color-text-secondary);
   margin-bottom: 0.5rem;
   border-radius: 4px;
-  background: #252525;
+  background: var(--color-bg-secondary);
 }
 
 .ingredients-list .ingredient.missing {
@@ -193,16 +194,16 @@
 .ingredients-list .ing-controls button {
   width: 28px;
   height: 28px;
-  background: #333;
+  background: var(--color-border);
   border: none;
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text);
   font-size: 1rem;
   cursor: pointer;
 }
 
 .ingredients-list .ing-controls button:hover:not(:disabled) {
-  background: #444;
+  background: var(--color-text-secondary);
 }
 
 .ingredients-list .ing-controls button:disabled {
@@ -212,6 +213,7 @@
 
 .ingredients-list .ing-controls button.remove {
   background: #dc3545;
+  color: #fff;
   margin-left: 0.5rem;
 }
 
@@ -235,17 +237,17 @@
 .form-row label {
   width: 100px;
   font-size: 0.875rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .form-row select {
   flex: 1;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #2a2a2a;
-  color: #fff;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
 }
 
 .form-row select:focus {
@@ -262,16 +264,16 @@
 .servings-input button {
   width: 32px;
   height: 32px;
-  background: #333;
+  background: var(--color-border);
   border: none;
   border-radius: 6px;
-  color: #fff;
+  color: var(--color-text);
   font-size: 1.25rem;
   cursor: pointer;
 }
 
 .servings-input button:hover {
-  background: #444;
+  background: var(--color-text-secondary);
 }
 
 .servings-input span {
@@ -284,16 +286,16 @@
 .cook-summary {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: #2a2a2a;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
 .cook-summary p {
   margin: 0.25rem 0;
   font-size: 0.875rem;
-  color: #ccc;
+  color: var(--color-text-secondary);
 }
 
 .cook-summary p strong {
-  color: #fff;
+  color: var(--color-text);
 }

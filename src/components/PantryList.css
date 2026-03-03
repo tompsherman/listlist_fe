@@ -1,5 +1,6 @@
 /**
  * Pantry List Styles
+ * Light-mode first with CSS variables
  */
 
 .pantry-list {
@@ -44,7 +45,7 @@
 .pantry-list.error {
   text-align: center;
   padding: 2rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 /* Add Item */
@@ -57,10 +58,10 @@
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 2px solid #333;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .pantry-list .add-item input:focus {
@@ -73,8 +74,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   margin-top: 4px;
   z-index: 10;
@@ -100,7 +101,7 @@
 }
 
 .pantry-list .search-results li:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-border);
 }
 
 .pantry-list .search-results .item-name {
@@ -121,8 +122,8 @@
   text-align: center;
   padding: 0.5rem;
   font-size: 0.75rem;
-  color: #888;
-  border-bottom: 1px solid #333;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
   background: rgba(255, 183, 77, 0.1);
 }
 
@@ -135,11 +136,12 @@
 .location-btns button {
   padding: 0.375rem 0.5rem;
   font-size: 0.75rem;
-  background: #333;
-  border: 1px solid #444;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s;
+  color: var(--color-text);
 }
 
 .location-btns button:hover {
@@ -190,17 +192,17 @@
 
 .location-tabs button {
   padding: 0.5rem 0.75rem;
-  background: #2a2a2a;
+  background: var(--color-bg-secondary);
   border: none;
   border-radius: 6px;
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .location-tabs button:hover {
-  background: #333;
+  background: var(--color-border);
 }
 
 .location-tabs button.active {
@@ -220,7 +222,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .item-info {
@@ -237,7 +239,7 @@
   font-size: 0.75rem;
   padding: 0.125rem 0.375rem;
   border-radius: 4px;
-  background: #333;
+  background: var(--color-bg-secondary);
 }
 
 .location-badge[data-location="fridge"] { background: #4fc3f7; color: #000; }
@@ -269,16 +271,16 @@
 .qty-controls button {
   width: 32px;
   height: 32px;
-  background: #333;
+  background: var(--color-bg-secondary);
   border: none;
   border-radius: 6px;
-  color: #fff;
+  color: var(--color-text);
   font-size: 1.25rem;
   cursor: pointer;
 }
 
 .qty-controls button:hover {
-  background: #444;
+  background: var(--color-border);
 }
 
 .qty-controls .qty {
@@ -289,7 +291,7 @@
 
 .pantry-list .empty {
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
   padding: 2rem;
 }
 
@@ -305,7 +307,7 @@
 .group-toggle {
   display: flex;
   gap: 0.25rem;
-  background: #1a1a1a;
+  background: var(--color-bg);
   border-radius: 8px;
   padding: 0.25rem;
 }
@@ -316,14 +318,14 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
 }
 
 .group-toggle button.active {
-  background: #333;
-  color: #fff;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
 }
 
 /* Grouped items */
@@ -343,18 +345,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 0.75rem;
-  background: #1a1a1a;
+  background: var(--color-bg);
   border: none;
-  border-left: 4px solid #666;
+  border-left: 4px solid var(--color-text-secondary);
   border-radius: 4px;
-  color: #fff;
+  color: var(--color-text);
   font-size: 0.875rem;
   cursor: pointer;
   text-align: left;
 }
 
 .group-header:hover {
-  background: #222;
+  background: var(--color-bg-secondary);
 }
 
 .group-name {
@@ -363,16 +365,16 @@
 }
 
 .group-count {
-  background: #333;
+  background: var(--color-bg-secondary);
   padding: 0.125rem 0.5rem;
   border-radius: 10px;
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .collapse-icon {
   font-size: 0.625rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Subgroups (level 2) */
@@ -391,18 +393,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.625rem;
-  background: #222;
+  background: var(--color-bg-secondary);
   border: none;
-  border-left: 3px solid #555;
+  border-left: 3px solid var(--color-border);
   border-radius: 4px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.8125rem;
   cursor: pointer;
   text-align: left;
 }
 
 .subgroup-header:hover {
-  background: #2a2a2a;
+  background: var(--color-border);
 }
 
 .subgroup-name {
@@ -411,11 +413,11 @@
 }
 
 .subgroup-count {
-  background: #333;
+  background: var(--color-bg-secondary);
   padding: 0.125rem 0.375rem;
   border-radius: 8px;
   font-size: 0.6875rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .subgroup-section .name-groups {
@@ -424,7 +426,7 @@
 
 /* Item with category border */
 .group-section .item {
-  border-left: 4px solid #666;
+  border-left: 4px solid var(--color-text-secondary);
   padding-left: 0.75rem;
 }
 
@@ -514,7 +516,7 @@
 
 .group-section .item.dragging {
   opacity: 0.4;
-  background: #333;
+  background: var(--color-bg-secondary);
 }
 
 .group-section.drop-target {
@@ -531,7 +533,7 @@
   content: '⋮⋮';
   position: absolute;
   left: 8px;
-  color: #555;
+  color: var(--color-border);
   font-size: 0.75rem;
   opacity: 0;
   transition: opacity 0.15s;
@@ -562,18 +564,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: #252525;
+  background: var(--color-bg-secondary);
   border: none;
-  border-left: 3px solid #555;
+  border-left: 3px solid var(--color-border);
   border-radius: 4px;
-  color: #ccc;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
   cursor: pointer;
   text-align: left;
 }
 
 .name-group-header:hover {
-  background: #2a2a2a;
+  background: var(--color-border);
 }
 
 .name-group-name {
@@ -582,13 +584,13 @@
 }
 
 .name-group-count {
-  color: #888;
+  color: var(--color-text-secondary);
   font-size: 0.75rem;
 }
 
 .items.indented {
   margin-left: 0.5rem;
-  border-left: 2px solid #333;
+  border-left: 2px solid var(--color-border);
 }
 
 /* Gap #5: Open tag */
@@ -665,7 +667,7 @@
   padding: 0.375rem;
   font-size: 0.75rem;
   background: transparent;
-  color: #888;
+  color: var(--color-text-secondary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -680,7 +682,7 @@
 .qty-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #888;
+  color: var(--color-text-secondary);
   min-width: 2rem;
   text-align: center;
 }
@@ -690,7 +692,7 @@
   padding: 0.375rem;
   font-size: 0.75rem;
   background: transparent;
-  color: #888;
+  color: var(--color-text-secondary);
   border: none;
   border-radius: 4px;
   cursor: pointer;

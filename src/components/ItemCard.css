@@ -1,11 +1,12 @@
 /**
  * ItemCard Styles
  * Layout: Row1 (name/status/icons) → Row2 (progress) → Row3 (buttons)
+ * Light-mode first with CSS variables
  */
 
 .item-card {
-  background: var(--color-bg, #1a1a1a);
-  border: 1px solid var(--color-border, #333);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-left-width: 4px;
   border-radius: var(--radius-md, 6px);
   padding: var(--space-3, 0.75rem);
@@ -37,7 +38,7 @@
 .item-name {
   font-size: 1rem;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--color-text);
 }
 
 /* Status labels */
@@ -50,7 +51,7 @@
 
 .bought-label {
   font-size: 0.75rem;
-  color: #a0aec0;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
 }
 
@@ -60,13 +61,13 @@
 }
 
 .expires-label.exp-green { color: #48bb78; }
-.expires-label.exp-yellow { color: #ecc94b; }
-.expires-label.exp-red { color: #fc8181; }
-.expires-label.exp-black { color: #a0aec0; }
+.expires-label.exp-yellow { color: #d69e2e; }
+.expires-label.exp-red { color: #e53e3e; }
+.expires-label.exp-black { color: var(--color-text-secondary); }
 
 .expired-label {
   font-size: 0.75rem;
-  color: #fc8181;
+  color: #e53e3e;
   font-weight: 600;
 }
 
@@ -86,21 +87,21 @@
 }
 
 .open-badge.open-yellow {
-  border-color: #ecc94b;
-  background: rgba(236, 201, 75, 0.15);
-  color: #ecc94b;
+  border-color: #d69e2e;
+  background: rgba(214, 158, 46, 0.15);
+  color: #d69e2e;
 }
 
 .open-badge.open-red {
-  border-color: #fc8181;
-  background: rgba(252, 129, 129, 0.15);
-  color: #fc8181;
+  border-color: #e53e3e;
+  background: rgba(229, 62, 62, 0.15);
+  color: #e53e3e;
 }
 
 .open-badge.open-black {
-  border-color: #718096;
+  border-color: var(--color-text-secondary);
   background: rgba(113, 128, 150, 0.15);
-  color: #718096;
+  color: var(--color-text-secondary);
 }
 
 /* Icons on right */
@@ -128,8 +129,8 @@
 .qty-badge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #a0aec0;
-  background: var(--color-bg-secondary, #2d2d2d);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -138,7 +139,7 @@
 .item-card-progress {
   position: relative;
   height: 10px;
-  background: var(--color-bg-secondary, #2d2d2d);
+  background: var(--color-bg-secondary);
   border-radius: 5px;
   margin-bottom: var(--space-2, 0.5rem);
   overflow: hidden;
@@ -188,16 +189,16 @@
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: lowercase;
-  background: var(--color-bg-secondary, #2d2d2d);
-  border: 1px solid var(--color-border, #444);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  color: #e2e8f0;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .action-btn:hover {
-  background: #3d3d3d;
+  background: var(--color-border);
 }
 
 .action-btn.open-btn {
@@ -241,12 +242,12 @@
 }
 
 .action-btn.trash-btn {
-  border-color: #718096;
-  color: #718096;
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .action-btn.trash-btn:hover {
-  background: #718096;
+  background: var(--color-text-secondary);
   color: #fff;
 }
 
@@ -262,8 +263,8 @@
 }
 
 .confirm-modal {
-  background: var(--color-bg, #1a1a1a);
-  border: 1px solid var(--color-border, #333);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 1.5rem;
   max-width: 320px;
@@ -278,13 +279,13 @@
 .confirm-modal p {
   margin: 0 0 0.5rem 0;
   font-size: 0.875rem;
-  color: #a0aec0;
+  color: var(--color-text-secondary);
 }
 
 .confirm-warning {
-  color: #ecc94b !important;
+  color: #d69e2e !important;
   font-weight: 600;
-  background: rgba(236, 201, 75, 0.1);
+  background: rgba(214, 158, 46, 0.1);
   padding: 0.5rem;
   border-radius: 6px;
   margin-bottom: 0.75rem !important;
@@ -307,12 +308,12 @@
 
 .cancel-btn {
   background: transparent;
-  border: 1px solid var(--color-border, #444);
-  color: #e2e8f0;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
 }
 
 .cancel-btn:hover {
-  background: var(--color-bg-secondary, #2d2d2d);
+  background: var(--color-bg-secondary);
 }
 
 .confirm-btn {
