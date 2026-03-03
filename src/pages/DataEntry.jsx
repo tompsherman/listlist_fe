@@ -11,11 +11,39 @@ import api from '../services/api';
 const DATA_SECRET = import.meta.env.VITE_DATA_SECRET || '';
 const STORAGE_KEY = 'data_entry_unlocked';
 
-// Item enums
-const CATEGORIES = ['vegetable', 'herbs', 'fruit', 'grains', 'meat', 'dairy', 'leftovers', 'household', 'snack', 'drinks', 'other'];
-const UNITS = ['each', 'lb', 'oz', 'bunch', 'bag', 'box', 'can', 'jar', 'bottle', 'gallon', 'dozen'];
-const LOCATIONS = ['fridge', 'freezer', 'pantry', 'counter'];
+// Item enums - extensible via localStorage
+const DEFAULT_CATEGORIES = ['vegetable', 'herbs', 'fruit', 'grains', 'meat', 'dairy', 'leftovers', 'household', 'snack', 'drinks', 'other'];
+const DEFAULT_UNITS = ['each', 'lb', 'oz', 'bunch', 'bag', 'box', 'can', 'jar', 'bottle', 'gallon', 'dozen'];
+const DEFAULT_LOCATIONS = ['fridge', 'freezer', 'pantry', 'counter'];
 const TIME_TO_EXPIRE = ['three_days', 'six_days', 'nine_days', 'eighteen_days', 'thirty-six_days', 'seventy-three_days', 'three-hundred-sixty-five_days', 'never'];
+
+// Load custom options from localStorage
+const getCustomOptions = (key, defaults) => {
+  try {
+    const stored = localStorage.getItem(`listlist_custom_${key}`);
+    if (stored) {
+      const custom = JSON.parse(stored);
+      return [...new Set([...defaults, ...custom])];
+    }
+  } catch (e) {}
+  return defaults;
+};
+
+const saveCustomOption = (key, value, defaults) => {
+  try {
+    const stored = localStorage.getItem(`listlist_custom_${key}`);
+    const custom = stored ? JSON.parse(stored) : [];
+    if (!defaults.includes(value) && !custom.includes(value)) {
+      custom.push(value);
+      localStorage.setItem(`listlist_custom_${key}`, JSON.stringify(custom));
+    }
+  } catch (e) {}
+};
+
+// Dynamic getters
+const getCategories = () => getCustomOptions('categories', DEFAULT_CATEGORIES);
+const getUnits = () => getCustomOptions('units', DEFAULT_UNITS);
+const getLocations = () => getCustomOptions('locations', DEFAULT_LOCATIONS);
 
 // Dish enums
 const DISH_TYPES = ['main', 'side', 'dessert'];
@@ -148,6 +176,8 @@ function ItemsManager() {
   const [search, setSearch] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showCustomOptions, setShowCustomOptions] = useState(false);
   const [message, setMessage] = useState('');
 
   const fetchItems = useCallback(async () => {
@@ -208,10 +238,27 @@ function ItemsManager() {
           style={{ flex: 1, minWidth: '200px', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
         />
         <button onClick={() => { setEditingItem(null); setShowForm(true); }} style={btnStyle}>+ Add Item</button>
+        <button onClick={() => setShowBulkImport(true)} style={{ ...btnStyle, backgroundColor: '#38a169' }}>📋 Bulk Import</button>
+        <button onClick={() => setShowCustomOptions(true)} style={{ ...btnStyle, backgroundColor: '#805ad5' }}>⚙️ Options</button>
         <button onClick={handleDeleteAll} style={{ ...btnStyle, backgroundColor: '#e53e3e' }}>🗑️ Delete All</button>
       </div>
 
       {message && <p style={{ padding: '0.5rem', backgroundColor: '#eee', borderRadius: '4px', marginBottom: '1rem' }}>{message}</p>}
+
+      {/* Bulk Import */}
+      {showBulkImport && (
+        <BulkImportForm
+          onImport={(count) => { setShowBulkImport(false); fetchItems(); setMessage(`Imported ${count} items!`); }}
+          onCancel={() => setShowBulkImport(false)}
+        />
+      )}
+
+      {/* Custom Options Manager */}
+      {showCustomOptions && (
+        <CustomOptionsManager
+          onClose={() => setShowCustomOptions(false)}
+        />
+      )}
 
       {/* Form */}
       {showForm && (
@@ -308,19 +355,19 @@ function ItemForm({ item, onSave, onCancel }) {
         <label>
           Category
           <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {getCategories().map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </label>
         <label>
           Default Unit
           <select value={form.defaultUnit} onChange={(e) => setForm({ ...form, defaultUnit: e.target.value })} style={inputStyle}>
-            {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+            {getUnits().map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
         </label>
         <label>
           Default Location
           <select value={form.defaultLocation} onChange={(e) => setForm({ ...form, defaultLocation: e.target.value })} style={inputStyle}>
-            {LOCATIONS.map((l) => <option key={l} value={l}>{l}</option>)}
+            {getLocations().map((l) => <option key={l} value={l}>{l}</option>)}
           </select>
         </label>
         <label>
@@ -347,6 +394,261 @@ function ItemForm({ item, onSave, onCancel }) {
         <button type="button" onClick={onCancel} style={{ ...btnStyle, backgroundColor: '#666' }}>Cancel</button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Bulk Import Form Component
+ * Paste CSV/TSV data to import multiple items at once
+ */
+function BulkImportForm({ onImport, onCancel }) {
+  const [bulkData, setBulkData] = useState('');
+  const [preview, setPreview] = useState([]);
+  const [importing, setImporting] = useState(false);
+
+  const parseData = (text) => {
+    const lines = text.trim().split('\n');
+    if (lines.length === 0) return [];
+    
+    // Detect delimiter (tab or comma)
+    const delimiter = lines[0].includes('\t') ? '\t' : ',';
+    
+    // Parse header
+    const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
+    
+    // Map common header names
+    const headerMap = {
+      'name': 'name',
+      'item': 'name',
+      'item name': 'name',
+      'category': 'category',
+      'type': 'category',
+      'unit': 'defaultUnit',
+      'default unit': 'defaultUnit',
+      'location': 'defaultLocation',
+      'default location': 'defaultLocation',
+      'storage': 'defaultLocation',
+      'shelf life': 'shelfLifeDays',
+      'shelf life days': 'shelfLifeDays',
+      'days': 'shelfLifeDays',
+      'uses': 'usePerUnit',
+      'uses per unit': 'usePerUnit',
+      'portions': 'usePerUnit',
+    };
+    
+    const mappedHeaders = headers.map(h => headerMap[h] || h);
+    
+    // Parse rows
+    const items = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const values = lines[i].split(delimiter).map(v => v.trim());
+      const item = {};
+      mappedHeaders.forEach((header, idx) => {
+        if (values[idx]) {
+          item[header] = values[idx];
+        }
+      });
+      if (item.name) {
+        // Apply defaults
+        item.category = item.category || 'other';
+        item.defaultUnit = item.defaultUnit || 'each';
+        item.defaultLocation = item.defaultLocation || 'pantry';
+        item.usePerUnit = parseInt(item.usePerUnit) || 1;
+        item.shelfLifeDays = parseInt(item.shelfLifeDays) || null;
+        item.isGlobal = true;
+        items.push(item);
+      }
+    }
+    return items;
+  };
+
+  const handlePreview = () => {
+    const parsed = parseData(bulkData);
+    setPreview(parsed);
+  };
+
+  const handleImport = async () => {
+    if (preview.length === 0) return;
+    setImporting(true);
+    
+    let successCount = 0;
+    for (const item of preview) {
+      try {
+        await api.post('/api/items/admin', item, {
+          headers: { 'x-data-secret': DATA_SECRET },
+        });
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to import ${item.name}:`, err);
+      }
+    }
+    
+    setImporting(false);
+    onImport(successCount);
+  };
+
+  return (
+    <div style={{ backgroundColor: '#f0fff4', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', border: '2px solid #38a169' }}>
+      <h3>📋 Bulk Import Items</h3>
+      <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+        Paste CSV or tab-separated data. First row should be headers.<br/>
+        Supported columns: name, category, unit, location, shelf life, uses
+      </p>
+      <textarea
+        value={bulkData}
+        onChange={(e) => setBulkData(e.target.value)}
+        placeholder="name&#9;category&#9;location&#9;uses
+Milk&#9;dairy&#9;fridge&#9;8
+Chicken Breast&#9;meat&#9;freezer&#9;4
+Rice&#9;grains&#9;pantry&#9;20"
+        rows={8}
+        style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'pre' }}
+      />
+      
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+        <button type="button" onClick={handlePreview} style={btnStyle}>Preview ({parseData(bulkData).length} items)</button>
+        <button type="button" onClick={handleImport} disabled={preview.length === 0 || importing} style={{ ...btnStyle, backgroundColor: '#38a169' }}>
+          {importing ? 'Importing...' : `Import ${preview.length} Items`}
+        </button>
+        <button type="button" onClick={onCancel} style={{ ...btnStyle, backgroundColor: '#666' }}>Cancel</button>
+      </div>
+      
+      {preview.length > 0 && (
+        <div style={{ marginTop: '1rem', maxHeight: '200px', overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#e2e8f0' }}>
+                <th style={thStyle}>Name</th>
+                <th style={thStyle}>Category</th>
+                <th style={thStyle}>Location</th>
+                <th style={thStyle}>Uses</th>
+              </tr>
+            </thead>
+            <tbody>
+              {preview.slice(0, 10).map((item, i) => (
+                <tr key={i}>
+                  <td style={tdStyle}>{item.name}</td>
+                  <td style={tdStyle}>{item.category}</td>
+                  <td style={tdStyle}>{item.defaultLocation}</td>
+                  <td style={tdStyle}>{item.usePerUnit}</td>
+                </tr>
+              ))}
+              {preview.length > 10 && (
+                <tr><td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: '#666' }}>... and {preview.length - 10} more</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Custom Options Manager
+ * Add new categories, units, and locations
+ */
+function CustomOptionsManager({ onClose }) {
+  const [newCategory, setNewCategory] = useState('');
+  const [newUnit, setNewUnit] = useState('');
+  const [newLocation, setNewLocation] = useState('');
+  const [, forceUpdate] = useState(0);
+
+  const handleAddCategory = () => {
+    if (newCategory.trim()) {
+      saveCustomOption('categories', newCategory.trim().toLowerCase(), DEFAULT_CATEGORIES);
+      setNewCategory('');
+      forceUpdate(n => n + 1);
+    }
+  };
+
+  const handleAddUnit = () => {
+    if (newUnit.trim()) {
+      saveCustomOption('units', newUnit.trim().toLowerCase(), DEFAULT_UNITS);
+      setNewUnit('');
+      forceUpdate(n => n + 1);
+    }
+  };
+
+  const handleAddLocation = () => {
+    if (newLocation.trim()) {
+      saveCustomOption('locations', newLocation.trim().toLowerCase(), DEFAULT_LOCATIONS);
+      setNewLocation('');
+      forceUpdate(n => n + 1);
+    }
+  };
+
+  return (
+    <div style={{ backgroundColor: '#faf5ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem', border: '2px solid #805ad5' }}>
+      <h3>⚙️ Custom Options</h3>
+      <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+        Add custom categories, units, and locations. These are stored locally in your browser.
+      </p>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+        {/* Categories */}
+        <div>
+          <h4 style={{ marginBottom: '0.5rem' }}>Categories</h4>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="e.g., seeds"
+              style={{ ...inputStyle, flex: 1 }}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+            />
+            <button onClick={handleAddCategory} style={{ ...btnStyle, backgroundColor: '#805ad5' }}>+</button>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#666' }}>
+            Current: {getCategories().join(', ')}
+          </div>
+        </div>
+        
+        {/* Units */}
+        <div>
+          <h4 style={{ marginBottom: '0.5rem' }}>Units</h4>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input
+              type="text"
+              value={newUnit}
+              onChange={(e) => setNewUnit(e.target.value)}
+              placeholder="e.g., packet"
+              style={{ ...inputStyle, flex: 1 }}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddUnit()}
+            />
+            <button onClick={handleAddUnit} style={{ ...btnStyle, backgroundColor: '#805ad5' }}>+</button>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#666' }}>
+            Current: {getUnits().join(', ')}
+          </div>
+        </div>
+        
+        {/* Locations */}
+        <div>
+          <h4 style={{ marginBottom: '0.5rem' }}>Locations</h4>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input
+              type="text"
+              value={newLocation}
+              onChange={(e) => setNewLocation(e.target.value)}
+              placeholder="e.g., outside fridge"
+              style={{ ...inputStyle, flex: 1 }}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddLocation()}
+            />
+            <button onClick={handleAddLocation} style={{ ...btnStyle, backgroundColor: '#805ad5' }}>+</button>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#666' }}>
+            Current: {getLocations().join(', ')}
+          </div>
+        </div>
+      </div>
+      
+      <div style={{ marginTop: '1rem' }}>
+        <button onClick={onClose} style={btnStyle}>Done</button>
+      </div>
+    </div>
   );
 }
 
