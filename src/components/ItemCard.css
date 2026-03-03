@@ -35,15 +35,9 @@
 }
 
 .item-name {
-  font-size: 1.125rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #e53e3e;
-  letter-spacing: 0.5px;
-}
-
-.item-name.name-open {
-  color: #38a169;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e2e8f0;
 }
 
 /* Status labels */

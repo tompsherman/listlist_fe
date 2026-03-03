@@ -46,7 +46,6 @@ export default function ItemCard({
   onUse,
   onThrow,
   onEdit,
-  showName = true,
   allPantryItems = [], // For checking if another of same item is open
 }) {
   const [showOpenConfirm, setShowOpenConfirm] = useState(false);
@@ -102,11 +101,9 @@ export default function ItemCard({
       {/* Row 1: Name | Status | Icons */}
       <div className="item-card-row1">
         <div className="item-card-name-status">
-          {showName && (
-            <span className={`item-name ${isOpen ? 'name-open' : ''}`}>
-              {item?.name || 'Unknown'}
-            </span>
-          )}
+          <span className="item-name">
+            {item?.name || 'Unknown'}
+          </span>
           
           <div className="item-status">
             {isOpen ? (

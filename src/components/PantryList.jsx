@@ -756,7 +756,6 @@ export default function PantryList() {
                                           <ItemCard
                                             item={listItem.itemId}
                                             listItem={listItem}
-                                            showName={!hasMultiple}
                                             allPantryItems={items}
                                             onOpen={handleMarkOpen}
                                             onEat={handleEatOne}
