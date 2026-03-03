@@ -325,6 +325,113 @@ export default function PantryList() {
     return Object.values(nameGroups);
   };
 
+  // #13: Build nested hierarchy with subgroups
+  // Location mode: Location → Category → Name groups → Items
+  // Category mode: Category → Location → Name groups → Items
+  const buildNestedGroups = (itemList, primaryGroupBy) => {
+    if (primaryGroupBy === 'location') {
+      // Group by location first
+      return LOCATIONS.map(loc => {
+        const locItems = itemList.filter(i => i.location === loc.id);
+        if (locItems.length === 0) return null;
+        
+        // Then group by category within location
+        const categorySubgroups = CATEGORIES.map(cat => {
+          const catItems = locItems.filter(i => i.itemId?.category === cat);
+          if (catItems.length === 0) return null;
+          return {
+            id: cat,
+            label: cat.charAt(0).toUpperCase() + cat.slice(1),
+            color: getCategoryColor(cat),
+            nameGroups: groupItemsByName(catItems),
+            itemCount: catItems.length,
+          };
+        }).filter(Boolean);
+        
+        // Add "other" category if any items don't have a category
+        const otherItems = locItems.filter(i => !CATEGORIES.includes(i.itemId?.category));
+        if (otherItems.length > 0) {
+          categorySubgroups.push({
+            id: 'other',
+            label: 'Other',
+            color: '#888',
+            nameGroups: groupItemsByName(otherItems),
+            itemCount: otherItems.length,
+          });
+        }
+        
+        return {
+          ...loc,
+          subgroups: categorySubgroups,
+          itemCount: locItems.length,
+        };
+      }).filter(Boolean);
+    } else {
+      // Group by category first
+      const categoryGroups = CATEGORIES.map(cat => {
+        const catItems = itemList.filter(i => i.itemId?.category === cat);
+        if (catItems.length === 0) return null;
+        
+        // Then group by location within category
+        const locationSubgroups = LOCATIONS.map(loc => {
+          const locItems = catItems.filter(i => i.location === loc.id);
+          if (locItems.length === 0) return null;
+          return {
+            id: loc.id,
+            label: loc.label,
+            color: loc.color,
+            nameGroups: groupItemsByName(locItems),
+            itemCount: locItems.length,
+          };
+        }).filter(Boolean);
+        
+        return {
+          id: cat,
+          label: cat.charAt(0).toUpperCase() + cat.slice(1),
+          color: getCategoryColor(cat),
+          subgroups: locationSubgroups,
+          itemCount: catItems.length,
+        };
+      }).filter(Boolean);
+      
+      // Add "other" category
+      const otherItems = itemList.filter(i => !CATEGORIES.includes(i.itemId?.category));
+      if (otherItems.length > 0) {
+        const locationSubgroups = LOCATIONS.map(loc => {
+          const locItems = otherItems.filter(i => i.location === loc.id);
+          if (locItems.length === 0) return null;
+          return {
+            id: loc.id,
+            label: loc.label,
+            color: loc.color,
+            nameGroups: groupItemsByName(locItems),
+            itemCount: locItems.length,
+          };
+        }).filter(Boolean);
+        
+        categoryGroups.push({
+          id: 'other',
+          label: 'Other',
+          color: '#888',
+          subgroups: locationSubgroups,
+          itemCount: otherItems.length,
+        });
+      }
+      
+      return categoryGroups;
+    }
+  };
+  
+  // State for collapsed subgroups
+  const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
+  
+  const toggleSubgroup = (subgroupKey) => {
+    setCollapsedSubgroups(prev => ({
+      ...prev,
+      [subgroupKey]: !prev[subgroupKey],
+    }));
+  };
+
   // Get border color for item based on expiration
   const getItemBorderColor = (item) => {
     const expColor = getExpirationColor(item.expiresAt);
@@ -468,6 +575,7 @@ export default function PantryList() {
         />
         {(searchResults.length > 0 || searchQuery.length >= 2) && !showQuickAdd && (
           <div className="search-dropdown">
+            <div className="location-hint">👆 Select location to add</div>
             <ul className="search-results">
               {searchResults.map(item => (
                 <li key={item._id}>
@@ -477,9 +585,10 @@ export default function PantryList() {
                       <button
                         key={loc.id}
                         onClick={() => handleAddItem(item, loc.id)}
-                        title={loc.label}
+                        title={`Add to ${loc.label}`}
+                        className={`loc-btn loc-${loc.id}`}
                       >
-                        {loc.label.split(' ')[0]}
+                        {loc.label}
                       </button>
                     ))}
                   </div>
@@ -493,9 +602,10 @@ export default function PantryList() {
                       <button
                         key={loc.id}
                         onClick={() => handleShowQuickAdd(searchQuery, loc.id)}
-                        title={loc.label}
+                        title={`Create and add to ${loc.label}`}
+                        className={`loc-btn loc-${loc.id}`}
                       >
-                        {loc.label.split(' ')[0]}
+                        {loc.label}
                       </button>
                     ))}
                   </div>
@@ -558,12 +668,12 @@ export default function PantryList() {
         )}
       </div>
 
-      {/* Items grouped */}
+      {/* Items grouped - 3-level hierarchy */}
       {filteredItems.length === 0 ? (
         <p className="empty">No items here yet.</p>
       ) : (
         <div className="grouped-items">
-          {groups.map(group => {
+          {buildNestedGroups(filteredItems, groupBy).map(group => {
             const isLocationGroup = groupBy === 'location';
             const isDropTarget = isLocationGroup && dropTarget === group.id;
             
@@ -575,66 +685,93 @@ export default function PantryList() {
               onDragLeave={isLocationGroup ? handleDragLeave : undefined}
               onDrop={isLocationGroup ? (e) => handleDrop(e, group.id) : undefined}
             >
+              {/* Level 1: Location or Category header */}
               <button 
                 className="group-header"
                 onClick={() => toggleGroup(group.id)}
                 style={{ borderLeftColor: group.color }}
               >
                 <span className="group-name">{group.label}</span>
-                <span className="group-count">{group.items.length}</span>
+                <span className="group-count">{group.itemCount}</span>
                 <span className="collapse-icon">
                   {collapsedGroups[group.id] ? '▶' : '▼'}
                 </span>
               </button>
               
               {!collapsedGroups[group.id] && (
-                <div className="name-groups">
-                  {groupItemsByName(group.items).map(nameGroup => {
-                    const nameKey = `${group.id}-${nameGroup.name.toLowerCase()}`;
-                    const isNameCollapsed = collapsedNameGroups[nameKey];
-                    const hasMultiple = nameGroup.items.length > 1;
+                <div className="subgroups">
+                  {group.subgroups.map(subgroup => {
+                    const subgroupKey = `${group.id}-${subgroup.id}`;
+                    const isSubgroupCollapsed = collapsedSubgroups[subgroupKey];
                     
                     return (
-                      <div key={nameKey} className="name-group">
-                        {/* Gap #3: Collapsible name header when multiple items */}
-                        {hasMultiple && (
-                          <button 
-                            className="name-group-header"
-                            onClick={() => toggleNameGroup(nameKey)}
-                          >
-                            <span className="name-group-name">{nameGroup.name}</span>
-                            <span className="name-group-count">{nameGroup.items.length} items</span>
-                            <span className="collapse-icon">
-                              {isNameCollapsed ? '▶' : '▼'}
-                            </span>
-                          </button>
-                        )}
+                      <div key={subgroupKey} className="subgroup-section">
+                        {/* Level 2: Category (in location mode) or Location (in category mode) */}
+                        <button 
+                          className="subgroup-header"
+                          onClick={() => toggleSubgroup(subgroupKey)}
+                          style={{ borderLeftColor: subgroup.color }}
+                        >
+                          <span className="subgroup-name">{subgroup.label}</span>
+                          <span className="subgroup-count">{subgroup.itemCount}</span>
+                          <span className="collapse-icon">
+                            {isSubgroupCollapsed ? '▶' : '▼'}
+                          </span>
+                        </button>
                         
-                        {/* Items (collapsed if multiple and collapsed state) */}
-                        {(!hasMultiple || !isNameCollapsed) && (
-                          <div className={`items ${hasMultiple ? 'indented' : ''}`}>
-                            {nameGroup.items.map(listItem => (
-                              <div 
-                                key={listItem._id}
-                                className={draggedItem?._id === listItem._id ? 'dragging' : ''}
-                                draggable={groupBy === 'location'}
-                                onDragStart={(e) => handleDragStart(e, listItem)}
-                                onDragEnd={handleDragEnd}
-                              >
-                                <ItemCard
-                                  item={listItem.itemId}
-                                  listItem={listItem}
-                                  showName={!hasMultiple}
-                                  allPantryItems={items}
-                                  onOpen={handleMarkOpen}
-                                  onEat={handleEatOne}
-                                  onCook={handleCookIt}
-                                  onUse={handleUseOne}
-                                  onThrow={handleThrowOut}
-                                  onEdit={setEditingItem}
-                                />
-                              </div>
-                            ))}
+                        {!isSubgroupCollapsed && (
+                          <div className="name-groups">
+                            {subgroup.nameGroups.map(nameGroup => {
+                              const nameKey = `${subgroupKey}-${nameGroup.name.toLowerCase()}`;
+                              const isNameCollapsed = collapsedNameGroups[nameKey];
+                              const hasMultiple = nameGroup.items.length > 1;
+                              
+                              return (
+                                <div key={nameKey} className="name-group">
+                                  {/* Level 3: Name group header (only if multiple) */}
+                                  {hasMultiple && (
+                                    <button 
+                                      className="name-group-header"
+                                      onClick={() => toggleNameGroup(nameKey)}
+                                    >
+                                      <span className="name-group-name">{nameGroup.name}</span>
+                                      <span className="name-group-count">{nameGroup.items.length}</span>
+                                      <span className="collapse-icon">
+                                        {isNameCollapsed ? '▶' : '▼'}
+                                      </span>
+                                    </button>
+                                  )}
+                                  
+                                  {/* Level 4: Individual items */}
+                                  {(!hasMultiple || !isNameCollapsed) && (
+                                    <div className={`items ${hasMultiple ? 'indented' : ''}`}>
+                                      {nameGroup.items.map(listItem => (
+                                        <div 
+                                          key={listItem._id}
+                                          className={draggedItem?._id === listItem._id ? 'dragging' : ''}
+                                          draggable={groupBy === 'location'}
+                                          onDragStart={(e) => handleDragStart(e, listItem)}
+                                          onDragEnd={handleDragEnd}
+                                        >
+                                          <ItemCard
+                                            item={listItem.itemId}
+                                            listItem={listItem}
+                                            showName={!hasMultiple}
+                                            allPantryItems={items}
+                                            onOpen={handleMarkOpen}
+                                            onEat={handleEatOne}
+                                            onCook={handleCookIt}
+                                            onUse={handleUseOne}
+                                            onThrow={handleThrowOut}
+                                            onEdit={setEditingItem}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
