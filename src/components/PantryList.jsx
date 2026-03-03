@@ -22,6 +22,7 @@ import {
 import CookDishModal from './CookDishModal';
 import QuickAddForm from './QuickAddForm';
 import ItemEditModal from './ItemEditModal';
+import ItemCard from './ItemCard';
 import LoadingCountdown from './LoadingCountdown';
 import './PantryList.css';
 
@@ -611,118 +612,30 @@ export default function PantryList() {
                         
                         {/* Items (collapsed if multiple and collapsed state) */}
                         {(!hasMultiple || !isNameCollapsed) && (
-                          <ul className={`items ${hasMultiple ? 'indented' : ''}`}>
-                            {nameGroup.items.map(item => {
-                              const expColor = getExpirationColor(item.expiresAt);
-                              const openColor = getOpenTagColor(item.openedAt, item.itemId?.timeToExpire);
-                              const usesRemaining = item.usesRemaining ?? item.quantity ?? 1;
-                              const itemIsEdible = isEdible(item.itemId);
-                              const isOpen = !!item.openedAt;
-                              
-                              return (
-                                <li 
-                                  key={item._id} 
-                                  className={`item ${expColor ? `exp-${expColor}` : ''} ${draggedItem?._id === item._id ? 'dragging' : ''}`}
-                                  style={{ borderLeftColor: getItemBorderColor(item) }}
-                                  draggable={groupBy === 'location'}
-                                  onDragStart={(e) => handleDragStart(e, item)}
-                                  onDragEnd={handleDragEnd}
-                                >
-                                  <div className="item-info">
-                                    {/* Only show name if not in a multi-item name group */}
-                                    {!hasMultiple && (
-                                      <span className="name">{item.itemId?.name || 'Unknown'}</span>
-                                    )}
-                                    {/* Gap #5: Open tag with color */}
-                                    {isOpen && (
-                                      <span 
-                                        className={`open-tag open-${openColor || 'green'}`}
-                                        style={openColor ? {
-                                          borderColor: OPEN_TAG_COLORS[openColor]?.border,
-                                          backgroundColor: OPEN_TAG_COLORS[openColor]?.background,
-                                          color: OPEN_TAG_COLORS[openColor]?.text,
-                                        } : undefined}
-                                      >
-                                        OPEN
-                                      </span>
-                                    )}
-                                    {groupBy === 'category' && (
-                                      <span className="location-badge" data-location={item.location}>
-                                        {LOCATIONS.find(l => l.id === item.location)?.label.split(' ')[0]}
-                                      </span>
-                                    )}
-                                    {item.expiresAt && (
-                                      <span className={`expiry-badge ${expColor || ''}`}>
-                                        {formatExpiry(item.expiresAt)}
-                                      </span>
-                                    )}
-                                    {usesRemaining > 1 && (
-                                      <span className="uses-badge">{usesRemaining} uses</span>
-                                    )}
-                                  </div>
-                                  <div className="item-actions">
-                                    {/* Gap #5: Mark as Open button */}
-                                    {!isOpen && (
-                                      <button 
-                                        className="open-btn"
-                                        onClick={() => handleMarkOpen(item)}
-                                        title="Mark as opened"
-                                      >
-                                        📦 Open
-                                      </button>
-                                    )}
-                                    {/* Edible items: Eat and Cook buttons */}
-                                    {itemIsEdible && (
-                                      <div className="eat-cook-btns">
-                                        <button 
-                                          className="eat-btn" 
-                                          onClick={() => handleEatOne(item)}
-                                          title="Eat one"
-                                        >
-                                          🍴 Eat
-                                        </button>
-                                        <button 
-                                          className="cook-btn" 
-                                          onClick={() => handleCookIt(item)}
-                                          title="Use in cooking"
-                                        >
-                                          🍳 Cook
-                                        </button>
-                                      </div>
-                                    )}
-                                    {/* Non-edible items: Use button */}
-                                    {!itemIsEdible && (
-                                      <button 
-                                        className="use-btn" 
-                                        onClick={() => handleUseOne(item)}
-                                        title="Use one"
-                                      >
-                                        ✓ Use
-                                      </button>
-                                    )}
-                                    {/* Edit button */}
-                                    <button 
-                                      className="edit-btn" 
-                                      onClick={() => setEditingItem(item.itemId)}
-                                      title="Edit item"
-                                    >
-                                      ✏️
-                                    </button>
-                                    {/* Throw out button for all items */}
-                                    <button 
-                                      className="throw-btn" 
-                                      onClick={() => handleThrowOut(item)}
-                                      title="Throw out"
-                                    >
-                                      🗑️
-                                    </button>
-                                    {/* Show quantity badge (no manual controls) */}
-                                    <span className="qty-badge">×{item.quantity}</span>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
+                          <div className={`items ${hasMultiple ? 'indented' : ''}`}>
+                            {nameGroup.items.map(listItem => (
+                              <div 
+                                key={listItem._id}
+                                className={draggedItem?._id === listItem._id ? 'dragging' : ''}
+                                draggable={groupBy === 'location'}
+                                onDragStart={(e) => handleDragStart(e, listItem)}
+                                onDragEnd={handleDragEnd}
+                              >
+                                <ItemCard
+                                  item={listItem.itemId}
+                                  listItem={listItem}
+                                  showName={!hasMultiple}
+                                  allPantryItems={items}
+                                  onOpen={handleMarkOpen}
+                                  onEat={handleEatOne}
+                                  onCook={handleCookIt}
+                                  onUse={handleUseOne}
+                                  onThrow={handleThrowOut}
+                                  onEdit={setEditingItem}
+                                />
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
                     );
