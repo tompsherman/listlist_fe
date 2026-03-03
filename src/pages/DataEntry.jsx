@@ -252,7 +252,15 @@ function ItemsManager() {
       {/* Bulk Import */}
       {showBulkImport && (
         <BulkImportForm
-          onImport={(count) => { setShowBulkImport(false); fetchItems(); setMessage(`Imported ${count} items!`); }}
+          existingItems={items}
+          onImport={(count, skipped) => { 
+            setShowBulkImport(false); 
+            fetchItems(); 
+            const msg = skipped > 0 
+              ? `Imported ${count} items! (Skipped ${skipped} duplicates)`
+              : `Imported ${count} items!`;
+            setMessage(msg);
+          }}
           onCancel={() => setShowBulkImport(false)}
         />
       )}
@@ -472,11 +480,17 @@ function ItemForm({ item, onSave, onCancel }) {
  * Bulk Import Form Component
  * Paste CSV/TSV data to import multiple items at once
  * Full schema: name, category, location, uses, expires, purchaseUnit, useUnit, cost, shelfLife, perishable
+ * Deduplication: skips items with matching names (case-insensitive) within CSV and against existing items
  */
-function BulkImportForm({ onImport, onCancel }) {
+function BulkImportForm({ onImport, onCancel, existingItems = [] }) {
   const [bulkData, setBulkData] = useState('');
   const [preview, setPreview] = useState([]);
   const [importing, setImporting] = useState(false);
+  const [dupesInCsv, setDupesInCsv] = useState(0);
+  const [dupesInDb, setDupesInDb] = useState(0);
+  
+  // Create a Set of existing item names (lowercase) for fast lookup
+  const existingNames = new Set(existingItems.map(item => item.name?.toLowerCase()));
 
   const parseData = (text) => {
     const lines = text.trim().split('\n');
@@ -569,7 +583,34 @@ function BulkImportForm({ onImport, onCancel }) {
 
   const handlePreview = () => {
     const parsed = parseData(bulkData);
-    setPreview(parsed);
+    
+    // Deduplicate within CSV (case-insensitive)
+    const seenInCsv = new Set();
+    let csvDupes = 0;
+    const dedupedCsv = parsed.filter(item => {
+      const nameLower = item.name.toLowerCase();
+      if (seenInCsv.has(nameLower)) {
+        csvDupes++;
+        return false;
+      }
+      seenInCsv.add(nameLower);
+      return true;
+    });
+    
+    // Check against existing items in database
+    let dbDupes = 0;
+    const dedupedFinal = dedupedCsv.filter(item => {
+      const nameLower = item.name.toLowerCase();
+      if (existingNames.has(nameLower)) {
+        dbDupes++;
+        return false;
+      }
+      return true;
+    });
+    
+    setDupesInCsv(csvDupes);
+    setDupesInDb(dbDupes);
+    setPreview(dedupedFinal);
   };
 
   const handleImport = async () => {
@@ -599,7 +640,7 @@ function BulkImportForm({ onImport, onCancel }) {
     if (failedItems.length > 0) {
       console.warn('Failed items:', failedItems);
     }
-    onImport(successCount);
+    onImport(successCount, dupesInCsv + dupesInDb);
   };
 
   return (
@@ -622,13 +663,20 @@ Rice&#9;grains&#9;pantry&#9;bag&#9;cup&#9;20&#9;3.49&#9;365&#9;false"
         style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'pre' }}
       />
       
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <button type="button" onClick={handlePreview} style={btnStyle}>Preview ({parseData(bulkData).length} items)</button>
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <button type="button" onClick={handlePreview} style={btnStyle}>Preview ({parseData(bulkData).length} rows)</button>
         <button type="button" onClick={handleImport} disabled={preview.length === 0 || importing} style={{ ...btnStyle, backgroundColor: '#38a169' }}>
           {importing ? 'Importing...' : `Import ${preview.length} Items`}
         </button>
         <button type="button" onClick={onCancel} style={{ ...btnStyle, backgroundColor: '#666' }}>Cancel</button>
       </div>
+      
+      {/* Duplicate warning */}
+      {(dupesInCsv > 0 || dupesInDb > 0) && (
+        <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#c53030', backgroundColor: '#fed7d7', padding: '0.5rem 0.75rem', borderRadius: '4px' }}>
+          ⚠️ Skipping {dupesInCsv + dupesInDb} duplicate{dupesInCsv + dupesInDb > 1 ? 's' : ''}: {dupesInCsv > 0 && `${dupesInCsv} in CSV`}{dupesInCsv > 0 && dupesInDb > 0 && ', '}{dupesInDb > 0 && `${dupesInDb} already exist`}
+        </p>
+      )}
       
       {preview.length > 0 && (
         <div style={{ marginTop: '1rem', maxHeight: '250px', overflow: 'auto' }}>
