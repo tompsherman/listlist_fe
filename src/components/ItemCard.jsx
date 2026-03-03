@@ -3,12 +3,11 @@
  * Redesigned item card with progress bar and expiration indicators
  * 
  * Layout:
- * Row 1: Name | Status (BOUGHT/OPEN + EXPIRES) | Edit/Qty icons
+ * Row 1: Name + OPEN badge | Edit icon
  * Row 2: Progress bar
  * Row 3: Action buttons (open, eat, cook, trash)
  */
 
-import { useState } from 'react';
 import { 
   getOpenTagColor, 
   getExpirationDays,
@@ -46,10 +45,9 @@ export default function ItemCard({
   onUse,
   onThrow,
   onEdit,
-  allPantryItems = [], // For checking if another of same item is open
+  onSplit,
+  onBreakdown,
 }) {
-  const [showOpenConfirm, setShowOpenConfirm] = useState(false);
-  
   const isOpen = !!listItem.openedAt;
   const itemIsEdible = isEdible(item);
   const usesRemaining = listItem.usesRemaining ?? listItem.quantity ?? 1;
@@ -59,80 +57,61 @@ export default function ItemCard({
   const progressPercent = totalUses > 0 ? (usesRemaining / totalUses) * 100 : 100;
   const progressColor = progressPercent > 66 ? 'green' : progressPercent > 33 ? 'yellow' : 'red';
   
-  // Expiration calculations
+  // Expiration calculations - color based on how far through expiration window
   const timeToExpire = item?.timeToExpire;
-  const openTagColor = getOpenTagColor(listItem.openedAt, timeToExpire);
+  const openTagColor = isOpen ? (getOpenTagColor(listItem.openedAt, timeToExpire) || 'green') : null;
   const estimatedExpiration = calculateExpirationDate(listItem.openedAt, timeToExpire);
   const isExpired = openTagColor === 'black';
   
   // For unopened items, show purchase date
   const purchaseDate = listItem.purchasedAt || listItem.createdAt;
   
-  // Check if another item of same type is already open
-  const sameItemOpenCount = allPantryItems.filter(pi => 
-    (pi.itemId?._id || pi.itemId) === (item?._id || item) && 
-    pi.openedAt && 
-    pi._id !== listItem._id
-  ).length;
-  
+  // Simple toggle - just call onOpen
   const handleOpenClick = () => {
-    // Always show confirmation
-    setShowOpenConfirm(true);
-  };
-  
-  const confirmOpen = () => {
-    setShowOpenConfirm(false);
     onOpen?.(listItem);
-  };
-  
-  // Get border color based on state
-  const getBorderColor = () => {
-    if (isOpen) {
-      return OPEN_TAG_COLORS[openTagColor]?.border || '#28a745';
-    }
-    return '#444';
   };
   
   return (
     <div 
       className={`item-card ${isOpen ? 'is-open' : 'is-unopened'} ${isExpired ? 'is-expired' : ''}`}
-      style={{ borderLeftColor: getBorderColor() }}
     >
-      {/* Row 1: Name | Status | Icons */}
+      {/* Row 1: Name + Badge | Icons */}
       <div className="item-card-row1">
         <div className="item-card-name-status">
           <span className="item-name">
             {item?.name || 'Unknown'}
           </span>
           
-          <div className="item-status">
-            {isOpen ? (
-              <>
-                <span 
-                  className={`open-badge open-${openTagColor}`}
-                  style={{
-                    borderColor: OPEN_TAG_COLORS[openTagColor]?.border,
-                    backgroundColor: OPEN_TAG_COLORS[openTagColor]?.background,
-                    color: OPEN_TAG_COLORS[openTagColor]?.text,
-                  }}
-                >
-                  ((OPEN!!)))
-                </span>
-                {estimatedExpiration && !isExpired && (
-                  <span className={`expires-label exp-${openTagColor}`}>
-                    EXPIRES {formatDate(estimatedExpiration)}:
-                  </span>
-                )}
-                {isExpired && (
-                  <span className="expired-label">💀💀💀 EXPIRED</span>
-                )}
-              </>
-            ) : (
-              <span className="bought-label">
-                BOUGHT {formatDate(purchaseDate)}:
-              </span>
-            )}
-          </div>
+          {/* OPEN badge - colored based on expiration progress */}
+          {isOpen && (
+            <span 
+              className={`open-badge open-${openTagColor}`}
+              style={{
+                borderColor: OPEN_TAG_COLORS[openTagColor]?.border,
+                backgroundColor: OPEN_TAG_COLORS[openTagColor]?.background,
+                color: OPEN_TAG_COLORS[openTagColor]?.text,
+              }}
+            >
+              OPEN
+            </span>
+          )}
+          
+          {/* Expiration info */}
+          {isOpen && estimatedExpiration && !isExpired && (
+            <span className={`expires-label exp-${openTagColor}`}>
+              exp {formatDate(estimatedExpiration)}
+            </span>
+          )}
+          {isExpired && (
+            <span className="expired-label">EXPIRED</span>
+          )}
+          
+          {/* Purchase date for unopened */}
+          {!isOpen && purchaseDate && (
+            <span className="bought-label">
+              {formatDate(purchaseDate)}
+            </span>
+          )}
         </div>
         
         <div className="item-card-icons">
@@ -143,7 +122,6 @@ export default function ItemCard({
           >
             ✏️
           </button>
-          <span className="qty-badge">×{listItem.quantity || 1}</span>
         </div>
       </div>
       
@@ -158,7 +136,7 @@ export default function ItemCard({
       
       {/* Row 3: Action buttons */}
       <div className="item-card-actions">
-        {/* Open button (only for unopened) */}
+        {/* Open button - only shows when NOT open */}
         {!isOpen && (
           <button 
             className="action-btn open-btn"
@@ -193,6 +171,26 @@ export default function ItemCard({
           </button>
         )}
         
+        {/* Split (for containers) */}
+        {onSplit && (
+          <button 
+            className="action-btn split-btn"
+            onClick={() => onSplit(listItem)}
+          >
+            split
+          </button>
+        )}
+        
+        {/* Breakdown (for items that break into parts) */}
+        {onBreakdown && (
+          <button 
+            className="action-btn breakdown-btn"
+            onClick={() => onBreakdown(listItem)}
+          >
+            break down
+          </button>
+        )}
+        
         {/* Trash */}
         <button 
           className="action-btn trash-btn"
@@ -201,29 +199,6 @@ export default function ItemCard({
           trash
         </button>
       </div>
-      
-      {/* Open Confirmation Modal */}
-      {showOpenConfirm && (
-        <div className="confirm-overlay" onClick={() => setShowOpenConfirm(false)}>
-          <div className="confirm-modal" onClick={e => e.stopPropagation()}>
-            <h3>Open {item?.name}?</h3>
-            {sameItemOpenCount > 0 && (
-              <p className="confirm-warning">
-                ⚠️ You already have {sameItemOpenCount} open {item?.name}!
-              </p>
-            )}
-            <p>This will start the expiration countdown.</p>
-            <div className="confirm-actions">
-              <button className="cancel-btn" onClick={() => setShowOpenConfirm(false)}>
-                Cancel
-              </button>
-              <button className="confirm-btn" onClick={confirmOpen}>
-                Yes, Open It
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

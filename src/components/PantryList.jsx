@@ -24,6 +24,7 @@ import QuickAddForm from './QuickAddForm';
 import ItemEditModal from './ItemEditModal';
 import ItemCard from './ItemCard';
 import LoadingCountdown from './LoadingCountdown';
+import { Modal, Button } from './ui';
 import './PantryList.css';
 
 const LOCATIONS = [
@@ -32,6 +33,29 @@ const LOCATIONS = [
   { id: 'pantry', label: '🏠 Pantry', color: '#ffb74d' },
   { id: 'counter', label: '🍌 Counter', color: '#aed581' },
 ];
+
+// Split options based on current storage size
+const SPLIT_OPTIONS = {
+  gallon: [
+    { targetSize: 'half_gallon', count: 2, label: '2 half-gallons' },
+    { targetSize: 'quart', count: 4, label: '4 quarts' },
+    { targetSize: 'pint', count: 8, label: '8 pints' },
+  ],
+  half_gallon: [
+    { targetSize: 'quart', count: 2, label: '2 quarts' },
+    { targetSize: 'pint', count: 4, label: '4 pints' },
+  ],
+  quart: [
+    { targetSize: 'pint', count: 2, label: '2 pints' },
+  ],
+  large: [
+    { targetSize: 'medium', count: 2, label: '2 medium' },
+    { targetSize: 'small', count: 4, label: '4 small' },
+  ],
+  medium: [
+    { targetSize: 'small', count: 2, label: '2 small' },
+  ],
+};
 
 export default function PantryList() {
   const { currentPod } = useUser();
@@ -80,10 +104,23 @@ export default function PantryList() {
   // Edit modal state
   const [editingItem, setEditingItem] = useState(null);
   
+  // Removal flow state
+  const [removingItem, setRemovingItem] = useState(null);
+  const [removalStep, setRemovalStep] = useState('reason'); // 'reason' | 'grocery'
+  const [removalReason, setRemovalReason] = useState(null);
+  
+  // Use-up flow state (when eating/using last unit)
+  const [useUpItem, setUseUpItem] = useState(null);
+  
+  // Split/Breakdown state
+  const [splittingItem, setSplittingItem] = useState(null);
+  const [breakingDownItem, setBreakingDownItem] = useState(null);
+  
   // UI state
   const [groupBy, setGroupBy] = useState('location'); // 'location' | 'category'
   const [collapsedGroups, setCollapsedGroups] = useState({});
-  const [collapsedNameGroups, setCollapsedNameGroups] = useState({}); // Gap #3: name groups
+  const [collapsedNameGroups, setCollapsedNameGroups] = useState({});
+  const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
 
@@ -120,7 +157,6 @@ export default function PantryList() {
   };
 
   // Create and add from quick form
-  // Creates INDIVIDUAL entries for each unit (not 1 item with quantity=N)
   const handleCreateAndAdd = async ({ name, category, cost, quantity }) => {
     if (!list || !currentPod) return;
     
@@ -182,50 +218,51 @@ export default function PantryList() {
     }
   };
 
-  const handleUpdateQuantity = async (listItem, delta) => {
-    const newQty = Math.max(0, listItem.quantity + delta);
-    if (newQty === 0) {
-      handleRemove(listItem);
-      return;
-    }
-    
+  // Mark item as opened
+  const handleMarkOpen = async (listItem) => {
     try {
       const updated = await listsApi.updateItem(list._id, listItem._id, {
-        quantity: newQty,
+        openedAt: new Date().toISOString(),
       });
       setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
     } catch (err) {
-      console.error('Failed to update quantity:', err);
-    }
-  };
-
-  const handleRemove = async (listItem) => {
-    try {
-      await listsApi.removeItem(list._id, listItem._id);
-      setItems(prev => prev.filter(i => i._id !== listItem._id));
-    } catch (err) {
-      console.error('Failed to remove item:', err);
+      console.error('Failed to mark item as open:', err);
     }
   };
 
   // Eat one use of an item
   const handleEatOne = async (listItem) => {
     const currentUses = listItem.usesRemaining ?? listItem.quantity ?? 1;
-    const newUses = currentUses - 1;
     
-    if (newUses <= 0) {
-      // Fully consumed - remove item
-      handleRemove(listItem);
-    } else {
-      try {
-        const updated = await listsApi.updateItem(list._id, listItem._id, {
-          usesRemaining: newUses,
-        });
-        setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
-      } catch (err) {
-        console.error('Failed to eat item:', err);
-      }
+    if (currentUses <= 1) {
+      // This will be the last use - show grocery prompt
+      setUseUpItem(listItem);
+      return;
     }
+    
+    try {
+      const result = await listsApi.useItem(list._id, listItem._id, { amount: 1 });
+      if (result.isEmpty) {
+        setItems(prev => prev.filter(i => i._id !== listItem._id));
+      } else {
+        setItems(prev => prev.map(i => i._id === listItem._id ? result.item : i));
+      }
+    } catch (err) {
+      console.error('Failed to eat item:', err);
+    }
+  };
+
+  // Handle use-up confirmation (last unit)
+  const handleUseUpConfirm = async (addToGrocery) => {
+    if (!useUpItem) return;
+    
+    try {
+      await listsApi.useItem(list._id, useUpItem._id, { amount: 1, addToGrocery });
+      setItems(prev => prev.filter(i => i._id !== useUpItem._id));
+    } catch (err) {
+      console.error('Failed to use item:', err);
+    }
+    setUseUpItem(null);
   };
 
   // Use item in cooking - opens cook modal
@@ -238,26 +275,96 @@ export default function PantryList() {
   // Use (for non-edible items like household)
   const handleUseOne = async (listItem) => {
     const currentUses = listItem.usesRemaining ?? listItem.quantity ?? 1;
-    const newUses = currentUses - 1;
     
-    if (newUses <= 0) {
-      handleRemove(listItem);
-    } else {
-      try {
-        const updated = await listsApi.updateItem(list._id, listItem._id, {
-          usesRemaining: newUses,
-        });
-        setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
-      } catch (err) {
-        console.error('Failed to use item:', err);
+    if (currentUses <= 1) {
+      // This will be the last use - show grocery prompt
+      setUseUpItem(listItem);
+      return;
+    }
+    
+    try {
+      const result = await listsApi.useItem(list._id, listItem._id, { amount: 1 });
+      if (result.isEmpty) {
+        setItems(prev => prev.filter(i => i._id !== listItem._id));
+      } else {
+        setItems(prev => prev.map(i => i._id === listItem._id ? result.item : i));
       }
+    } catch (err) {
+      console.error('Failed to use item:', err);
     }
   };
 
-  // Throw out item
-  const handleThrowOut = async (listItem) => {
-    if (!confirm(`Throw out ${listItem.itemId?.name || 'this item'}?`)) return;
-    handleRemove(listItem);
+  // Start removal flow (shows reason picker)
+  const handleThrowOut = (listItem) => {
+    setRemovingItem(listItem);
+    setRemovalStep('reason');
+    setRemovalReason(null);
+  };
+
+  // Select removal reason
+  const handleSelectReason = (reason) => {
+    setRemovalReason(reason);
+    setRemovalStep('grocery');
+  };
+
+  // Complete removal with grocery decision
+  const handleRemovalComplete = async (addToGrocery) => {
+    if (!removingItem || !removalReason) return;
+    
+    try {
+      await listsApi.archiveItem(list._id, removingItem._id, {
+        reason: removalReason,
+        addToGrocery,
+      });
+      setItems(prev => prev.filter(i => i._id !== removingItem._id));
+    } catch (err) {
+      console.error('Failed to archive item:', err);
+    }
+    
+    setRemovingItem(null);
+    setRemovalStep('reason');
+    setRemovalReason(null);
+  };
+
+  // Cancel removal flow
+  const handleCancelRemoval = () => {
+    setRemovingItem(null);
+    setRemovalStep('reason');
+    setRemovalReason(null);
+  };
+
+  // Split container
+  const handleSplit = async (targetSize, count) => {
+    if (!splittingItem) return;
+    
+    try {
+      const result = await listsApi.splitItem(list._id, splittingItem._id, { targetSize, count });
+      // Remove old item, add new items
+      setItems(prev => [
+        ...result.items,
+        ...prev.filter(i => i._id !== splittingItem._id),
+      ]);
+    } catch (err) {
+      console.error('Failed to split item:', err);
+    }
+    setSplittingItem(null);
+  };
+
+  // Break down item
+  const handleBreakdown = async () => {
+    if (!breakingDownItem) return;
+    
+    try {
+      const result = await listsApi.breakdownItem(list._id, breakingDownItem._id);
+      // Remove old item, add new items
+      setItems(prev => [
+        ...result.items,
+        ...prev.filter(i => i._id !== breakingDownItem._id),
+      ]);
+    } catch (err) {
+      console.error('Failed to break down item:', err);
+    }
+    setBreakingDownItem(null);
   };
 
   // Toggle group collapse
@@ -268,7 +375,6 @@ export default function PantryList() {
     }));
   };
 
-  // Gap #3: Toggle name group collapse
   const toggleNameGroup = (nameKey) => {
     setCollapsedNameGroups(prev => ({
       ...prev,
@@ -276,19 +382,14 @@ export default function PantryList() {
     }));
   };
 
-  // Gap #5: Mark item as opened
-  const handleMarkOpen = async (listItem) => {
-    try {
-      const updated = await listsApi.updateItem(list._id, listItem._id, {
-        openedAt: new Date().toISOString(),
-      });
-      setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
-    } catch (err) {
-      console.error('Failed to mark item as open:', err);
-    }
+  const toggleSubgroup = (subgroupKey) => {
+    setCollapsedSubgroups(prev => ({
+      ...prev,
+      [subgroupKey]: !prev[subgroupKey],
+    }));
   };
 
-  // Gap #3: Group items by name within a group
+  // Group items by name within a group
   const groupItemsByName = (itemList) => {
     const nameGroups = {};
     itemList.forEach(item => {
@@ -305,13 +406,11 @@ export default function PantryList() {
     // Sort each name group: OPEN items first, then by expiresAt/purchasedAt
     Object.values(nameGroups).forEach(group => {
       group.items.sort((a, b) => {
-        // Open items come first
         const aOpen = !!a.openedAt;
         const bOpen = !!b.openedAt;
         if (aOpen && !bOpen) return -1;
         if (!aOpen && bOpen) return 1;
         
-        // Then sort by expiresAt (soonest first)
         if (a.expiresAt && b.expiresAt) {
           return new Date(a.expiresAt) - new Date(b.expiresAt);
         }
@@ -325,17 +424,13 @@ export default function PantryList() {
     return Object.values(nameGroups);
   };
 
-  // #13: Build nested hierarchy with subgroups
-  // Location mode: Location → Category → Name groups → Items
-  // Category mode: Category → Location → Name groups → Items
+  // Build nested hierarchy
   const buildNestedGroups = (itemList, primaryGroupBy) => {
     if (primaryGroupBy === 'location') {
-      // Group by location first
       return LOCATIONS.map(loc => {
         const locItems = itemList.filter(i => i.location === loc.id);
         if (locItems.length === 0) return null;
         
-        // Then group by category within location
         const categorySubgroups = CATEGORIES.map(cat => {
           const catItems = locItems.filter(i => i.itemId?.category === cat);
           if (catItems.length === 0) return null;
@@ -348,7 +443,6 @@ export default function PantryList() {
           };
         }).filter(Boolean);
         
-        // Add "other" category if any items don't have a category
         const otherItems = locItems.filter(i => !CATEGORIES.includes(i.itemId?.category));
         if (otherItems.length > 0) {
           categorySubgroups.push({
@@ -367,12 +461,10 @@ export default function PantryList() {
         };
       }).filter(Boolean);
     } else {
-      // Group by category first
       const categoryGroups = CATEGORIES.map(cat => {
         const catItems = itemList.filter(i => i.itemId?.category === cat);
         if (catItems.length === 0) return null;
         
-        // Then group by location within category
         const locationSubgroups = LOCATIONS.map(loc => {
           const locItems = catItems.filter(i => i.location === loc.id);
           if (locItems.length === 0) return null;
@@ -394,7 +486,6 @@ export default function PantryList() {
         };
       }).filter(Boolean);
       
-      // Add "other" category
       const otherItems = itemList.filter(i => !CATEGORIES.includes(i.itemId?.category));
       if (otherItems.length > 0) {
         const locationSubgroups = LOCATIONS.map(loc => {
@@ -421,49 +512,12 @@ export default function PantryList() {
       return categoryGroups;
     }
   };
-  
-  // State for collapsed subgroups
-  const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
-  
-  const toggleSubgroup = (subgroupKey) => {
-    setCollapsedSubgroups(prev => ({
-      ...prev,
-      [subgroupKey]: !prev[subgroupKey],
-    }));
-  };
-
-  // Get border color for item based on expiration
-  const getItemBorderColor = (item) => {
-    const expColor = getExpirationColor(item.expiresAt);
-    if (expColor) return EXPIRATION_BORDER_COLORS[expColor];
-    // Fallback to category color
-    return getCategoryColor(item.itemId?.category);
-  };
-
-  // Group items by category
-  const groupByCategory = (itemList) => {
-    const groups = {};
-    itemList.forEach(item => {
-      const cat = item.itemId?.category || 'other';
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(item);
-    });
-    return CATEGORIES.filter(c => groups[c]).map(c => ({
-      id: c,
-      label: c.charAt(0).toUpperCase() + c.slice(1),
-      color: getCategoryColor(c),
-      items: groups[c],
-    })).concat(
-      groups.other ? [{ id: 'other', label: 'Other', color: '#888', items: groups.other }] : []
-    );
-  };
 
   // Drag and drop handlers
   const handleDragStart = (e, item) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', item._id);
-    // Add dragging class after a tick
     setTimeout(() => {
       e.target.classList.add('dragging');
     }, 0);
@@ -484,7 +538,6 @@ export default function PantryList() {
   };
 
   const handleDragLeave = (e) => {
-    // Only clear if leaving the group entirely
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setDropTarget(null);
     }
@@ -520,15 +573,6 @@ export default function PantryList() {
   const filteredItems = activeLocation === 'all' 
     ? items 
     : items.filter(i => i.location === activeLocation);
-
-  const groupedByLocation = LOCATIONS.map(loc => ({
-    ...loc,
-    items: filteredItems.filter(i => i.location === loc.id),
-  })).filter(g => g.items.length > 0);
-
-  const groupedByCat = groupByCategory(filteredItems);
-  
-  const groups = groupBy === 'location' ? groupedByLocation : groupedByCat;
 
   // For location tabs count
   const groupedItems = LOCATIONS.reduce((acc, loc) => {
@@ -630,7 +674,6 @@ export default function PantryList() {
 
       {/* Controls row */}
       <div className="controls-row">
-        {/* Group by toggle */}
         <div className="group-toggle">
           <button 
             className={groupBy === 'location' ? 'active' : ''}
@@ -646,7 +689,6 @@ export default function PantryList() {
           </button>
         </div>
 
-        {/* Location filter (only in location mode) */}
         {groupBy === 'location' && (
           <div className="location-tabs">
             <button
@@ -668,7 +710,7 @@ export default function PantryList() {
         )}
       </div>
 
-      {/* Items grouped - 3-level hierarchy */}
+      {/* Items grouped */}
       {filteredItems.length === 0 ? (
         <p className="empty">No items here yet.</p>
       ) : (
@@ -685,7 +727,6 @@ export default function PantryList() {
               onDragLeave={isLocationGroup ? handleDragLeave : undefined}
               onDrop={isLocationGroup ? (e) => handleDrop(e, group.id) : undefined}
             >
-              {/* Level 1: Location or Category header */}
               <button 
                 className="group-header"
                 onClick={() => toggleGroup(group.id)}
@@ -706,7 +747,6 @@ export default function PantryList() {
                     
                     return (
                       <div key={subgroupKey} className="subgroup-section">
-                        {/* Level 2: Category (in location mode) or Location (in category mode) */}
                         <button 
                           className="subgroup-header"
                           onClick={() => toggleSubgroup(subgroupKey)}
@@ -728,7 +768,6 @@ export default function PantryList() {
                               
                               return (
                                 <div key={nameKey} className="name-group">
-                                  {/* Level 3: Name group header (only if multiple) */}
                                   {hasMultiple && (
                                     <button 
                                       className="name-group-header"
@@ -742,7 +781,6 @@ export default function PantryList() {
                                     </button>
                                   )}
                                   
-                                  {/* Level 4: Individual items */}
                                   {(!hasMultiple || !isNameCollapsed) && (
                                     <div className={`items ${hasMultiple ? 'indented' : ''}`}>
                                       {nameGroup.items.map(listItem => (
@@ -756,13 +794,14 @@ export default function PantryList() {
                                           <ItemCard
                                             item={listItem.itemId}
                                             listItem={listItem}
-                                            allPantryItems={items}
                                             onOpen={handleMarkOpen}
                                             onEat={handleEatOne}
                                             onCook={handleCookIt}
                                             onUse={handleUseOne}
                                             onThrow={handleThrowOut}
                                             onEdit={setEditingItem}
+                                            onSplit={(listItem.storageSize || listItem.itemId?.storageSize) && SPLIT_OPTIONS[listItem.storageSize || listItem.itemId?.storageSize] ? setSplittingItem : undefined}
+                                            onBreakdown={listItem.itemId?.breaksDown && listItem.itemId?.breaksInto?.length > 0 ? setBreakingDownItem : undefined}
                                           />
                                         </div>
                                       ))}
@@ -784,14 +823,14 @@ export default function PantryList() {
         </div>
       )}
 
-      {/* Cook Modal - opens when Cook button clicked */}
+      {/* Cook Modal */}
       <CookDishModal 
         isOpen={!!cookModalItem}
         onClose={() => setCookModalItem(null)}
         preselectedItem={cookModalItem}
         onCookComplete={() => {
           setCookModalItem(null);
-          fetchList(); // Refresh pantry
+          fetchList();
         }}
       />
       
@@ -802,6 +841,120 @@ export default function PantryList() {
         item={editingItem}
         onSave={handleItemSaved}
       />
+
+      {/* Removal Flow Modal */}
+      <Modal
+        isOpen={!!removingItem}
+        onClose={handleCancelRemoval}
+        title={`Remove ${removingItem?.itemId?.name || 'item'}?`}
+      >
+        {removalStep === 'reason' ? (
+          <div className="removal-reasons">
+            <p>What happened to this item?</p>
+            <div className="reason-buttons">
+              <Button variant="success" onClick={() => handleSelectReason('finished')}>
+                ✓ Finished
+              </Button>
+              <Button variant="warning" onClick={() => handleSelectReason('expired')}>
+                ⏰ Expired
+              </Button>
+              <Button variant="destructive" onClick={() => handleSelectReason('trashed')}>
+                🗑️ Trashed
+              </Button>
+            </div>
+            <Button variant="secondary" onClick={handleCancelRemoval} className="cancel-btn">
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <div className="grocery-prompt">
+            <p>Add <strong>{removingItem?.itemId?.name}</strong> to your grocery list?</p>
+            <div className="grocery-buttons">
+              <Button variant="primary" onClick={() => handleRemovalComplete(true)}>
+                Yes, add to grocery
+              </Button>
+              <Button variant="secondary" onClick={() => handleRemovalComplete(false)}>
+                No thanks
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Use-up Flow Modal (last unit) */}
+      <Modal
+        isOpen={!!useUpItem}
+        onClose={() => setUseUpItem(null)}
+        title="All used up!"
+      >
+        <div className="grocery-prompt">
+          <p>You just used the last of <strong>{useUpItem?.itemId?.name}</strong>.</p>
+          <p>Add it to your grocery list?</p>
+          <div className="grocery-buttons">
+            <Button variant="primary" onClick={() => handleUseUpConfirm(true)}>
+              Yes, add to grocery
+            </Button>
+            <Button variant="secondary" onClick={() => handleUseUpConfirm(false)}>
+              No thanks
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Split Modal */}
+      <Modal
+        isOpen={!!splittingItem}
+        onClose={() => setSplittingItem(null)}
+        title={`Split ${splittingItem?.itemId?.name || 'item'}`}
+      >
+        {(() => {
+          const storageSize = splittingItem?.storageSize || splittingItem?.itemId?.storageSize;
+          const options = storageSize ? SPLIT_OPTIONS[storageSize] : [];
+          return (
+            <div className="split-options">
+              <p>Split this {storageSize?.replace('_', ' ')} into:</p>
+              <div className="split-buttons">
+                {options?.map(opt => (
+                  <Button 
+                    key={opt.targetSize}
+                    variant="secondary"
+                    onClick={() => handleSplit(opt.targetSize, opt.count)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              <Button variant="secondary" onClick={() => setSplittingItem(null)} className="cancel-btn">
+                Cancel
+              </Button>
+            </div>
+          );
+        })()}
+      </Modal>
+
+      {/* Breakdown Modal */}
+      <Modal
+        isOpen={!!breakingDownItem}
+        onClose={() => setBreakingDownItem(null)}
+        title={`Break down ${breakingDownItem?.itemId?.name || 'item'}`}
+      >
+        <div className="breakdown-confirm">
+          <p>Break this down into:</p>
+          <ul className="breakdown-parts">
+            {breakingDownItem?.itemId?.breaksInto?.map((part, i) => (
+              <li key={i}>{part.name}</li>
+            ))}
+          </ul>
+          <div className="breakdown-buttons">
+            <Button variant="primary" onClick={handleBreakdown}>
+              Yes, break it down
+            </Button>
+            <Button variant="secondary" onClick={() => setBreakingDownItem(null)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

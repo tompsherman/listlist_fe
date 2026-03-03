@@ -25,4 +25,19 @@ export const listsApi = {
   
   // Move checked items to pantry
   checkout: (listId) => api.post(`/api/lists/${listId}/checkout`),
+  
+  // Use one unit of item (decrements usesRemaining, logs history)
+  // Returns { isEmpty, item?, addedToGrocery? }
+  useItem: (listId, itemId, data = {}) => api.post(`/api/lists/${listId}/items/${itemId}/use`, data),
+  
+  // Archive item with reason and optional grocery add
+  // data: { reason: 'finished'|'expired'|'trashed', addToGrocery: boolean }
+  archiveItem: (listId, itemId, data) => api.post(`/api/lists/${listId}/items/${itemId}/archive`, data),
+  
+  // Split container into smaller units
+  // data: { targetSize: 'pint'|'quart'|..., count: number }
+  splitItem: (listId, itemId, data) => api.post(`/api/lists/${listId}/items/${itemId}/split`, data),
+  
+  // Break down item into components (e.g., whole chicken → meat + bones)
+  breakdownItem: (listId, itemId) => api.post(`/api/lists/${listId}/items/${itemId}/breakdown`),
 };

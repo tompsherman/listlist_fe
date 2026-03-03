@@ -702,3 +702,53 @@
   background: #e3f2fd;
   color: #1565c0;
 }
+
+/* Modal content styles */
+.removal-reasons,
+.grocery-prompt,
+.split-options,
+.breakdown-confirm {
+  text-align: center;
+}
+
+.removal-reasons p,
+.grocery-prompt p,
+.split-options p,
+.breakdown-confirm p {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.reason-buttons,
+.grocery-buttons,
+.split-buttons,
+.breakdown-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.reason-buttons button,
+.grocery-buttons button,
+.split-buttons button,
+.breakdown-buttons button {
+  width: 100%;
+}
+
+.cancel-btn {
+  margin-top: 0.5rem;
+}
+
+/* Breakdown parts list */
+.breakdown-parts {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.breakdown-parts li {
+  padding: 0.25rem 0;
+  color: var(--color-text);
+}

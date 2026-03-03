@@ -251,6 +251,26 @@
   color: #fff;
 }
 
+.action-btn.split-btn {
+  border-color: #38b2ac;
+  color: #38b2ac;
+}
+
+.action-btn.split-btn:hover {
+  background: #38b2ac;
+  color: #fff;
+}
+
+.action-btn.breakdown-btn {
+  border-color: #805ad5;
+  color: #805ad5;
+}
+
+.action-btn.breakdown-btn:hover {
+  background: #805ad5;
+  color: #fff;
+}
+
 /* Confirmation modal */
 .confirm-overlay {
   position: fixed;
