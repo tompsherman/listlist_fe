@@ -391,7 +391,7 @@ export default function GroceryList() {
         <div className="shop-mode">
           {grouped.map(({ category, items: catItems }) => (
             <div key={category} className="category-section">
-              <h3 style={{ borderLeftColor: getCategoryColor(category) }}>
+              <h3 style={{ backgroundColor: getCategoryColor(category) }}>
                 {category}
               </h3>
               <div className="shop-items">
@@ -442,7 +442,7 @@ export default function GroceryList() {
         <div className="view-mode">
           {grouped.map(({ category, items: catItems }) => (
             <div key={category} className="category-section">
-              <h3 style={{ borderLeftColor: getCategoryColor(category) }}>
+              <h3 style={{ backgroundColor: getCategoryColor(category) }}>
                 {category} <Badge size="sm">{catItems.length}</Badge>
               </h3>
               <div className="item-cards">
