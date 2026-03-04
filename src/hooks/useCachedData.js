@@ -15,7 +15,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getCached, setCache } from '../utils/cache';
+import { getCached, setCache, clearCache } from '../utils/cache';
 
 const DEFAULT_COLD_START_MS = 30000; // 30 seconds for Render cold start
 const COUNTDOWN_INTERVAL_MS = 1000;
@@ -84,8 +84,9 @@ export function useCachedData({
   getId = (item) => item._id || item.id,
 }) {
   // Core state
+  // Note: loading starts false — the hook isn't loading until fetchData actually runs
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isStale, setIsStale] = useState(false);
   const [countdown, setCountdown] = useState(null);
@@ -208,10 +209,7 @@ export function useCachedData({
     } catch (err) {
       console.error('useCachedData fetch error:', err);
       setError(err.message || 'Failed to load data');
-      // Keep stale data if we have it
-      if (!data) {
-        setData(null);
-      }
+      // Keep stale data if we have it (don't clear data on error)
       
       // Register error state
       errorRegistry.add(key);
@@ -223,45 +221,54 @@ export function useCachedData({
       syncRegistry.delete(key);
       notifySyncChange();
     }
-  }, [key, fetchFn, enabled, ttl, startCountdown, stopCountdown, applyPendingChanges, data]);
+  }, [key, fetchFn, enabled, ttl, startCountdown, stopCountdown, applyPendingChanges]);
 
   // Queue an optimistic change
   const applyChange = useCallback((changeType, payload) => {
-    // Apply immediately to current data
+    // Apply immediately to current data AND update cache in one setData call
+    // (Bug fix: combining these prevents stale cache writes from React batching)
     setData(current => {
       if (!Array.isArray(current)) return current;
 
+      let updated;
       switch (changeType) {
         case 'add':
-          return [...current, payload];
+          updated = [...current, payload];
+          break;
 
         case 'update':
-          return current.map(item => 
+          updated = current.map(item => 
             getId(item) === getId(payload) ? { ...item, ...payload } : item
           );
+          break;
 
         case 'remove':
-          return current.filter(item => getId(item) !== payload);
+          updated = current.filter(item => getId(item) !== payload);
+          break;
 
         case 'custom':
-          return payload.apply ? payload.apply(current) : current;
+          updated = payload.apply ? payload.apply(current) : current;
+          break;
 
         default:
-          return current;
+          updated = current;
       }
-    });
 
-    // Also update cache immediately
-    setData(current => {
-      if (current) {
-        setCache(key, current, ttl);
+      // Update cache with the new data (inside same setData to avoid stale write)
+      if (updated) {
+        setCache(key, updated, ttl);
       }
-      return current;
+      return updated;
     });
 
     // Queue for merge with fresh data (if still fetching)
+    // Bug fix: handle remove separately since payload is just an ID string
     if (loading) {
-      pendingChanges.current.push({ type: changeType, ...payload, item: payload, id: payload });
+      if (changeType === 'remove') {
+        pendingChanges.current.push({ type: 'remove', id: payload });
+      } else {
+        pendingChanges.current.push({ type: changeType, item: payload });
+      }
     }
   }, [getId, key, ttl, loading]);
 
@@ -274,7 +281,7 @@ export function useCachedData({
   const clearAndRefetch = useCallback(() => {
     setData(null);
     setIsStale(false);
-    localStorage.removeItem(`listlist_${key}`);
+    clearCache(key);  // Use cache util instead of direct localStorage access
     fetchData();
   }, [key, fetchData]);
 
