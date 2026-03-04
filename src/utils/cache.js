@@ -3,7 +3,7 @@
  */
 
 const CACHE_PREFIX = 'listlist_';
-const DEFAULT_TTL = 24 * 60 * 60 * 1000; // 24 hours - survives cold starts
+const DEFAULT_TTL = 72 * 60 * 60 * 1000; // 72 hours (3 days) - survives cold starts
 
 export function getCached(key) {
   try {
