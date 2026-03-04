@@ -5,16 +5,16 @@
  * Ported from v1 with full color system and expiration logic
  */
 
-// All categories
+// All categories (synced with backend Item.js enum)
 export const CATEGORIES = [
-  "vegetable", "herbs", "fruit", "grains", "meat", 
-  "dairy", "leftovers", "household", "snack", "drinks"
+  "vegetable", "herbs & spices", "fruit", "grains", "beans", "meat", 
+  "dairy", "nuts & seeds", "baking", "snacks", "drinks", "leftovers", "household", "other"
 ];
 
 // Categories that can be used as meal ingredients (excludes household items)
 export const EDIBLE_CATEGORIES = [
-  "vegetable", "herbs", "fruit", "grains", "meat", 
-  "dairy", "leftovers", "snack", "drinks"
+  "vegetable", "herbs & spices", "fruit", "grains", "beans", "meat", 
+  "dairy", "nuts & seeds", "baking", "snacks", "drinks", "leftovers"
 ];
 export const NON_EDIBLE_CATEGORIES = ["household"];
 
@@ -26,17 +26,20 @@ export const isCategoryEdible = (category) => !NON_EDIBLE_CATEGORIES.includes(ca
 
 // Category colors for visual identification
 export const CATEGORY_COLORS = {
-  vegetable: "#228B22",   // Forest green
-  herbs: "#8B7355",       // Brown
-  fruit: "#9ACD32",       // Yellow-green
-  grains: "#DAA520",      // Goldenrod
-  meat: "#F08080",        // Light coral
-  dairy: "#FFFAF0",       // Floral white
-  leftovers: "#9370DB",   // Medium purple
-  household: "#ADD8E6",   // Light blue
-  drinks: "#BDB76B",      // Dark khaki
-  snack: "#FF6347",       // Tomato red
-  other: "#ddd",          // Gray fallback
+  vegetable: "#228B22",       // Forest green
+  "herbs & spices": "#8B7355", // Brown
+  fruit: "#9ACD32",           // Yellow-green
+  grains: "#DAA520",          // Goldenrod
+  beans: "#8B4513",           // Saddle brown
+  meat: "#F08080",            // Light coral
+  dairy: "#FFFAF0",           // Floral white
+  "nuts & seeds": "#D2691E",  // Chocolate
+  baking: "#DEB887",          // Burlywood
+  snacks: "#FF6347",          // Tomato red
+  drinks: "#BDB76B",          // Dark khaki
+  leftovers: "#9370DB",       // Medium purple
+  household: "#ADD8E6",       // Light blue
+  other: "#888",              // Gray fallback
 };
 
 // Get category color with fallback
@@ -44,15 +47,16 @@ export const getCategoryColor = (category) =>
   CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
 
 // Storage locations
-export const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "closet"];
+export const STORAGE_LOCATIONS = ["counter", "pantry", "fridge", "freezer", "outside freezer", "closet"];
 
 // Storage location colors
 export const STORAGE_COLORS = {
-  counter: "#f5deb3",     // Wheat
-  pantry: "#d2b48c",      // Tan
-  fridge: "#add8e6",      // Light blue
-  freezer: "#b0e0e6",     // Powder blue
-  closet: "#dda0dd",      // Plum
+  counter: "#f5deb3",           // Wheat
+  pantry: "#d2b48c",            // Tan
+  fridge: "#add8e6",            // Light blue
+  freezer: "#b0e0e6",           // Powder blue
+  "outside freezer": "#87CEEB", // Sky blue
+  closet: "#dda0dd",            // Plum
 };
 
 // Get storage color with fallback

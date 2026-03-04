@@ -30,6 +30,7 @@ import './PantryList.css';
 const LOCATIONS = [
   { id: 'fridge', label: '🧊 Fridge', color: '#4fc3f7' },
   { id: 'freezer', label: '❄️ Freezer', color: '#90caf9' },
+  { id: 'outside freezer', label: '🏔️ Outside', color: '#87CEEB' },
   { id: 'pantry', label: '🏠 Pantry', color: '#ffb74d' },
   { id: 'counter', label: '🍌 Counter', color: '#aed581' },
 ];
