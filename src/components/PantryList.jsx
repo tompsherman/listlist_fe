@@ -623,14 +623,21 @@ export default function PantryList() {
             <ul className="search-results">
               {searchResults.map(item => (
                 <li key={item._id}>
-                  <span className="item-name">{item.name}</span>
+                  <button 
+                    className="item-name item-name-btn"
+                    onClick={() => handleAddItem(item, item.defaultLocation || 'pantry')}
+                    title={`Quick add to ${item.defaultLocation || 'pantry'}`}
+                  >
+                    {item.name}
+                    <span className="default-loc-hint">→ {item.defaultLocation || 'pantry'}</span>
+                  </button>
                   <div className="location-btns">
                     {LOCATIONS.map(loc => (
                       <button
                         key={loc.id}
                         onClick={() => handleAddItem(item, loc.id)}
                         title={`Add to ${loc.label}`}
-                        className={`loc-btn loc-${loc.id}`}
+                        className={`loc-btn loc-${loc.id}${loc.id === item.defaultLocation ? ' default' : ''}`}
                       >
                         {loc.label}
                       </button>

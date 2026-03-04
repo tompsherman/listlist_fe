@@ -108,6 +108,34 @@
   font-weight: 500;
 }
 
+/* Clickable item name for quick add */
+.pantry-list .search-results .item-name-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+}
+
+.pantry-list .search-results .item-name-btn:hover {
+  color: var(--color-primary);
+}
+
+.pantry-list .search-results .default-loc-hint {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+/* Highlight default location button */
+.loc-btn.default {
+  font-weight: 600;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
 .pantry-list .search-results .create-new {
   border-left-color: #4CAF50 !important;
   background: rgba(76, 175, 80, 0.1);
