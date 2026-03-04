@@ -178,12 +178,15 @@ export function useCachedData({
     
     // Check cache first
     const cached = getCached(key);
+    console.log('[useCachedData] key:', key, 'cached:', cached ? `${Array.isArray(cached) ? cached.length + ' items' : 'object'}` : 'null');
     if (cached) {
+      console.log('[useCachedData] Using cached data for', key);
       setData(cached);
       setIsStale(true);
       setLoading(false);
       // Don't show countdown if we have cache
     } else {
+      console.log('[useCachedData] No cache for', key, '- showing countdown');
       // No cache - show countdown
       setLoading(true);
       startCountdown();
@@ -195,6 +198,7 @@ export function useCachedData({
       // Apply any changes made while we were fetching
       const mergedData = applyPendingChanges(freshData);
       
+      console.log('[useCachedData] Fresh data received for', key, ':', Array.isArray(mergedData) ? mergedData.length + ' items' : 'object');
       setData(mergedData);
       setCache(key, mergedData, ttl);
       setIsStale(false);

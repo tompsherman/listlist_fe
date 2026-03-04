@@ -43,6 +43,10 @@
     --color-text: #ffffff;
     --color-text-secondary: #a0a0a0;
   }
+  
+  body {
+    background-color: var(--color-bg); /* Dark mode keeps dark bg */
+  }
 }
 
 /* Reset */
@@ -61,7 +65,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-family);
-  background-color: var(--color-bg);
+  background-color: #f5f0e6; /* Light tan - makes white cards visible */
   color: var(--color-text);
   line-height: 1.5;
 }

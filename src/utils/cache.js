@@ -7,16 +7,21 @@ const DEFAULT_TTL = 72 * 60 * 60 * 1000; // 72 hours (3 days) - survives cold st
 
 export function getCached(key) {
   try {
-    const raw = localStorage.getItem(CACHE_PREFIX + key);
+    const fullKey = CACHE_PREFIX + key;
+    const raw = localStorage.getItem(fullKey);
+    console.log('[cache] getCached', fullKey, raw ? 'found' : 'miss');
     if (!raw) return null;
     
     const { data, expires } = JSON.parse(raw);
     if (expires && Date.now() > expires) {
-      localStorage.removeItem(CACHE_PREFIX + key);
+      console.log('[cache] expired, removing', fullKey);
+      localStorage.removeItem(fullKey);
       return null;
     }
+    console.log('[cache] returning cached data, items:', Array.isArray(data) ? data.length : 'object');
     return data;
-  } catch {
+  } catch (e) {
+    console.error('[cache] getCached error:', e);
     return null;
   }
 }

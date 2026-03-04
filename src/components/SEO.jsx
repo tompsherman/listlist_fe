@@ -14,14 +14,14 @@
 import { Helmet } from 'react-helmet-async';
 
 // Defaults from environment
-const SITE_NAME = 'Skeleton Key';
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://skeletonkey-fe.vercel.app';
-const DEFAULT_IMAGE = import.meta.env.VITE_OG_IMAGE_DEFAULT || `${SITE_URL}/og-default.png`;
+const SITE_NAME = 'ListList';
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://listless.vercel.app';
+const DEFAULT_IMAGE = import.meta.env.VITE_OG_IMAGE_DEFAULT || `${SITE_URL}/listlistlogo.png`;
 const TWITTER_HANDLE = import.meta.env.VITE_TWITTER_HANDLE || '';
 
 export default function SEO({
   title,
-  description = 'Production-ready full-stack starter kit with React, Express, MongoDB, and Auth0.',
+  description = 'Track your groceries, pantry, and meals with your household.',
   path = '',
   image,
   type = 'website',

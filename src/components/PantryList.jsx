@@ -730,7 +730,7 @@ export default function PantryList() {
               <button 
                 className="group-header"
                 onClick={() => toggleGroup(group.id)}
-                style={{ borderLeftColor: group.color }}
+                style={{ backgroundColor: group.color }}
               >
                 <span className="group-name">{group.label}</span>
                 <span className="group-count">{group.itemCount}</span>
@@ -750,7 +750,7 @@ export default function PantryList() {
                         <button 
                           className="subgroup-header"
                           onClick={() => toggleSubgroup(subgroupKey)}
-                          style={{ borderLeftColor: subgroup.color }}
+                          style={{ backgroundColor: subgroup.color }}
                         >
                           <span className="subgroup-name">{subgroup.label}</span>
                           <span className="subgroup-count">{subgroup.itemCount}</span>

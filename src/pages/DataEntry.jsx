@@ -341,7 +341,7 @@ function ItemForm({ item, onSave, onCancel }) {
     brandMatters: item?.brandMatters || false,
     brand: item?.brand || '',
     imageUrl: item?.imageUrl || '',
-    isGlobal: item?.isGlobal !== false,
+    isGlobal: item?.isGlobal || false, // Default to editable
   });
   const [saving, setSaving] = useState(false);
 
@@ -574,7 +574,7 @@ function BulkImportForm({ onImport, onCancel, existingItems = [] }) {
         } else {
           item.perishable = true;
         }
-        item.isGlobal = true;
+        item.isGlobal = false; // Allow users to edit items created via bulk import
         items.push(item);
       }
     }
