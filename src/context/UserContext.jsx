@@ -113,7 +113,7 @@ export function UserProvider({ children }) {
 
         setNeedsOnboarding(false);
         setUser(response);
-        setCache('user', response, 10 * 60 * 1000); // 10 min
+        setCache('user', response, 72 * 60 * 60 * 1000); // 72 hours
         
         // Set first pod as current (or from localStorage)
         if (response.pods?.length > 0) {
@@ -207,7 +207,6 @@ export function UserProvider({ children }) {
     hasPermission,
     refetch: fetchUser,
     logout: () => {
-      clearCache('user');
       logout({ logoutParams: { returnTo: window.location.origin } });
     },
     // Convenience booleans
