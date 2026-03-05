@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { dishesApi } from '../services/dishes';
 import { itemsApi } from '../services/items';
-import { useCachedData } from '../hooks';
+import { useCachedData, useQueuedMutation } from '../hooks';
 import { getCategoryColor, isEdible } from '../utils/categories';
 import CookDishModal from './CookDishModal';
 import LoadingCountdown from './LoadingCountdown';
@@ -48,6 +48,29 @@ export default function MealsList() {
   // Gap #6: Cook modal
   const [showCookModal, setShowCookModal] = useState(false);
 
+  // Queued mutation for cooking (handles cold start)
+  const { mutate: cookMutate } = useQueuedMutation({
+    mutationFn: async ({ dishId }) => {
+      return await dishesApi.cook(dishId);
+    },
+    onOptimistic: ({ dishId }) => {
+      // Optimistically update cook count
+      setDishes(prev => prev.map(d => 
+        d._id === dishId 
+          ? { ...d, cookCount: (d.cookCount || 0) + 1, lastCooked: new Date() }
+          : d
+      ));
+    },
+    onSuccess: (updated) => {
+      // Update with actual server response
+      setDishes(prev => prev.map(d => d._id === updated._id ? updated : d));
+    },
+    onError: (err) => {
+      console.error('Failed to log cook:', err);
+      fetchDishes(); // Revert optimistic update
+    },
+  });
+
   const handleAddDish = async (e) => {
     e.preventDefault();
     if (!newDishName.trim() || !currentPod) return;
@@ -67,14 +90,10 @@ export default function MealsList() {
     }
   };
 
-  const handleCook = async (dish, e) => {
+  const handleCook = (dish, e) => {
     e?.stopPropagation();
-    try {
-      const updated = await dishesApi.cook(dish._id);
-      setDishes(prev => prev.map(d => d._id === dish._id ? updated : d));
-    } catch (err) {
-      console.error('Failed to log cook:', err);
-    }
+    // Use queued mutation - handles cold start gracefully
+    cookMutate({ dishId: dish._id });
   };
 
   const handleDelete = async (dish, e) => {

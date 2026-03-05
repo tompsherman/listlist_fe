@@ -1,10 +1,15 @@
 /**
  * ItemEditModal Component
  * Full edit modal for all item fields
+ * 
+ * For global items: creates PodItemOverride (pod-specific customization)
+ * For pod items: edits directly
  */
 
 import { useState, useEffect } from 'react';
+import { useUser } from '../context/UserContext';
 import { itemsApi } from '../services/items';
+import { useQueuedMutation } from '../hooks';
 import { 
   CATEGORIES, 
   getCategoryColor,
@@ -24,6 +29,8 @@ const USE_UNITS = ['each', 'cup', 'tbsp', 'tsp', 'slice', 'serving', 'oz', 'lb',
 const STORAGE_SIZES = ['pint', 'quart', 'half_gallon', 'gallon', 'small', 'medium', 'large'];
 
 export default function ItemEditModal({ isOpen, onClose, item, onSave }) {
+  const { currentPod } = useUser();
+  
   const [form, setForm] = useState({
     name: '',
     category: 'other',
@@ -41,6 +48,21 @@ export default function ItemEditModal({ isOpen, onClose, item, onSave }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Queued mutation for editing items (handles cold start)
+  const { mutate: editItemMutate, isPending, isQueued } = useQueuedMutation({
+    mutationFn: async ({ itemId, podId, data }) => {
+      return await itemsApi.update(itemId, { ...data, podId });
+    },
+    onSuccess: (saved) => {
+      onSave?.(saved);
+      onClose();
+    },
+    onError: (err) => {
+      setError(err.message || 'Failed to save');
+      setSaving(false);
+    },
+  });
 
   // Initialize form when item changes
   useEffect(() => {
@@ -73,34 +95,39 @@ export default function ItemEditModal({ isOpen, onClose, item, onSave }) {
       setError('Name is required');
       return;
     }
+    if (!currentPod?.podId) {
+      setError('No pod selected');
+      return;
+    }
 
     setSaving(true);
     setError('');
     
-    try {
-      const payload = {
-        ...form,
-        cost: form.cost ? parseFloat(form.cost) : null,
-        shelfLifeDays: form.shelfLifeDays ? parseInt(form.shelfLifeDays) : null,
-        usePerUnit: parseInt(form.usePerUnit) || 1,
-        storageSize: form.storageSize || null,
-      };
+    const payload = {
+      ...form,
+      cost: form.cost ? parseFloat(form.cost) : null,
+      shelfLifeDays: form.shelfLifeDays ? parseInt(form.shelfLifeDays) : null,
+      usePerUnit: parseInt(form.usePerUnit) || 1,
+      storageSize: form.storageSize || null,
+    };
 
-      let saved;
-      if (item?._id) {
-        // Update existing
-        saved = await itemsApi.update(item._id, payload);
-      } else {
-        // Create new
-        saved = await itemsApi.create(payload);
+    if (item?._id) {
+      // Update existing - use queued mutation (handles global item overrides)
+      editItemMutate({
+        itemId: item._id,
+        podId: currentPod.podId,
+        data: payload,
+      });
+    } else {
+      // Create new - direct call (less critical, creates pod-specific item)
+      try {
+        const saved = await itemsApi.create({ ...payload, podId: currentPod.podId });
+        onSave?.(saved);
+        onClose();
+      } catch (err) {
+        setError(err.message || 'Failed to create');
+        setSaving(false);
       }
-      
-      onSave?.(saved);
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Failed to save');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -294,8 +321,8 @@ export default function ItemEditModal({ isOpen, onClose, item, onSave }) {
 
         <ModalFooter>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" type="submit" loading={saving}>
-            {item?._id ? 'Save Changes' : 'Create Item'}
+          <Button variant="primary" type="submit" loading={saving || isPending} disabled={isQueued}>
+            {isQueued ? '⏳ Queued...' : isPending ? 'Saving...' : item?._id ? 'Save Changes' : 'Create Item'}
           </Button>
         </ModalFooter>
       </form>

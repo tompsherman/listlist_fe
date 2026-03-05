@@ -23,8 +23,12 @@ export const listsApi = {
   // Remove item from list
   removeItem: (listId, itemId) => api.delete(`/api/lists/${listId}/items/${itemId}`),
   
-  // Move checked items to pantry
+  // Move checked items to pantry (legacy - prefer doneShopping)
   checkout: (listId) => api.post(`/api/lists/${listId}/checkout`),
+  
+  // Atomic done shopping - handles entire checkout flow
+  // cart: { [listItemId]: { acquired: number, needed: number }, ... }
+  doneShopping: (listId, cart) => api.post(`/api/lists/${listId}/done-shopping`, { cart }),
   
   // Use one unit of item (decrements usesRemaining, logs history)
   // Returns { isEmpty, item?, addedToGrocery? }

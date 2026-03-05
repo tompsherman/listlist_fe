@@ -9,7 +9,8 @@ import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
 import { historyApi } from '../services/history';
-import { useCachedData } from '../hooks';
+import { useCachedData, useQueuedMutation } from '../hooks';
+import mutations from '../services/mutations';
 import { 
   CATEGORIES, 
   getCategoryColor, 
@@ -124,6 +125,27 @@ export default function PantryList() {
   const [collapsedSubgroups, setCollapsedSubgroups] = useState({});
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
+
+  // Queued mutation for moving items between locations
+  const { mutate: moveItemMutate } = useQueuedMutation({
+    mutationFn: async ({ listId, itemId, location }) => {
+      return await listsApi.updateItem(listId, itemId, { location });
+    },
+    onOptimistic: ({ itemId, location }) => {
+      // Optimistically update item location in local state
+      setItems(prev => prev.map(item => 
+        item._id === itemId ? { ...item, location } : item
+      ));
+    },
+    onSuccess: () => {
+      // Refresh to ensure server state matches
+      fetchList();
+    },
+    onError: (err) => {
+      console.error('Failed to move item:', err);
+      fetchList(); // Revert optimistic update
+    },
+  });
 
   // Fetch expiring items separately
   useEffect(() => {
@@ -544,7 +566,7 @@ export default function PantryList() {
     }
   };
 
-  const handleDrop = async (e, targetLocation) => {
+  const handleDrop = (e, targetLocation) => {
     e.preventDefault();
     setDropTarget(null);
     
@@ -553,14 +575,12 @@ export default function PantryList() {
       return;
     }
 
-    try {
-      const updated = await listsApi.updateItem(list._id, draggedItem._id, {
-        location: targetLocation,
-      });
-      setItems(prev => prev.map(i => i._id === draggedItem._id ? updated : i));
-    } catch (err) {
-      console.error('Failed to move item:', err);
-    }
+    // Use queued mutation - handles cold start gracefully
+    moveItemMutate({
+      listId: list._id,
+      itemId: draggedItem._id,
+      location: targetLocation,
+    });
     
     setDraggedItem(null);
   };

@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
-import { useCachedData } from '../hooks';
+import { useCachedData, useQueuedMutation } from '../hooks';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
 import { CollapsibleCard, Button, Badge } from './ui';
 import QuickAddForm from './QuickAddForm';
@@ -68,6 +68,82 @@ export default function GroceryList() {
   
   // Shopping cart state (tracks slider values)
   const [cart, setCart] = useState({});
+
+  // Done shopping mutation - queued if backend initializing
+  const { mutate: doneShoppingMutate, isPending: isDoneShoppingPending, isQueued: isDoneShoppingQueued } = useQueuedMutation({
+    mutationFn: async (cartData) => {
+      if (!list) throw new Error('No list');
+      return await listsApi.doneShopping(list._id, cartData);
+    },
+    onOptimistic: (cartData) => {
+      // Optimistically update local state - remove/update items based on cart
+      setItems(currentItems => {
+        return currentItems.reduce((acc, item) => {
+          const cartItem = cartData[item._id];
+          if (!cartItem || cartItem.acquired <= 0) {
+            // Not in cart or nothing acquired - keep as-is
+            acc.push(item);
+          } else if (cartItem.acquired < cartItem.needed) {
+            // Partial - update with remainder
+            acc.push({ ...item, quantity: cartItem.needed - cartItem.acquired });
+          }
+          // If acquired >= needed, item is removed (not added to acc)
+          return acc;
+        }, []);
+      });
+    },
+    onSuccess: (result) => {
+      console.log('Done shopping success:', result);
+      fetchList(); // Refresh to get accurate server state
+      setMode('view');
+    },
+    onError: (err) => {
+      console.error('Done shopping failed:', err);
+      fetchList(); // Refresh to revert optimistic update
+    },
+  });
+
+  // Add item mutation - queued if backend initializing
+  const { mutate: addItemMutate } = useQueuedMutation({
+    mutationFn: async ({ listId, itemId, quantity = 1 }) => {
+      return await listsApi.addItem(listId, { itemId, quantity });
+    },
+    onOptimistic: ({ itemId, quantity, catalogItem }) => {
+      // Optimistically add to local state
+      const tempItem = {
+        _id: `temp_${Date.now()}`,
+        itemId: catalogItem || itemId,
+        quantity,
+        checked: false,
+      };
+      setItems(prev => [tempItem, ...prev]);
+    },
+    onSuccess: (newItem) => {
+      // Replace temp item with actual server response
+      fetchList();
+    },
+    onError: (err) => {
+      console.error('Failed to add item:', err);
+      fetchList(); // Revert
+    },
+  });
+
+  // Update item mutation - queued if backend initializing
+  const { mutate: updateItemMutate } = useQueuedMutation({
+    mutationFn: async ({ listId, itemId, data }) => {
+      return await listsApi.updateItem(listId, itemId, data);
+    },
+    onOptimistic: ({ itemId, data }) => {
+      setItems(prev => prev.map(item => 
+        item._id === itemId ? { ...item, ...data } : item
+      ));
+    },
+    onSuccess: () => fetchList(),
+    onError: (err) => {
+      console.error('Failed to update item:', err);
+      fetchList();
+    },
+  });
 
   // Initialize cart when entering shop mode
   useEffect(() => {
@@ -146,8 +222,8 @@ export default function GroceryList() {
     ));
   };
 
-  // Add item to list (with duplicate detection)
-  const handleAddItem = async (catalogItem) => {
+  // Add item to list (with duplicate detection) - queued if backend initializing
+  const handleAddItem = (catalogItem) => {
     if (!list) return;
     
     // Check if item already exists on the list
@@ -157,44 +233,35 @@ export default function GroceryList() {
     
     if (existingItem) {
       // Increment quantity of existing item
-      try {
-        const updated = await listsApi.updateItem(list._id, existingItem._id, {
-          quantity: (existingItem.quantity || 1) + 1,
-        });
-        setItems(prev => prev.map(i => i._id === existingItem._id ? updated : i));
-        setSearchQuery('');
-        setSearchResults([]);
-      } catch (err) {
-        console.error('Failed to update quantity:', err);
-      }
+      updateItemMutate({
+        listId: list._id,
+        itemId: existingItem._id,
+        data: { quantity: (existingItem.quantity || 1) + 1 },
+      });
+      setSearchQuery('');
+      setSearchResults([]);
       return;
     }
     
     // Add new item
-    try {
-      const newItem = await listsApi.addItem(list._id, {
-        itemId: catalogItem._id,
-        quantity: 1,
-      });
-      setItems(prev => [newItem, ...prev]);
-      setSearchQuery('');
-      setSearchResults([]);
-    } catch (err) {
-      console.error('Failed to add item:', err);
-    }
+    addItemMutate({
+      listId: list._id,
+      itemId: catalogItem._id,
+      quantity: 1,
+      catalogItem, // Pass for optimistic update
+    });
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
-  // Update quantity in add mode
-  const handleQuantityChange = async (listItem, delta) => {
+  // Update quantity in add mode - queued if backend initializing
+  const handleQuantityChange = (listItem, delta) => {
     const newQty = Math.max(1, (listItem.quantity || 1) + delta);
-    try {
-      const updated = await listsApi.updateItem(list._id, listItem._id, {
-        quantity: newQty,
-      });
-      setItems(prev => prev.map(i => i._id === listItem._id ? updated : i));
-    } catch (err) {
-      console.error('Failed to update quantity:', err);
-    }
+    updateItemMutate({
+      listId: list._id,
+      itemId: listItem._id,
+      data: { quantity: newQty },
+    });
   };
 
   // Remove item
@@ -218,56 +285,25 @@ export default function GroceryList() {
     }));
   };
 
-  // Done Shopping - split items between pantry and grocery
-  const handleDoneShopping = async () => {
+  // Done Shopping - atomic operation via queued mutation
+  const handleDoneShopping = () => {
     if (!list) return;
-
-    try {
-      const itemsToReAdd = []; // Items with remaining qty to add back after checkout
-      
-      // Step 1: Mark items as checked with acquired qty
-      for (const item of items) {
-        const cartItem = cart[item._id];
-        if (!cartItem) continue;
-        
-        const acquired = cartItem.acquired;
-        const needed = cartItem.needed;
-        
-        if (acquired > 0) {
-          // Track if we need to re-add remainder
-          if (acquired < needed) {
-            itemsToReAdd.push({
-              itemId: item.itemId?._id || item.itemId,
-              quantity: needed - acquired,
-            });
-          }
-          
-          // Update item: set qty to acquired amount and mark checked
-          await listsApi.updateItem(list._id, item._id, {
-            quantity: acquired,
-            checked: true,
-          });
-        }
+    
+    // Filter cart to only items with acquired > 0
+    const cartData = {};
+    for (const [itemId, cartItem] of Object.entries(cart)) {
+      if (cartItem.acquired > 0) {
+        cartData[itemId] = cartItem;
       }
-
-      // Step 2: Checkout - moves all checked items to pantry
-      await listsApi.checkout(list._id);
-
-      // Step 3: Re-add remaining quantities back to grocery
-      for (const item of itemsToReAdd) {
-        await listsApi.addItem(list._id, {
-          itemId: item.itemId,
-          quantity: item.quantity,
-        });
-      }
-
-      // Refresh list
-      await fetchList();
-      setMode('view');
-      
-    } catch (err) {
-      console.error('Done shopping failed:', err);
     }
+    
+    if (Object.keys(cartData).length === 0) {
+      setMode('view');
+      return;
+    }
+    
+    // Fire mutation (queued if backend initializing, immediate otherwise)
+    doneShoppingMutate(cartData);
   };
 
   // Group items by category
@@ -432,9 +468,10 @@ export default function GroceryList() {
             variant="warning"
             size="lg"
             onClick={handleDoneShopping}
+            disabled={isDoneShoppingPending || isDoneShoppingQueued}
             className="done-shopping-btn"
           >
-            ✓ Done Shopping
+            {isDoneShoppingQueued ? '⏳ Queued...' : isDoneShoppingPending ? '⏳ Saving...' : '✓ Done Shopping'}
           </Button>
         </div>
       ) : (
