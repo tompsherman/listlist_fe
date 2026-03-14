@@ -129,6 +129,9 @@
 .content {
   flex: 1;
   padding: 1rem;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .tab-content h2 {
