@@ -68,6 +68,9 @@ export default function GroceryList() {
   
   // Shopping cart state (tracks slider values)
   const [cart, setCart] = useState({});
+  
+  // Collapsed categories state
+  const [collapsedCategories, setCollapsedCategories] = useState({});
 
   // Done shopping mutation - queued if backend initializing
   const { mutate: doneShoppingMutate, isPending: isDoneShoppingPending, isQueued: isDoneShoppingQueued } = useQueuedMutation({
@@ -306,6 +309,14 @@ export default function GroceryList() {
     doneShoppingMutate(cartData);
   };
 
+  // Toggle category collapse
+  const toggleCategory = (category) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
   // Group items by category
   const groupByCategory = (itemList) => {
     const groups = {};
@@ -475,42 +486,52 @@ export default function GroceryList() {
           </Button>
         </div>
       ) : (
-        /* VIEW/ADD MODE - Collapsed Cards */
+        /* VIEW/ADD MODE - Collapsible Category Cards */
         <div className="view-mode">
           {grouped.map(({ category, items: catItems }) => (
             <div key={category} className="category-section">
-              <h3 style={{ backgroundColor: getCategoryColor(category) }}>
-                {category} <Badge size="sm">{catItems.length}</Badge>
-              </h3>
-              <div className="item-cards">
-                {catItems.map(item => (
-                  <CollapsibleCard
-                    key={item._id}
-                    title={
-                      <div className="card-title">
-                        <span>{item.itemId?.name || 'Unknown'}</span>
-                        <Badge size="sm">×{item.quantity || 1}</Badge>
+              <button 
+                className="category-header"
+                onClick={() => toggleCategory(category)}
+                style={{ backgroundColor: getCategoryColor(category) }}
+              >
+                <span className="category-name">{category}</span>
+                <span className="category-count">{catItems.length}</span>
+                <span className="collapse-icon">
+                  {collapsedCategories[category] ? '▶' : '▼'}
+                </span>
+              </button>
+              {!collapsedCategories[category] && (
+                <div className="item-cards">
+                  {catItems.map(item => (
+                    <CollapsibleCard
+                      key={item._id}
+                      title={
+                        <div className="card-title">
+                          <span>{item.itemId?.name || 'Unknown'}</span>
+                          <Badge size="sm">×{item.quantity || 1}</Badge>
+                        </div>
+                      }
+                    >
+                      <div className="card-details">
+                        <div className="qty-controls">
+                          <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, -1)}>−</Button>
+                          <span className="qty">{item.quantity || 1}</span>
+                          <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, 1)}>+</Button>
+                        </div>
+                        <div className="card-actions">
+                          <Button size="sm" variant="secondary" onClick={() => setEditingItem(item.itemId)}>
+                            ✏️ Edit
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleRemove(item)}>
+                            Remove
+                          </Button>
+                        </div>
                       </div>
-                    }
-                  >
-                    <div className="card-details">
-                      <div className="qty-controls">
-                        <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, -1)}>−</Button>
-                        <span className="qty">{item.quantity || 1}</span>
-                        <Button size="sm" variant="secondary" onClick={() => handleQuantityChange(item, 1)}>+</Button>
-                      </div>
-                      <div className="card-actions">
-                        <Button size="sm" variant="secondary" onClick={() => setEditingItem(item.itemId)}>
-                          ✏️ Edit
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleRemove(item)}>
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  </CollapsibleCard>
-                ))}
-              </div>
+                    </CollapsibleCard>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

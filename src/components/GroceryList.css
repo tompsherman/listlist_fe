@@ -86,13 +86,55 @@
   margin-bottom: var(--space-4);
 }
 
+/* Category header - collapsible button */
+.category-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.category-header:hover {
+  opacity: 0.9;
+}
+
+.category-header .category-name {
+  flex: 1;
+  text-align: left;
+}
+
+.category-header .category-count {
+  background: rgba(255,255,255,0.3);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  margin-right: var(--space-2);
+}
+
+.category-header .collapse-icon {
+  font-size: var(--text-xs);
+  opacity: 0.8;
+}
+
+/* Legacy h3 for shop mode */
 .category-section h3 {
   font-size: var(--text-sm);
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
   padding: var(--space-2) var(--space-3);
-  border-left: 3px solid;
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-2);
   display: flex;
   align-items: center;
