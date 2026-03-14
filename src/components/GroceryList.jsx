@@ -14,7 +14,7 @@ import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
 import { useCachedData, useQueuedMutation } from '../hooks';
 import { CATEGORIES, getCategoryColor } from '../utils/categories';
-import { CollapsibleCard, Button, Badge } from './ui';
+import { CollapsibleCard, Button, Badge, useToast } from './ui';
 import QuickAddForm from './QuickAddForm';
 import ItemEditModal from './ItemEditModal';
 import LoadingCountdown from './LoadingCountdown';
@@ -22,6 +22,7 @@ import './GroceryList.css';
 
 export default function GroceryList() {
   const { currentPod } = useUser();
+  const { addToast } = useToast();
   
   // Fetch grocery list with cold-start handling
   const {
@@ -76,7 +77,11 @@ export default function GroceryList() {
   const { mutate: doneShoppingMutate, isPending: isDoneShoppingPending, isQueued: isDoneShoppingQueued } = useQueuedMutation({
     mutationFn: async (cartData) => {
       if (!list) throw new Error('No list');
-      return await listsApi.doneShopping(list._id, cartData);
+      console.log('[DoneShopping] Sending cart:', cartData);
+      console.log('[DoneShopping] List ID:', list._id);
+      const result = await listsApi.doneShopping(list._id, cartData);
+      console.log('[DoneShopping] Result:', result);
+      return result;
     },
     onOptimistic: (cartData) => {
       // Optimistically update local state - remove/update items based on cart
@@ -97,11 +102,19 @@ export default function GroceryList() {
     },
     onSuccess: (result) => {
       console.log('Done shopping success:', result);
+      addToast({
+        type: 'success',
+        message: `Added ${result.pantryCreated} items to pantry`,
+      });
       fetchList(); // Refresh to get accurate server state
       setMode('view');
     },
     onError: (err) => {
       console.error('Done shopping failed:', err);
+      addToast({
+        type: 'error',
+        message: err?.message || 'Failed to complete checkout. Please try again.',
+      });
       fetchList(); // Refresh to revert optimistic update
     },
   });
