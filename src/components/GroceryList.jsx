@@ -8,7 +8,7 @@
  * Done Shopping: Splits acquired → pantry, remainder → grocery
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser } from '../context/UserContext';
 import { listsApi } from '../services/lists';
 import { itemsApi } from '../services/items';
@@ -161,9 +161,12 @@ export default function GroceryList() {
     },
   });
 
-  // Initialize cart when entering shop mode
+  // Initialize cart when entering shop mode (only once per shop session)
+  const shopSessionRef = useRef(false);
+  
   useEffect(() => {
-    if (mode === 'shop') {
+    if (mode === 'shop' && !shopSessionRef.current) {
+      // Entering shop mode - initialize cart
       const initialCart = {};
       items.forEach(item => {
         initialCart[item._id] = {
@@ -172,8 +175,13 @@ export default function GroceryList() {
         };
       });
       setCart(initialCart);
+      shopSessionRef.current = true;
+    } else if (mode !== 'shop' && shopSessionRef.current) {
+      // Leaving shop mode - reset
+      setCart({});
+      shopSessionRef.current = false;
     }
-  }, [mode, items]);
+  }, [mode]); // Only react to mode changes, not items
 
   // Search catalog
   const handleSearch = async (q) => {
